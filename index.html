@@ -304,6 +304,11 @@
     border-radius:12px;
     padding:12px 14px;
     margin-bottom:8px;
+    cursor:pointer;
+  }
+  .findway-item.active{
+    border-color:var(--coral);
+    background:rgba(255,90,54,0.06);
   }
   .findway-item .fw-info{
     display:flex;
@@ -1424,7 +1429,7 @@ function renderFindway(dayKey){
   document.getElementById("nextStopGoBtn").href = mapsUrl(next[2], next[3], next[4]);
 
   document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng]) => `
-    <div class="findway-item">
+    <div class="findway-item" data-lat="${lat != null ? lat : ""}" data-lng="${lng != null ? lng : ""}">
       <span class="fw-info">
         <span class="fw-time">${time}</span>
         <span class="fw-name">${name}</span>
@@ -1435,6 +1440,30 @@ function renderFindway(dayKey){
 }
 
 renderFindway(currentDayKey);
+
+document.getElementById("findwayList").addEventListener("click", (e) => {
+  if(e.target.closest(".fw-btn")) return;
+  const item = e.target.closest(".findway-item");
+  if(!item) return;
+  const lat = item.dataset.lat, lng = item.dataset.lng;
+  if(!lat || !lng) return;
+  document.getElementById("findwayList").querySelectorAll(".findway-item").forEach(el => el.classList.remove("active"));
+  item.classList.add("active");
+  focusMapOn(parseFloat(lat), parseFloat(lng));
+});
+
+function focusMapOn(lat, lng){
+  if(!leafletMap) return;
+  leafletMap.setView([lat, lng], 15);
+  let closest = null, minDist = Infinity;
+  stopMarkers.forEach(m => {
+    const pos = m.getLatLng();
+    const d = Math.abs(pos.lat - lat) + Math.abs(pos.lng - lng);
+    if(d < minDist){ minDist = d; closest = m; }
+  });
+  if(closest) closest.openPopup();
+  document.getElementById("mapContainer").scrollIntoView({ behavior: "smooth", block: "center" });
+}
 
 /* ---- 오늘의 동선 지도 (Leaflet + OpenStreetMap, API 키 필요 없음) ---- */
 let leafletMap = null;
