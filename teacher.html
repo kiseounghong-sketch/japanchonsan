@@ -381,6 +381,34 @@
   }
   .fw-btn svg{width:13px;height:13px;}
 
+  /* ===== 숙소 지급 품목 ===== */
+  .amenity-card{
+    background:#fff;
+    border:1.5px dashed var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+  .amenity-card .amenity-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .amenity-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .amenity-tag{
+    font-size:12px;
+    font-weight:600;
+    background:var(--paper-dim);
+    color:var(--ink);
+    padding:5px 10px;
+    border-radius:999px;
+  }
+
   /* ===== 진행률 바 (준비물/미션 공용) ===== */
   .progress{
     background:#fff;
@@ -1270,6 +1298,19 @@
         <p class="progress-text"><span id="checkedCount">0</span>/<span id="totalCount">0</span>개 챙겼어요</p>
       </div>
       <div class="scroll-area">
+        <div class="amenity-card">
+          <p class="amenity-title">숙소 지급 품목 (따로 안 챙겨도 돼요)</p>
+          <div class="amenity-tags">
+            <span class="amenity-tag">수건·바스타올</span>
+            <span class="amenity-tag">잠옷</span>
+            <span class="amenity-tag">슬리퍼</span>
+            <span class="amenity-tag">칫솔·치약</span>
+            <span class="amenity-tag">바디워시·샴푸·린스</span>
+            <span class="amenity-tag">헤어드라이어</span>
+            <span class="amenity-tag">전기포트</span>
+            <span class="amenity-tag">냉장고</span>
+          </div>
+        </div>
         <div id="checklistGroups"></div>
       </div>
     </section>
@@ -1455,15 +1496,9 @@ const SCHEDULE = {
 // 선생님용 "학생현황"에는 이 항목들만 따로 빠졌는지 표시됩니다.
 const CHECKLIST = {
   "필수 서류": [
-    { text:"여권 (유효기간 6개월 이상)", essential:true },
-    { text:"티웨이앱 모바일 항공권", essential:true }
-  ],
-  "의류": [
-    { text:"여벌 옷 2벌", essential:false },
-    { text:"잠옷", essential:false },
-    { text:"우산 또는 우비", essential:false },
-    { text:"편한 운동화", essential:false },
-    { text:"슬리퍼", essential:false }
+    { text:"여권", essential:true },
+    { text:"티웨이앱 설치 → 모바일 항공권 발급", essential:true },
+    { text:"운동화 (슬리퍼 X)", essential:true }
   ],
   "세면/위생용품": [
     { text:"칫솔·치약", essential:false },
@@ -1473,15 +1508,10 @@ const CHECKLIST = {
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
-    { text:"멀티 어댑터 (일본은 콘센트 모양이 달라요)", essential:false },
-    { text:"보조배터리", essential:false },
-    { text:"이어폰", essential:false }
+    { text:"110V 어댑터(돼지코)", essential:false }
   ],
   "기타": [
-    { text:"엔화 환전", essential:false },
-    { text:"개인 간식", essential:false },
-    { text:"멀미약(필요시)", essential:false },
-    { text:"개인 상비약", essential:false }
+    { text:"개인 간식", essential:false }
   ]
 };
 
