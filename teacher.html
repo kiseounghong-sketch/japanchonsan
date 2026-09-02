@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>2026 청산고등학교 2학년 수학여행 (선생님용)</title>
+<link rel="manifest" href="manifest-teacher.json">
+<meta name="theme-color" content="#FF5A36">
+<link rel="apple-touch-icon" href="icon-teacher-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="수학여행 관리">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -37,7 +43,8 @@
   .app{
     max-width:480px;
     margin:0 auto;
-    min-height:100vh;
+    height:100vh;
+    height:100dvh;
     background:var(--paper);
     display:flex;
     flex-direction:column;
@@ -51,7 +58,7 @@
     position:relative;
   }
   .ticket-top{
-    padding:28px 24px 22px;
+    padding:16px 24px 12px;
   }
   .badge{
     display:inline-block;
@@ -67,14 +74,14 @@
   .trip-title{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:34px;
-    line-height:1.18;
-    margin:14px 0 6px;
+    font-size:29px;
+    line-height:1.15;
+    margin:8px 0 4px;
     letter-spacing:.01em;
   }
   .trip-sub{
     margin:0;
-    font-size:14.5px;
+    font-size:13px;
     color:rgba(255,255,255,0.72);
     font-weight:500;
   }
@@ -98,7 +105,7 @@
 
   .ticket-bottom{
     display:flex;
-    padding:18px 24px 22px;
+    padding:12px 24px 14px;
     gap:8px;
   }
   .stat{
@@ -122,10 +129,52 @@
   /* ===== 컨텐츠 ===== */
   .content{
     flex:1;
-    padding:22px 20px 100px;
+    min-height:0;
+    overflow:hidden;
   }
   .panel{display:none;}
-  .panel.active{display:block;}
+  .panel.active{
+    display:block;
+    height:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:22px 20px 100px;
+    box-sizing:border-box;
+  }
+  /* 공지·일정(지도)·준비물 탭은 위쪽을 고정하고 아래 목록만 스크롤되게 함 */
+  #panel-notice.active,
+  #panel-schedule.active,
+  #panel-checklist.active{
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding:22px 20px 0;
+  }
+  #panel-notice > .assembly-form-card,
+  #panel-notice > .assembly-card,
+  #panel-schedule > .day-pills,
+  #panel-schedule > .view-toggle,
+  #panel-schedule > .day-label,
+  #panel-checklist > .progress{
+    flex-shrink:0;
+  }
+  .scroll-area{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:100px;
+  }
+  .findway-view{
+    flex:1;
+    min-height:0;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .findway-view .next-stop-card,
+  .findway-view .map-section{
+    flex-shrink:0;
+  }
 
   .day-pills{
     display:flex;
@@ -507,6 +556,93 @@
     color:var(--coral-deep);
     font-weight:600;
     line-height:1.5;
+  }
+
+  /* ===== 집합 카운트다운 ===== */
+  .assembly-form-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .assembly-form-card .af-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .assembly-form-card .af-input{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:11px 12px;
+    font-family:inherit;
+    font-size:14.5px;
+    margin-bottom:8px;
+    color:var(--ink);
+  }
+  .assembly-form-card .af-submit{
+    width:100%;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:11px 0;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .assembly-form-card .af-status{
+    margin:8px 0 0;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    min-height:1.2em;
+  }
+  .assembly-form-card .af-status.ok{ color:var(--coral-deep); font-weight:700; }
+
+  .assembly-card{
+    background:var(--navy);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:14px;
+    text-align:center;
+    transition:background .3s ease;
+  }
+  .assembly-card .ac-label{
+    font-size:12px;
+    font-weight:700;
+    color:rgba(255,255,255,0.65);
+    margin:0 0 6px;
+    letter-spacing:.02em;
+  }
+  .assembly-card .ac-place{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:22px;
+    margin:0 0 10px;
+  }
+  .assembly-card .ac-countdown{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:32px;
+    letter-spacing:.02em;
+    color:var(--mustard);
+    margin:0;
+  }
+  .assembly-card.urgent{
+    background:var(--coral);
+    animation:assemblyPulse 1s infinite;
+  }
+  .assembly-card.urgent .ac-countdown{ color:#fff; }
+  .assembly-card.overdue{ background:#7a1f1f; }
+  .assembly-card.overdue .ac-countdown{ font-size:20px; color:#fff; }
+  @keyframes assemblyPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,90,54,0.55); }
+    50%{ box-shadow:0 0 0 12px rgba(255,90,54,0); }
   }
 
   /* ===== 공지사항 ===== */
@@ -1013,7 +1149,21 @@
   <main class="content">
 
     <section id="panel-notice" class="panel active">
-      <div id="noticeList"></div>
+      <div class="assembly-form-card">
+        <p class="af-label">집합 시간 등록</p>
+        <input type="datetime-local" id="assemblyTimeInput" class="af-input">
+        <input type="text" id="assemblyPlaceInput" class="af-input" placeholder="집합 장소 (예: 호텔 로비)">
+        <button type="button" id="assemblySubmitBtn" class="af-submit">등록</button>
+        <p class="af-status" id="assemblyStatusMsg"></p>
+      </div>
+      <div class="assembly-card" id="assemblyCard" style="display:none;">
+        <p class="ac-label">지금 모여야 할 곳</p>
+        <p class="ac-place" id="assemblyPlace">-</p>
+        <p class="ac-countdown" id="assemblyCountdown">--:--</p>
+      </div>
+      <div class="scroll-area">
+        <div id="noticeList"></div>
+      </div>
       <button class="fab" id="newNoticeFab">+</button>
       <div class="notice-form-overlay" id="noticeFormOverlay">
         <div class="notice-form-card">
@@ -1043,7 +1193,9 @@
         <button class="pill" data-view="findway">지도</button>
       </div>
       <p class="day-label" id="dayLabel"></p>
-      <ol class="timeline" id="timeline"></ol>
+      <div class="scroll-area" id="timelineScrollArea">
+        <ol class="timeline" id="timeline"></ol>
+      </div>
       <div class="findway-view" id="findwayView" style="display:none;">
         <div class="next-stop-card">
           <p class="label">지금 갈 곳</p>
@@ -1061,7 +1213,9 @@
           <div id="mapContainer"></div>
           <p class="map-note" id="mapNote"></p>
         </div>
-        <div id="findwayList"></div>
+        <div class="scroll-area">
+          <div id="findwayList"></div>
+        </div>
       </div>
     </section>
 
@@ -1070,7 +1224,9 @@
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <p class="progress-text"><span id="checkedCount">0</span>/<span id="totalCount">0</span>개 챙겼어요</p>
       </div>
-      <div id="checklistGroups"></div>
+      <div class="scroll-area">
+        <div id="checklistGroups"></div>
+      </div>
     </section>
 
     <section id="panel-contacts" class="panel">
@@ -1181,6 +1337,8 @@ const RETURN_DATE = "2026-10-30";
 //    https://docs.google.com/spreadsheets/d/시트ID/gviz/tq?tqx=out:csv&sheet=시트1
 // 비워두면 바로 아래 NOTICES 배열이 대신 표시됩니다(오프라인 예비용).
 const NOTICES_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&gid=0";
+// 집합 카운트다운 데이터
+const ASSEMBLY_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=집합안내";
 const NOTICES_REFRESH_SECONDS = 30; // 페이지를 열어둔 동안 몇 초마다 새 공지를 확인할지
 
 // 학생현황(출석·체크리스트·미션) 시트 주소 — Apps Script가 자동으로 "학생현황" 탭을 만들어줍니다.
@@ -1534,6 +1692,91 @@ if(NOTICES_SHEET_CSV_URL){
   });
 }
 
+/* ---- 집합 카운트다운 ---- */
+let assemblyTarget = null;
+let assemblyCountdownInterval = null;
+
+function showAssembly(place){
+  document.getElementById("assemblyCard").style.display = "block";
+  document.getElementById("assemblyPlace").textContent = place;
+  updateAssemblyCountdown();
+  if(assemblyCountdownInterval) clearInterval(assemblyCountdownInterval);
+  assemblyCountdownInterval = setInterval(updateAssemblyCountdown, 1000);
+}
+
+function hideAssembly(){
+  document.getElementById("assemblyCard").style.display = "none";
+  if(assemblyCountdownInterval){ clearInterval(assemblyCountdownInterval); assemblyCountdownInterval = null; }
+}
+
+function updateAssemblyCountdown(){
+  const card = document.getElementById("assemblyCard");
+  const el = document.getElementById("assemblyCountdown");
+  const diffMs = assemblyTarget - new Date();
+  if(diffMs <= 0){
+    el.textContent = "집합 시간이 지났어요!";
+    card.classList.add("overdue");
+    card.classList.remove("urgent");
+    return;
+  }
+  const totalSec = Math.floor(diffMs / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  el.textContent = (h > 0 ? h + "시간 " : "") + String(m).padStart(2, "0") + "분 " + String(s).padStart(2, "0") + "초 남음";
+  card.classList.remove("overdue");
+  card.classList.toggle("urgent", diffMs <= 5 * 60 * 1000);
+}
+
+function loadAssembly(){
+  fetch(ASSEMBLY_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text).filter(r => r.length >= 2 && r[0] && r[0] !== "목표시각");
+      if(rows.length === 0){ hideAssembly(); return; }
+      const target = new Date(rows[0][0]);
+      if(isNaN(target.getTime())){ hideAssembly(); return; }
+      assemblyTarget = target;
+      showAssembly(rows[0][1] || "");
+    })
+    .catch(() => {});
+}
+
+loadAssembly();
+setInterval(loadAssembly, NOTICES_REFRESH_SECONDS * 1000);
+
+document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
+  const t = document.getElementById("assemblyTimeInput").value;
+  const place = document.getElementById("assemblyPlaceInput").value.trim();
+  const statusEl = document.getElementById("assemblyStatusMsg");
+
+  if(!hasScriptUrl()){
+    statusEl.textContent = "코드 상단 SCRIPT_URL을 먼저 채워주세요.";
+    statusEl.className = "af-status";
+    return;
+  }
+  if(!t || !place){
+    statusEl.textContent = "시간과 장소를 모두 입력해주세요.";
+    statusEl.className = "af-status";
+    return;
+  }
+
+  statusEl.textContent = "등록하는 중...";
+  statusEl.className = "af-status";
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "assembly", targetTime: t, place: place })
+  }).then(() => {
+    statusEl.textContent = "등록됐어요! 학생 화면에 곧 반영됩니다.";
+    statusEl.className = "af-status ok";
+    setTimeout(loadAssembly, 1500);
+  }).catch(() => {
+    statusEl.textContent = "등록에 실패했어요. 인터넷 연결을 확인해주세요.";
+    statusEl.className = "af-status";
+  });
+});
+
 /* ---- 공지 작성 (선생님용) ---- */
 // 구글 Apps Script를 "웹 앱"으로 배포하면 나오는 URL(끝이 /exec)을 여기에 붙여넣으세요.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
@@ -1643,8 +1886,8 @@ viewToggle.addEventListener("click", (e) => {
   viewToggle.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
   btn.classList.add("active");
   const isFindway = btn.dataset.view === "findway";
-  document.getElementById("timeline").style.display = isFindway ? "none" : "";
-  document.getElementById("findwayView").style.display = isFindway ? "block" : "none";
+  document.getElementById("timelineScrollArea").style.display = isFindway ? "none" : "block";
+  document.getElementById("findwayView").style.display = isFindway ? "flex" : "none";
   if(isFindway){
     if(!leafletMap){
       initMap();
@@ -2027,21 +2270,17 @@ function renderStudentList(rows){
   }
   list.innerHTML = rows.map(r => {
     const name = r[0] || "";
-    const attend = r[1] || "";
     const checklist = r[2] || "0/0";
-    const mission = r[3] || "0/0";
     const essential = r[5] || "";
     const essentialMissing = essential.indexOf("미비") === 0;
     return `
       <div class="student-card">
         <span>
           <p class="s-name">${name}</p>
-          <p class="s-attend${attend ? " done" : ""}">${attend ? "출석 " + attend : "미접속"}</p>
           ${essential ? `<p class="s-essential${essentialMissing ? " warn" : ""}">${essential}</p>` : ""}
         </span>
         <span class="s-progress">
           <span class="s-chip">준비물 ${checklist}</span>
-          <span class="s-chip">미션 ${mission}</span>
         </span>
       </div>
     `;
@@ -2082,6 +2321,13 @@ document.getElementById("resetAllBtn").addEventListener("click", () => {
     alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
   });
 });
+
+// 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
