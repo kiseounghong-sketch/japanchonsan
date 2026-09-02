@@ -58,33 +58,38 @@
     position:relative;
   }
   .ticket-top{
-    padding:8px 44px 4px 20px;
+    padding:8px 80px 6px 16px;
   }
   .badge{
+    position:absolute;
+    top:8px;
+    right:14px;
     display:inline-block;
-    font-size:9px;
+    font-size:12px;
     font-weight:700;
     letter-spacing:.02em;
     background:rgba(255,255,255,0.12);
     border:1px solid rgba(255,255,255,0.35);
     color:#fff;
-    padding:2px 8px;
+    padding:3px 10px;
     border-radius:999px;
+    white-space:nowrap;
   }
   .student-name-tag{
-    position:absolute;
-    top:10px;
-    right:16px;
-    font-size:10.5px;
+    align-self:flex-end;
+    font-size:13.5px;
     font-weight:600;
     color:rgba(255,255,255,0.8);
+    white-space:nowrap;
+    margin-left:auto;
+    padding-bottom:1px;
   }
   .trip-title{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:clamp(14px, 4.3vw, 18px);
-    line-height:1.2;
-    margin:3px 0 0;
+    font-size:clamp(18px, 5.4vw, 23px);
+    line-height:1.15;
+    margin:2px 0 0;
     letter-spacing:0;
     white-space:nowrap;
   }
@@ -118,12 +123,12 @@
     gap:4px;
   }
   .stat .label{
-    font-size:8.5px;
+    font-size:11px;
     font-weight:700;
     color:rgba(255,255,255,0.55);
   }
   .stat .value{
-    font-size:12px;
+    font-size:15.5px;
     font-weight:700;
     color:#fff;
   }
@@ -856,7 +861,7 @@
     display:flex;
     background:#fff;
     border-top:1.5px solid var(--line);
-    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    padding:3px 6px calc(3px + env(safe-area-inset-bottom));
     z-index:50;
   }
   .tab{
@@ -864,18 +869,18 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:4px;
+    gap:2px;
     background:none;
     border:none;
     font-family:inherit;
-    font-size:11px;
+    font-size:14px;
     font-weight:700;
     color:var(--ink-soft);
-    padding:6px 0;
+    padding:2px 0;
     cursor:pointer;
   }
   .tab .icon-wrap{position:relative;display:inline-flex;}
-  .tab svg{width:21px;height:21px;stroke:var(--ink-soft);}
+  .tab svg{width:27px;height:27px;stroke:var(--ink-soft);}
   .tab.active{color:var(--coral-deep);}
   .tab.active svg{stroke:var(--coral-deep);}
   .tab .ping{
@@ -982,7 +987,6 @@
   <header class="ticket">
     <div class="ticket-top">
       <span class="badge">청산고등학교</span>
-      <span class="student-name-tag" id="studentNameTag"></span>
       <h1 class="trip-title">2026 안전하고 즐거운 오사카 수학여행</h1>
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
@@ -990,6 +994,7 @@
       <div class="stat"><span class="label">출발</span><span class="value" id="departLabel">10.14(화)</span></div>
       <div class="stat"><span class="label">도착</span><span class="value" id="returnLabel">10.16(목)</span></div>
       <div class="stat dday"><span class="label">D-DAY</span><span class="value" id="ddayValue">-</span></div>
+      <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
 
@@ -1225,8 +1230,8 @@ const SCHEDULE = {
 const CHECKLIST = {
   "필수 서류": [
     { text:"여권 (유효기간 6개월 이상)", essential:true },
-    { text:"여권 사본 1부 (분실 대비)", essential:true },
-    { text:"항공권(E-티켓) 또는 예약 확인서", essential:true },
+    { text:"여권 사본 1부 (분실 대비)", essential:false },
+    { text:"티웨이앱 모바일 항공권", essential:true },
     { text:"여행자보험 가입 확인서", essential:false }
   ],
   "의류": [
@@ -1244,12 +1249,12 @@ const CHECKLIST = {
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
-    { text:"멀티 어댑터 (일본은 콘센트 모양이 달라요)", essential:true },
+    { text:"멀티 어댑터 (일본은 콘센트 모양이 달라요)", essential:false },
     { text:"보조배터리", essential:false },
     { text:"이어폰", essential:false }
   ],
   "기타": [
-    { text:"엔화 환전", essential:true },
+    { text:"엔화 환전", essential:false },
     { text:"개인 간식", essential:false },
     { text:"멀미약(필요시)", essential:false },
     { text:"개인 상비약", essential:false }
