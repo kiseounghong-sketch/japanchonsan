@@ -58,32 +58,35 @@
     position:relative;
   }
   .ticket-top{
-    padding:10px 22px 6px;
+    padding:8px 44px 4px 20px;
   }
   .badge{
     display:inline-block;
-    font-size:10px;
+    font-size:9px;
     font-weight:700;
     letter-spacing:.02em;
     background:rgba(255,255,255,0.12);
     border:1px solid rgba(255,255,255,0.35);
     color:#fff;
-    padding:3px 9px;
+    padding:2px 8px;
     border-radius:999px;
+  }
+  .student-name-tag{
+    position:absolute;
+    top:10px;
+    right:16px;
+    font-size:10.5px;
+    font-weight:600;
+    color:rgba(255,255,255,0.8);
   }
   .trip-title{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:22px;
-    line-height:1.1;
-    margin:4px 0 2px;
-    letter-spacing:.01em;
-  }
-  .trip-sub{
-    margin:0;
-    font-size:11.5px;
-    color:rgba(255,255,255,0.72);
-    font-weight:500;
+    font-size:clamp(14px, 4.3vw, 18px);
+    line-height:1.2;
+    margin:3px 0 0;
+    letter-spacing:0;
+    white-space:nowrap;
   }
 
   .perforation{
@@ -105,7 +108,7 @@
 
   .ticket-bottom{
     display:flex;
-    padding:7px 22px 8px;
+    padding:5px 20px 6px;
     gap:8px;
   }
   .stat{
@@ -115,12 +118,12 @@
     gap:4px;
   }
   .stat .label{
-    font-size:9.5px;
+    font-size:8.5px;
     font-weight:700;
     color:rgba(255,255,255,0.55);
   }
   .stat .value{
-    font-size:13.5px;
+    font-size:12px;
     font-weight:700;
     color:#fff;
   }
@@ -582,6 +585,14 @@
     margin:0 0 10px;
     line-height:1.05;
   }
+  .assembly-card .ac-info-row{
+    display:flex;
+    gap:8px;
+  }
+  .assembly-card .ac-info-item{
+    flex:1;
+    min-width:0;
+  }
   .assembly-card .ac-place-label{
     font-size:11px;
     font-weight:700;
@@ -592,6 +603,21 @@
     font-size:16px;
     font-weight:700;
     margin:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ac-delete-btn{
+    margin-top:12px;
+    background:rgba(255,255,255,0.15);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.4);
+    border-radius:999px;
+    padding:7px 16px;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
   }
   .assembly-card.urgent{
     background:var(--coral);
@@ -952,8 +978,8 @@
   <header class="ticket">
     <div class="ticket-top">
       <span class="badge">청산고등학교</span>
-      <h1 class="trip-title">2026 오사카<br>수학여행</h1>
-      <p class="trip-sub">2학년 · 고베·교토 · 3박 4일</p>
+      <span class="student-name-tag" id="studentNameTag"></span>
+      <h1 class="trip-title">2026 안전하고 즐거운 오사카 수학여행</h1>
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
     <div class="ticket-bottom">
@@ -969,8 +995,16 @@
       <div class="assembly-card" id="assemblyCard" style="display:none;">
         <p class="ac-label">집합까지 남은 시간</p>
         <p class="ac-countdown" id="assemblyCountdown">--:--</p>
-        <p class="ac-place-label">집합 장소</p>
-        <p class="ac-place" id="assemblyPlace">-</p>
+        <div class="ac-info-row">
+          <div class="ac-info-item">
+            <p class="ac-place-label">집합 시간</p>
+            <p class="ac-place" id="assemblyTimeLabel">-</p>
+          </div>
+          <div class="ac-info-item">
+            <p class="ac-place-label">집합 장소</p>
+            <p class="ac-place" id="assemblyPlace">-</p>
+          </div>
+        </div>
       </div>
       <div class="scroll-area">
         <div id="noticeList"></div>
@@ -1278,6 +1312,7 @@ function completeLogin(name){
   studentName = name;
   localStorage.setItem(STUDENT_NAME_KEY, studentName);
   nameGate.style.display = "none";
+  document.getElementById("studentNameTag").textContent = studentName;
   reportAttendance();
 }
 
@@ -1320,6 +1355,7 @@ function logoutStudent(){
   localStorage.removeItem(CHECKLIST_STATE_KEY);
   localStorage.removeItem(MISSION_STATE_KEY);
   studentName = "";
+  document.getElementById("studentNameTag").textContent = "";
   nameGateCard.innerHTML = nameGateCardOriginalHTML;
   attachStudentIdConfirm();
   nameGate.style.display = "flex";
@@ -1333,6 +1369,7 @@ document.getElementById("logoutBtn").addEventListener("click", logoutStudent);
 
 if(studentName){
   nameGate.style.display = "none";
+  document.getElementById("studentNameTag").textContent = studentName;
   reportAttendance();
 } else {
   nameGate.style.display = "flex";
@@ -1465,9 +1502,14 @@ let assemblyCountdownInterval = null;
 function showAssembly(place){
   document.getElementById("assemblyCard").style.display = "block";
   document.getElementById("assemblyPlace").textContent = place;
+  document.getElementById("assemblyTimeLabel").textContent = formatTimeHM(assemblyTarget);
   updateAssemblyCountdown();
   if(assemblyCountdownInterval) clearInterval(assemblyCountdownInterval);
   assemblyCountdownInterval = setInterval(updateAssemblyCountdown, 1000);
+}
+
+function formatTimeHM(date){
+  return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
 }
 
 function hideAssembly(){
@@ -1489,7 +1531,7 @@ function updateAssemblyCountdown(){
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
   const s = totalSec % 60;
-  el.textContent = (h > 0 ? h + "시간 " : "") + String(m).padStart(2, "0") + "분 " + String(s).padStart(2, "0") + "초 남음";
+  el.textContent = (h > 0 ? h + "시간 " : "") + String(m).padStart(2, "0") + "분 " + String(s).padStart(2, "0") + "초";
   card.classList.remove("overdue");
   card.classList.toggle("urgent", diffMs <= 5 * 60 * 1000);
 }
