@@ -943,6 +943,61 @@
     border:1.5px solid #fff;
   }
 
+  /* ===== 오버레이 폼 공용 (환율 계산기 등) ===== */
+  .notice-form-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,25,48,0.45);
+    z-index:60;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .notice-form-card{
+    width:100%;
+    max-width:480px;
+    background:#fff;
+    border-radius:20px 20px 0 0;
+    padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .notice-form-card h3{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:20px;
+    margin:0 0 16px;
+  }
+  .nf-label{font-size:13px;font-weight:700;color:var(--ink-soft);margin:14px 0 8px;}
+  .nf-label:first-of-type{margin-top:0;}
+  .nf-input, .nf-textarea{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+  }
+  .nf-actions{display:flex;gap:10px;margin-top:18px;}
+  .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;background:var(--paper-dim);color:var(--ink);}
+  .exchange-rate-note{
+    margin:14px 0 0;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .stat-button{
+    cursor:pointer;
+    font-family:inherit;
+    background:none;
+    border:none;
+    padding:0;
+    text-align:left;
+    align-items:flex-start;
+  }
+
   /* ===== 이름 선택 게이트 ===== */
   .name-gate{
     position:fixed;
@@ -1041,12 +1096,26 @@
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
     <div class="ticket-bottom">
-      <div class="stat"><span class="label">출발</span><span class="value" id="departLabel">10.14(화)</span></div>
-      <div class="stat"><span class="label">도착</span><span class="value" id="returnLabel">10.16(목)</span></div>
+      <div class="stat"><span class="label">오사카 날씨</span><span class="value" id="weatherValue">-</span></div>
       <div class="stat dday"><span class="label">D-DAY</span><span class="value" id="ddayValue">-</span></div>
+      <button type="button" class="stat stat-button" id="openExchangeBtn"><span class="label">환율계산기</span><span class="value">¥→₩</span></button>
       <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
+
+  <div class="notice-form-overlay" id="exchangeOverlay">
+    <div class="notice-form-card">
+      <h3>환율 계산기</h3>
+      <p class="nf-label">엔화 (JPY)</p>
+      <input type="number" id="jpyInput" class="nf-input" placeholder="0" inputmode="decimal">
+      <p class="nf-label">원화 (KRW)</p>
+      <input type="number" id="krwInput" class="nf-input" placeholder="0" inputmode="decimal">
+      <p class="exchange-rate-note">오늘 환율: 100엔 = <span id="rateDisplay">900</span>원 기준</p>
+      <div class="nf-actions">
+        <button type="button" id="closeExchangeBtn">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <main class="content">
 
@@ -1468,9 +1537,6 @@ function fmtDate(iso){
   return (d.getMonth()+1) + "." + d.getDate() + "(" + w + ")";
 }
 
-document.getElementById("departLabel").textContent = fmtDate(DEPART_DATE);
-document.getElementById("returnLabel").textContent = fmtDate(RETURN_DATE);
-
 function updateDday(){
   const today = new Date(); today.setHours(0,0,0,0);
   const target = new Date(DEPART_DATE + "T00:00:00");
@@ -1479,6 +1545,44 @@ function updateDday(){
     diff === 0 ? "D-DAY" : diff > 0 ? ("D-" + diff) : ("D+" + Math.abs(diff));
 }
 updateDday();
+
+/* ---- 오사카 날씨 (Open-Meteo, API 키 필요 없음) ---- */
+function loadWeather(){
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=34.6937&longitude=135.5023&current=temperature_2m&timezone=Asia%2FTokyo")
+    .then(res => res.json())
+    .then(data => {
+      const temp = Math.round(data.current.temperature_2m);
+      document.getElementById("weatherValue").textContent = temp + "°C";
+    })
+    .catch(() => {
+      document.getElementById("weatherValue").textContent = "-";
+    });
+}
+loadWeather();
+setInterval(loadWeather, 15 * 60 * 1000);
+
+/* ---- 환율 계산기 (엔화 ↔ 원화, 수동 환율) ---- */
+// 출발 전 이 값만 그날 환율로 바꿔주세요. (100엔 기준 원화)
+const YEN100_TO_KRW = 900;
+const JPY_TO_KRW_RATE = YEN100_TO_KRW / 100;
+document.getElementById("rateDisplay").textContent = YEN100_TO_KRW;
+
+const jpyInput = document.getElementById("jpyInput");
+const krwInput = document.getElementById("krwInput");
+jpyInput.addEventListener("input", () => {
+  const jpy = parseFloat(jpyInput.value);
+  krwInput.value = isNaN(jpy) ? "" : Math.round(jpy * JPY_TO_KRW_RATE);
+});
+krwInput.addEventListener("input", () => {
+  const krw = parseFloat(krwInput.value);
+  jpyInput.value = isNaN(krw) ? "" : Math.round(krw / JPY_TO_KRW_RATE);
+});
+document.getElementById("openExchangeBtn").addEventListener("click", () => {
+  document.getElementById("exchangeOverlay").style.display = "flex";
+});
+document.getElementById("closeExchangeBtn").addEventListener("click", () => {
+  document.getElementById("exchangeOverlay").style.display = "none";
+});
 
 /* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
 const noticeList = document.getElementById("noticeList");
