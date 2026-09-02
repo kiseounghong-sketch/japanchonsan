@@ -319,6 +319,9 @@
     overflow:hidden;
     border:1.5px solid var(--line);
     background:var(--paper-dim);
+    position:relative;
+    z-index:0;
+    isolation:isolate;
   }
   .map-note{
     margin:8px 0 0;
@@ -854,6 +857,7 @@
     background:#fff;
     border-top:1.5px solid var(--line);
     padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    z-index:50;
   }
   .tab{
     flex:1;
