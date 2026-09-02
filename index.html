@@ -1198,12 +1198,18 @@ function attachStudentIdConfirm(){
 }
 
 function logoutStudent(){
-  if(!confirm("로그아웃하고 학번을 다시 입력할까요?")) return;
+  if(!confirm("로그아웃하고 학번을 다시 입력할까요? 지금까지 체크한 준비물·미션 기록도 함께 초기화돼요.")) return;
   localStorage.removeItem(STUDENT_NAME_KEY);
+  localStorage.removeItem(CHECKLIST_STATE_KEY);
+  localStorage.removeItem(MISSION_STATE_KEY);
   studentName = "";
   nameGateCard.innerHTML = nameGateCardOriginalHTML;
   attachStudentIdConfirm();
   nameGate.style.display = "flex";
+  groupsEl.querySelectorAll(".check-item.checked").forEach(el => el.classList.remove("checked"));
+  missionList.querySelectorAll(".check-item.checked").forEach(el => el.classList.remove("checked"));
+  updateProgress();
+  updateMissionProgress();
 }
 
 document.getElementById("logoutBtn").addEventListener("click", logoutStudent);
