@@ -117,6 +117,21 @@
     color:#fff;
   }
   .stat.dday .value{color:var(--mustard);}
+  .stat-button{
+    cursor:pointer;
+    font-family:inherit;
+    background:none;
+    border:none;
+    padding:0;
+    text-align:left;
+    align-items:flex-start;
+  }
+  .exchange-rate-note{
+    margin:14px 0 0;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
 
   /* ===== 컨텐츠 ===== */
   .content{
@@ -817,6 +832,15 @@
     font-size:22px;
     margin:0 0 16px;
   }
+  .group-move-hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:-10px 0 14px;
+  }
+  .member-chip.selected{
+    background:var(--coral);
+    color:#fff;
+  }
 
   /* ===== 학생현황 ===== */
   .students-header{
@@ -1193,11 +1217,25 @@
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
     <div class="ticket-bottom">
-      <div class="stat"><span class="label">출발</span><span class="value" id="departLabel">10.14(화)</span></div>
-      <div class="stat"><span class="label">도착</span><span class="value" id="returnLabel">10.16(목)</span></div>
+      <div class="stat"><span class="label">오사카 날씨</span><span class="value" id="weatherValue">-</span></div>
       <div class="stat dday"><span class="label">D-DAY</span><span class="value" id="ddayValue">-</span></div>
+      <button type="button" class="stat stat-button" id="openExchangeBtn"><span class="label">환율계산기</span><span class="value">¥→₩</span></button>
     </div>
   </header>
+
+  <div class="notice-form-overlay" id="exchangeOverlay">
+    <div class="notice-form-card">
+      <h3>환율 계산기</h3>
+      <p class="nf-label">엔화 (JPY)</p>
+      <input type="number" id="jpyInput" class="nf-input" placeholder="0" inputmode="decimal">
+      <p class="nf-label">원화 (KRW)</p>
+      <input type="number" id="krwInput" class="nf-input" placeholder="0" inputmode="decimal">
+      <p class="exchange-rate-note">오늘 환율: 100엔 = <span id="rateDisplay">900</span>원 기준</p>
+      <div class="nf-actions">
+        <button type="button" id="closeExchangeBtn">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <main class="content">
 
@@ -1342,13 +1380,36 @@
           <span class="more-text">학생현황 (출석·체크리스트)</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="more-item" data-target="hotel-checklist">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
+          <span class="more-text">숙소 체크리스트</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="bus-checklist">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+          <span class="more-text">버스 체크리스트</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
       <button class="danger-link" id="resetAllBtn">공지·학생현황 데이터 전체 초기화</button>
+    </section>
+
+    <section id="panel-hotel-checklist" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">숙소 체크리스트</h2>
+      <div id="hotelChecklist"></div>
+    </section>
+
+    <section id="panel-bus-checklist" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">버스 체크리스트</h2>
+      <div id="busChecklist"></div>
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">조 편성표</h2>
+      <p class="group-move-hint">학생 이름을 눌러 선택한 뒤, 옮길 조 제목을 누르면 이동해요.</p>
       <div id="groupList"></div>
     </section>
 
@@ -1644,9 +1705,6 @@ function fmtDate(iso){
   return (d.getMonth()+1) + "." + d.getDate() + "(" + w + ")";
 }
 
-document.getElementById("departLabel").textContent = fmtDate(DEPART_DATE);
-document.getElementById("returnLabel").textContent = fmtDate(RETURN_DATE);
-
 function updateDday(){
   const today = new Date(); today.setHours(0,0,0,0);
   const target = new Date(DEPART_DATE + "T00:00:00");
@@ -1655,6 +1713,44 @@ function updateDday(){
     diff === 0 ? "D-DAY" : diff > 0 ? ("D-" + diff) : ("D+" + Math.abs(diff));
 }
 updateDday();
+
+/* ---- 오사카 날씨 (Open-Meteo, API 키 필요 없음) ---- */
+function loadWeather(){
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=34.6937&longitude=135.5023&current=temperature_2m&timezone=Asia%2FTokyo")
+    .then(res => res.json())
+    .then(data => {
+      const temp = Math.round(data.current.temperature_2m);
+      document.getElementById("weatherValue").textContent = temp + "°C";
+    })
+    .catch(() => {
+      document.getElementById("weatherValue").textContent = "-";
+    });
+}
+loadWeather();
+setInterval(loadWeather, 15 * 60 * 1000);
+
+/* ---- 환율 계산기 (엔화 ↔ 원화, 수동 환율) ---- */
+// 출발 전 이 값만 그날 환율로 바꿔주세요. (100엔 기준 원화)
+const YEN100_TO_KRW = 900;
+const JPY_TO_KRW_RATE = YEN100_TO_KRW / 100;
+document.getElementById("rateDisplay").textContent = YEN100_TO_KRW;
+
+const jpyInput = document.getElementById("jpyInput");
+const krwInput = document.getElementById("krwInput");
+jpyInput.addEventListener("input", () => {
+  const jpy = parseFloat(jpyInput.value);
+  krwInput.value = isNaN(jpy) ? "" : Math.round(jpy * JPY_TO_KRW_RATE);
+});
+krwInput.addEventListener("input", () => {
+  const krw = parseFloat(krwInput.value);
+  jpyInput.value = isNaN(krw) ? "" : Math.round(krw / JPY_TO_KRW_RATE);
+});
+document.getElementById("openExchangeBtn").addEventListener("click", () => {
+  document.getElementById("exchangeOverlay").style.display = "flex";
+});
+document.getElementById("closeExchangeBtn").addEventListener("click", () => {
+  document.getElementById("exchangeOverlay").style.display = "none";
+});
 
 /* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
 const noticeList = document.getElementById("noticeList");
@@ -2288,28 +2384,80 @@ contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
 
 /* ---- 조 편성표 렌더 ---- */
 const groupList = document.getElementById("groupList");
-groupList.innerHTML = GROUPS.map(g => `
-  <div class="group-card">
-    <div class="group-head">
-      <span class="group-no">${g.no}조</span>
-      <span class="g-info">
-        <p class="g-leader">조장 · ${g.leader}</p>
-        <p class="g-meta">${g.bus} · ${g.room}</p>
-      </span>
-      <span class="chevron">${chevronDown}</span>
-    </div>
-    <div class="group-body">
-      <div class="member-chips">
-        ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+
+const GROUP_OVERRIDES_KEY = "teacher_group_overrides";
+function loadGroupOverrides(){
+  try { return JSON.parse(localStorage.getItem(GROUP_OVERRIDES_KEY) || "{}"); } catch(e){ return {}; }
+}
+function saveGroupOverrides(){
+  localStorage.setItem(GROUP_OVERRIDES_KEY, JSON.stringify(groupOverrides));
+}
+let groupOverrides = loadGroupOverrides();
+let selectedStudentForMove = null;
+
+function getEffectiveGroups(){
+  const effective = GROUPS.map(g => ({ ...g, members: [...g.members] }));
+  Object.entries(groupOverrides).forEach(([name, targetNo]) => {
+    effective.forEach(g => { g.members = g.members.filter(m => m !== name); });
+    const target = effective.find(g => g.no === targetNo);
+    if(target && !target.members.includes(name)) target.members.push(name);
+  });
+  return effective;
+}
+
+function renderGroups(){
+  const groups = getEffectiveGroups();
+  groupList.innerHTML = groups.map(g => `
+    <div class="group-card" data-group-no="${g.no}">
+      <div class="group-head">
+        <span class="group-no">${g.no}조</span>
+        <span class="g-info">
+          <p class="g-leader">조장 · ${g.leader}</p>
+          <p class="g-meta">${g.bus} · ${g.room}</p>
+        </span>
+        <span class="chevron">${chevronDown}</span>
+      </div>
+      <div class="group-body">
+        <div class="member-chips">
+          ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+        </div>
       </div>
     </div>
-  </div>
-`).join("");
+  `).join("");
+}
+
+renderGroups();
+
+function moveStudentToGroup(name, targetNo){
+  groupOverrides[name] = targetNo;
+  saveGroupOverrides();
+  selectedStudentForMove = null;
+  renderGroups();
+  document.querySelectorAll(`.group-card[data-group-no="${targetNo}"]`).forEach(c => c.classList.add("open"));
+}
 
 groupList.addEventListener("click", (e) => {
+  const chip = e.target.closest(".member-chip");
+  if(chip){
+    e.stopPropagation();
+    if(selectedStudentForMove === chip.textContent){
+      selectedStudentForMove = null;
+      chip.classList.remove("selected");
+      return;
+    }
+    groupList.querySelectorAll(".member-chip.selected").forEach(c => c.classList.remove("selected"));
+    selectedStudentForMove = chip.textContent;
+    chip.classList.add("selected");
+    return;
+  }
   const head = e.target.closest(".group-head");
   if(!head) return;
-  head.closest(".group-card").classList.toggle("open");
+  const card = head.closest(".group-card");
+  if(selectedStudentForMove){
+    moveStudentToGroup(selectedStudentForMove, parseInt(card.dataset.groupNo, 10));
+    return;
+  }
+  card.classList.toggle("open");
 });
 
 /* ---- 사진 미션 렌더 ---- */
@@ -2488,6 +2636,50 @@ document.getElementById("resetAllBtn").addEventListener("click", () => {
     alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
   });
 });
+
+/* ---- 숙소·버스 체크리스트 (선생님 전용, 이 기기에만 저장) ---- */
+const HOTEL_CHECKLIST = [
+  "전 조 객실 배정표 확인",
+  "방 열쇠(카드키) 전달 확인",
+  "귀중품 보관 안내 완료",
+  "취침 점호 시간 안내",
+  "조식 시간 및 장소 안내",
+  "체크아웃 시 개인 물품 분실 여부 확인",
+  "객실 파손·분실물 확인"
+];
+const BUS_CHECKLIST = [
+  "탑승 전 인원수 확인",
+  "좌석 배정표 확인",
+  "안전벨트 착용 확인",
+  "멀미 학생 확인 및 앞자리 배치",
+  "하차 시 소지품·좌석 분실물 확인",
+  "버스 기사님 연락처 확인",
+  "다음 이동 시간 및 장소 공지"
+];
+
+function renderSimpleChecklist(containerId, storageKey, items){
+  const container = document.getElementById(containerId);
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch(e){ return []; } })();
+  container.innerHTML = items.map(text => `
+    <div class="check-item">
+      <span class="box">${checkIcon}</span>
+      <span class="text">${text}</span>
+    </div>
+  `).join("");
+  container.querySelectorAll(".check-item").forEach(item => {
+    if(saved.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+  });
+  container.addEventListener("click", (e) => {
+    const item = e.target.closest(".check-item");
+    if(!item) return;
+    item.classList.toggle("checked");
+    const checkedTexts = Array.from(container.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
+    localStorage.setItem(storageKey, JSON.stringify(checkedTexts));
+  });
+}
+
+renderSimpleChecklist("hotelChecklist", "teacher_hotel_checklist", HOTEL_CHECKLIST);
+renderSimpleChecklist("busChecklist", "teacher_bus_checklist", BUS_CHECKLIST);
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){
