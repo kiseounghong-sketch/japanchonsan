@@ -58,22 +58,7 @@
     position:relative;
   }
   .ticket-top{
-    padding:8px 80px 6px 16px;
-  }
-  .badge{
-    position:absolute;
-    top:8px;
-    right:14px;
-    display:inline-block;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:.02em;
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.35);
-    color:#fff;
-    padding:3px 10px;
-    border-radius:999px;
-    white-space:nowrap;
+    padding:8px 16px 6px;
   }
   .student-name-tag{
     align-self:flex-end;
@@ -88,14 +73,9 @@
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
     font-size:clamp(14px, 5vw, 21px);
-    line-height:1.15;
+    line-height:1.2;
     margin:2px 0 0;
     letter-spacing:0;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    display:block;
-    max-width:100%;
   }
 
   .perforation{
@@ -484,6 +464,45 @@
     background:var(--coral);
     padding:3px 8px;
     border-radius:999px;
+  }
+  .custom-item-remove{
+    margin-left:auto;
+    flex-shrink:0;
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:2px 6px;
+  }
+  .custom-item-add{
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+  .custom-item-add input{
+    flex:1;
+    min-width:0;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+    background:#fff;
+  }
+  .custom-item-add button{
+    flex-shrink:0;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:0 16px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
   }
   .check-item.checked .box{
     background:var(--coral);
@@ -990,7 +1009,6 @@
 
   <header class="ticket">
     <div class="ticket-top">
-      <span class="badge">청산고등학교</span>
       <h1 class="trip-title">안전하고 즐거운 청산고 오사카 수학여행</h1>
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
@@ -1234,9 +1252,7 @@ const SCHEDULE = {
 const CHECKLIST = {
   "필수 서류": [
     { text:"여권 (유효기간 6개월 이상)", essential:true },
-    { text:"여권 사본 1부 (분실 대비)", essential:false },
-    { text:"티웨이앱 모바일 항공권", essential:true },
-    { text:"여행자보험 가입 확인서", essential:false }
+    { text:"티웨이앱 모바일 항공권", essential:true }
   ],
   "의류": [
     { text:"여벌 옷 2벌", essential:false },
@@ -1787,23 +1803,15 @@ document.getElementById("refreshLocationBtn").addEventListener("click", requestM
 
 /* ---- 체크리스트 렌더 ---- */
 const groupsEl = document.getElementById("checklistGroups");
-let totalItems = 0;
 
-groupsEl.innerHTML = Object.entries(CHECKLIST).map(([group, items]) => {
-  totalItems += items.length;
-  return `
-    <p class="group-title">${group}</p>
-    ${items.map(item => `
-      <div class="check-item" data-essential="${item.essential ? "true" : "false"}">
-        <span class="box">${checkIcon}</span>
-        <span class="text">${item.text}</span>
-        ${item.essential ? '<span class="essential-badge">필수</span>' : ""}
-      </div>
-    `).join("")}
-  `;
-}).join("");
-
-document.getElementById("totalCount").textContent = totalItems;
+const CUSTOM_ITEMS_KEY = "suhak_custom_items";
+function loadCustomItems(){
+  try { return JSON.parse(localStorage.getItem(CUSTOM_ITEMS_KEY) || "[]"); } catch(e){ return []; }
+}
+function saveCustomItems(){
+  localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customItems));
+}
+let customItems = loadCustomItems();
 
 const CHECKLIST_STATE_KEY = "suhak_checklist_checked";
 function loadChecklistState(){
@@ -1813,19 +1821,85 @@ function saveChecklistState(){
   const checkedTexts = Array.from(groupsEl.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
   localStorage.setItem(CHECKLIST_STATE_KEY, JSON.stringify(checkedTexts));
 }
-const savedChecklist = loadChecklistState();
-groupsEl.querySelectorAll(".check-item").forEach(item => {
-  if(savedChecklist.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
-});
+
+function renderChecklist(){
+  const presetHtml = Object.entries(CHECKLIST).map(([group, items]) => `
+    <p class="group-title">${group}</p>
+    ${items.map(item => `
+      <div class="check-item" data-essential="${item.essential ? "true" : "false"}">
+        <span class="box">${checkIcon}</span>
+        <span class="text">${item.text}</span>
+        ${item.essential ? '<span class="essential-badge">필수</span>' : ""}
+      </div>
+    `).join("")}
+  `).join("");
+
+  const customHtml = `
+    <p class="group-title">내가 추가한 준비물</p>
+    ${customItems.map(text => `
+      <div class="check-item">
+        <span class="box">${checkIcon}</span>
+        <span class="text">${text}</span>
+        <button type="button" class="custom-item-remove" data-text="${text.replace(/"/g, "&quot;")}">×</button>
+      </div>
+    `).join("")}
+    <div class="custom-item-add">
+      <input type="text" id="customItemInput" placeholder="직접 추가할 준비물">
+      <button type="button" id="addCustomItemBtn">추가</button>
+    </div>
+  `;
+
+  groupsEl.innerHTML = presetHtml + customHtml;
+
+  const saved = loadChecklistState();
+  groupsEl.querySelectorAll(".check-item").forEach(item => {
+    if(saved.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+  });
+
+  document.getElementById("addCustomItemBtn").addEventListener("click", addCustomItem);
+  document.getElementById("customItemInput").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") addCustomItem();
+  });
+  groupsEl.querySelectorAll(".custom-item-remove").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeCustomItem(btn.dataset.text);
+    });
+  });
+}
+
+function addCustomItem(){
+  const input = document.getElementById("customItemInput");
+  const text = input.value.trim();
+  if(!text || customItems.includes(text)){ input.value = ""; return; }
+  customItems.push(text);
+  saveCustomItems();
+  renderChecklist();
+  updateProgress();
+}
+
+function removeCustomItem(text){
+  customItems = customItems.filter(t => t !== text);
+  saveCustomItems();
+  const saved = loadChecklistState().filter(t => t !== text);
+  localStorage.setItem(CHECKLIST_STATE_KEY, JSON.stringify(saved));
+  renderChecklist();
+  updateProgress();
+}
+
+renderChecklist();
 
 function updateProgress(){
+  const total = groupsEl.querySelectorAll(".check-item").length;
   const checked = groupsEl.querySelectorAll(".check-item.checked").length;
   document.getElementById("checkedCount").textContent = checked;
-  document.getElementById("progressFill").style.width = (totalItems ? (checked/totalItems*100) : 0) + "%";
+  document.getElementById("totalCount").textContent = total;
+  document.getElementById("progressFill").style.width = (total ? (checked/total*100) : 0) + "%";
   reportProgress();
 }
 
 groupsEl.addEventListener("click", (e) => {
+  if(e.target.closest(".custom-item-remove")) return;
   const item = e.target.closest(".check-item");
   if(!item) return;
   item.classList.toggle("checked");
@@ -1917,6 +1991,7 @@ function getMissingEssentials(){
 
 function reportProgress(){
   if(!studentName || !scriptReady()) return;
+  const checklistTotal = groupsEl.querySelectorAll(".check-item").length;
   const checklistChecked = groupsEl.querySelectorAll(".check-item.checked").length;
   const missionChecked = missionList.querySelectorAll(".check-item.checked").length;
   const missingEssentials = getMissingEssentials();
@@ -1927,7 +2002,7 @@ function reportProgress(){
     body: JSON.stringify({
       action: "progress",
       name: studentName,
-      checklist: checklistChecked + "/" + totalItems,
+      checklist: checklistChecked + "/" + checklistTotal,
       mission: missionChecked + "/" + MISSIONS.length,
       essential: essentialStatus
     })
