@@ -408,6 +408,16 @@
     color:var(--ink);
     transition:color .15s ease;
   }
+  .essential-badge{
+    margin-left:auto;
+    flex-shrink:0;
+    font-size:10.5px;
+    font-weight:700;
+    color:#fff;
+    background:var(--coral);
+    padding:3px 8px;
+    border-radius:999px;
+  }
   .check-item.checked .box{
     background:var(--coral);
     border-color:var(--coral);
@@ -647,6 +657,8 @@
   .student-card .s-name{font-size:14.5px;font-weight:700;}
   .student-card .s-attend{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
   .student-card .s-attend.done{color:var(--coral-deep);font-weight:700;}
+  .student-card .s-essential{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+  .student-card .s-essential.warn{color:var(--coral-deep);font-weight:700;}
   .student-card .s-progress{
     display:flex;
     gap:8px;
@@ -1216,12 +1228,41 @@ const SCHEDULE = {
 };
 
 // 준비물 체크리스트 (그룹명: [항목, 항목, ...])
+// 준비물 체크리스트 (그룹명: [{ text, essential }])
+// essential:true인 항목은 학생 화면에 "필수" 표시가 뜨고,
+// 선생님용 "학생현황"에는 이 항목들만 따로 빠졌는지 표시됩니다.
 const CHECKLIST = {
-  "필수 서류": ["학생증(신분증)", "여행자보험 가입 확인서", "건강보험증 사본"],
-  "의류": ["여벌 옷 2벌", "잠옷", "우산 또는 우비", "편한 운동화", "슬리퍼"],
-  "세면/위생용품": ["칫솔·치약", "수건 2장", "개인 세면도구", "자외선 차단제"],
-  "전자기기": ["휴대폰 충전기", "보조배터리", "이어폰"],
-  "기타": ["용돈", "개인 간식", "멀미약(필요시)", "개인 상비약"]
+  "필수 서류": [
+    { text:"여권 (유효기간 6개월 이상)", essential:true },
+    { text:"여권 사본 1부 (분실 대비)", essential:true },
+    { text:"항공권(E-티켓) 또는 예약 확인서", essential:true },
+    { text:"여행자보험 가입 확인서", essential:false }
+  ],
+  "의류": [
+    { text:"여벌 옷 2벌", essential:false },
+    { text:"잠옷", essential:false },
+    { text:"우산 또는 우비", essential:false },
+    { text:"편한 운동화", essential:false },
+    { text:"슬리퍼", essential:false }
+  ],
+  "세면/위생용품": [
+    { text:"칫솔·치약", essential:false },
+    { text:"수건 2장", essential:false },
+    { text:"개인 세면도구", essential:false },
+    { text:"자외선 차단제", essential:false }
+  ],
+  "전자기기": [
+    { text:"휴대폰 충전기", essential:false },
+    { text:"멀티 어댑터 (일본은 콘센트 모양이 달라요)", essential:true },
+    { text:"보조배터리", essential:false },
+    { text:"이어폰", essential:false }
+  ],
+  "기타": [
+    { text:"엔화 환전", essential:true },
+    { text:"개인 간식", essential:false },
+    { text:"멀미약(필요시)", essential:false },
+    { text:"개인 상비약", essential:false }
+  ]
 };
 
 // 비상 연락망 (역할, 이름, 전화번호)
@@ -1742,15 +1783,29 @@ groupsEl.innerHTML = Object.entries(CHECKLIST).map(([group, items]) => {
   return `
     <p class="group-title">${group}</p>
     ${items.map(item => `
-      <div class="check-item">
+      <div class="check-item" data-essential="${item.essential ? "true" : "false"}">
         <span class="box">${checkIcon}</span>
-        <span class="text">${item}</span>
+        <span class="text">${item.text}</span>
+        ${item.essential ? '<span class="essential-badge">필수</span>' : ""}
       </div>
     `).join("")}
   `;
 }).join("");
 
 document.getElementById("totalCount").textContent = totalItems;
+
+const CHECKLIST_STATE_KEY = "suhak_checklist_checked";
+function loadChecklistState(){
+  try { return JSON.parse(localStorage.getItem(CHECKLIST_STATE_KEY) || "[]"); } catch(e){ return []; }
+}
+function saveChecklistState(){
+  const checkedTexts = Array.from(groupsEl.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
+  localStorage.setItem(CHECKLIST_STATE_KEY, JSON.stringify(checkedTexts));
+}
+const savedChecklist = loadChecklistState();
+groupsEl.querySelectorAll(".check-item").forEach(item => {
+  if(savedChecklist.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+});
 
 function updateProgress(){
   const checked = groupsEl.querySelectorAll(".check-item.checked").length;
@@ -1763,6 +1818,7 @@ groupsEl.addEventListener("click", (e) => {
   const item = e.target.closest(".check-item");
   if(!item) return;
   item.classList.toggle("checked");
+  saveChecklistState();
   updateProgress();
 });
 
@@ -1818,6 +1874,19 @@ missionList.innerHTML = MISSIONS.map(m => `
   </div>
 `).join("");
 
+const MISSION_STATE_KEY = "suhak_mission_checked";
+function loadMissionState(){
+  try { return JSON.parse(localStorage.getItem(MISSION_STATE_KEY) || "[]"); } catch(e){ return []; }
+}
+function saveMissionState(){
+  const checkedTitles = Array.from(missionList.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
+  localStorage.setItem(MISSION_STATE_KEY, JSON.stringify(checkedTitles));
+}
+const savedMissions = loadMissionState();
+missionList.querySelectorAll(".check-item").forEach(item => {
+  if(savedMissions.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+});
+
 function updateMissionProgress(){
   const checked = missionList.querySelectorAll(".check-item.checked").length;
   document.getElementById("missionCheckedCount").textContent = checked;
@@ -1825,10 +1894,22 @@ function updateMissionProgress(){
   reportProgress();
 }
 
+function getMissingEssentials(){
+  const missing = [];
+  groupsEl.querySelectorAll('.check-item[data-essential="true"]').forEach(item => {
+    if(!item.classList.contains("checked")){
+      missing.push(item.querySelector(".text").textContent);
+    }
+  });
+  return missing;
+}
+
 function reportProgress(){
   if(!studentName || !hasScriptUrl()) return;
   const checklistChecked = groupsEl.querySelectorAll(".check-item.checked").length;
   const missionChecked = missionList.querySelectorAll(".check-item.checked").length;
+  const missingEssentials = getMissingEssentials();
+  const essentialStatus = missingEssentials.length ? ("미비: " + missingEssentials.join(", ")) : "완료";
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -1836,7 +1917,8 @@ function reportProgress(){
       action: "progress",
       name: studentName,
       checklist: checklistChecked + "/" + totalItems,
-      mission: missionChecked + "/" + MISSIONS.length
+      mission: missionChecked + "/" + MISSIONS.length,
+      essential: essentialStatus
     })
   }).catch(() => {});
 }
@@ -1845,8 +1927,13 @@ missionList.addEventListener("click", (e) => {
   const item = e.target.closest(".check-item");
   if(!item) return;
   item.classList.toggle("checked");
+  saveMissionState();
   updateMissionProgress();
 });
+
+// 페이지를 새로 열었을 때 복원된 체크 상태로 진행률 표시줄과 학생현황을 한 번 갱신
+updateProgress();
+updateMissionProgress();
 
 /* ---- FAQ 렌더 ---- */
 const faqList = document.getElementById("faqList");
@@ -1900,11 +1987,14 @@ function renderStudentList(rows){
     const attend = r[1] || "";
     const checklist = r[2] || "0/0";
     const mission = r[3] || "0/0";
+    const essential = r[5] || "";
+    const essentialMissing = essential.indexOf("미비") === 0;
     return `
       <div class="student-card">
         <span>
           <p class="s-name">${name}</p>
           <p class="s-attend${attend ? " done" : ""}">${attend ? "출석 " + attend : "미접속"}</p>
+          ${essential ? `<p class="s-essential${essentialMissing ? " warn" : ""}">${essential}</p>` : ""}
         </span>
         <span class="s-progress">
           <span class="s-chip">준비물 ${checklist}</span>
