@@ -1110,7 +1110,7 @@
       <div class="stat"><span class="label">오사카 날씨</span><span class="value" id="weatherValue">-</span></div>
       <button type="button" class="exchange-btn" id="openExchangeBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h13M7 10l3-3M7 10l3 3"/><path d="M17 14H4M17 14l-3-3M17 14l-3 3"/></svg>
-        환율계산기
+        엔화계산기
       </button>
       <span class="student-name-tag" id="studentNameTag"></span>
     </div>
@@ -1118,7 +1118,7 @@
 
   <div class="notice-form-overlay" id="exchangeOverlay">
     <div class="notice-form-card">
-      <h3>환율 계산기</h3>
+      <h3>엔화 계산기</h3>
       <p class="nf-label">엔화 (JPY)</p>
       <input type="number" id="jpyInput" class="nf-input" placeholder="0" inputmode="decimal">
       <p class="nf-label">원화 (KRW)</p>
@@ -1403,17 +1403,17 @@ const CONTACTS = [
   ["숙소 (오사카 간사이 에어포트 호텔)", "프런트", "0000000000"]
 ];
 
-// 조 편성표 (조 번호, 조장, 성별, 버스 좌석 위치, 숙소 방 번호, 조원 전체)
-// 선생님용 화면(teacher.html)의 조 편성표와 같은 명단으로 맞춰두었습니다.
-// 실제 버스·객실이 정해지면 이 값들을 그대로 바꿔주세요.
+// 조 편성표 (조 번호, 조장, 조원 전체) — 선생님용 화면(teacher.html)과 같은 명단입니다.
+// 버스는 학년별(1학년 1호차·2학년 2호차), 숙소는 2인 1실(여학생 마지막 3명만 3인실)로
+// 별도 배정되며, 그 내용은 선생님용 화면의 "인원체크 및 조편성표"에서 확인할 수 있어요.
 const GROUPS = [
-  { no:1, leader:"고용석", gender:"남", bus:"1호차 2열", room:"301호", members:["고용석","김민호","김태원","박민웅","유지상","이승준"] },
-  { no:2, leader:"이진욱", gender:"남", bus:"1호차 4열", room:"302호", members:["이진욱","최건우","신민수","현영관","이금강"] },
-  { no:3, leader:"하유민", gender:"남", bus:"1호차 6열", room:"303호", members:["하유민","박서용","임지율","유승균","박정호"] },
-  { no:4, leader:"이수아", gender:"여", bus:"2호차 2열", room:"304호", members:["이수아","신소율","김은주","박규빈","박서연","박성희"] },
-  { no:5, leader:"박수영", gender:"여", bus:"2호차 4열", room:"305호", members:["박수영","김하영","구은정","최해나","김민지"] },
-  { no:6, leader:"한다해", gender:"여", bus:"2호차 6열", room:"306호", members:["한다해","김세영","서하원","이은서","장은영"] },
-  { no:7, leader:"조하경", gender:"여", bus:"2호차 8열", room:"307호", members:["조하경","박아람","전서현","김서연","김도연"] }
+  { no:1, leader:"박서용", members:["박서용","박정호","유승균","이금강","임지율","하유민"] },
+  { no:2, leader:"현영관", members:["현영관","고용석","김민호","김태원","박민웅"] },
+  { no:3, leader:"신민수", members:["신민수","유지상","이승준","이진욱","최건우"] },
+  { no:4, leader:"김도연", members:["김도연","김민지","김서연","김세영","박아람"] },
+  { no:5, leader:"서하원", members:["서하원","이은서","장은영","전서현","조하경","한다해"] },
+  { no:6, leader:"구은정", members:["구은정","김은주","김하영","박규빈","박서연"] },
+  { no:7, leader:"박성희", members:["박성희","박수영","신소율","이수아","최해나"] }
 ];
 
 /* ---- 이름 선택 게이트 & 출석/진행률 보고 ---- */
@@ -1422,11 +1422,11 @@ const GROUPS = [
 const ROSTER = [
   // 1학년 (학번 11xx)
   { name:"김도연", id:"1101" }, { name:"김민지", id:"1102" }, { name:"김서연", id:"1103" }, { name:"김세영", id:"1104" }, { name:"박서용", id:"1105" },
-  { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"박주은", id:"1108" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
+  { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
   { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" }, { name:"전서현", id:"1115" },
   { name:"조하경", id:"1116" }, { name:"하유민", id:"1117" }, { name:"한다해", id:"1118" }, { name:"현영관", id:"1119" },
   // 2학년 (학번 21xx)
-  { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김광남", id:"2103" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
+  { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
   { name:"김태원", id:"2106" }, { name:"김하영", id:"2107" }, { name:"박규빈", id:"2108" }, { name:"박민웅", id:"2109" }, { name:"박서연", id:"2110" },
   { name:"박성희", id:"2111" }, { name:"박수영", id:"2112" }, { name:"신민수", id:"2113" }, { name:"신소율", id:"2114" }, { name:"유지상", id:"2115" },
   { name:"이수아", id:"2116" }, { name:"이승준", id:"2117" }, { name:"이진욱", id:"2118" }, { name:"최건우", id:"2119" }, { name:"최해나", id:"2120" }
@@ -2080,7 +2080,7 @@ groupList.innerHTML = GROUPS.map(g => `
       <span class="group-no">${g.no}조</span>
       <span class="g-info">
         <p class="g-leader">조장 · ${g.leader}</p>
-        <p class="g-meta">${g.bus} · ${g.room}</p>
+        <p class="g-meta">총 ${g.members.length}명</p>
       </span>
       <span class="chevron">${chevronDown}</span>
     </div>
