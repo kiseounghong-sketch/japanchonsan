@@ -596,6 +596,19 @@
     color:var(--ink);
   }
   .more-item .chevron{width:16px;height:16px;stroke:var(--ink-soft);flex-shrink:0;}
+  .danger-link{
+    display:block;
+    width:100%;
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:12.5px;
+    color:var(--coral-deep);
+    text-decoration:underline;
+    text-align:center;
+    padding:16px 0 4px;
+    cursor:pointer;
+  }
 
   /* ===== 서브 패널(조편성/미션/FAQ) ===== */
   .back-btn{
@@ -1083,6 +1096,7 @@
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
+      <button class="danger-link" id="resetAllBtn">공지·학생현황 데이터 전체 초기화</button>
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
@@ -2022,6 +2036,23 @@ function loadStudentStatus(){
 }
 
 document.getElementById("refreshStudentsBtn").addEventListener("click", loadStudentStatus);
+
+document.getElementById("resetAllBtn").addEventListener("click", () => {
+  if(!hasScriptUrl()){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return;
+  }
+  if(!confirm("정말로 공지사항과 학생현황(출석·체크리스트·미션) 데이터를 전부 지울까요? 되돌릴 수 없어요.")) return;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "reset" })
+  }).then(() => {
+    alert("초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
+  }).catch(() => {
+    alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
+  });
+});
 </script>
 </body>
 </html>
