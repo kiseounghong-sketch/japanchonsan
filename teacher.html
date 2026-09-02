@@ -87,11 +87,15 @@
   .trip-title{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:clamp(18px, 5.4vw, 23px);
+    font-size:clamp(14px, 5vw, 21px);
     line-height:1.15;
     margin:2px 0 0;
     letter-spacing:0;
     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:block;
+    max-width:100%;
   }
 
   .perforation{
@@ -1139,7 +1143,7 @@
   <header class="ticket">
     <div class="ticket-top">
       <span class="badge">청산고등학교</span>
-      <h1 class="trip-title">2026 안전하고 즐거운 오사카 수학여행</h1>
+      <h1 class="trip-title">안전하고 즐거운 청산고 오사카 수학여행</h1>
     </div>
     <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
     <div class="ticket-bottom">
