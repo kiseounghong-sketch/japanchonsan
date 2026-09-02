@@ -970,56 +970,184 @@
     border-radius:999px;
   }
 
-  /* ===== 버스·숙소 편성표 (좌석/호실별 출석 체크) ===== */
+  /* ===== 버스·숙소 인원 체크 ===== */
   .roster-tabs{
     display:flex;
     gap:6px;
     margin-bottom:14px;
   }
   .roster-tabs .pill{flex:1;}
-  .roster-reset-btn{
-    display:block;
-    width:100%;
-    background:none;
-    border:none;
-    font-family:inherit;
-    font-size:12.5px;
-    color:var(--coral-deep);
-    text-decoration:underline;
-    text-align:center;
-    padding:14px 0 4px;
-    cursor:pointer;
+  .progress-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
   }
-  .seat-badge{
-    margin-left:auto;
+  .progress-head .progress-text{margin:0;}
+  .roster-reset-btn{
     flex-shrink:0;
-    font-size:10.5px;
+    background:var(--paper-dim);
+    color:var(--coral-deep);
+    border:none;
+    border-radius:999px;
+    padding:7px 12px;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  /* -- 버스 좌석 그리드 (한 열 4자리, 가운데 통로 2·2) -- */
+  .bus-seat-map{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .bus-seat-row{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+  }
+  .bus-seat-pair{
+    flex:1;
+    display:flex;
+    gap:6px;
+    min-width:0;
+  }
+  .bus-aisle{
+    width:16px;
+    flex-shrink:0;
+    position:relative;
+  }
+  .bus-aisle::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:4px;
+    bottom:4px;
+    width:1px;
+    background:var(--line);
+    transform:translateX(-50%);
+  }
+  .bus-seat{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px 4px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .bus-seat .bs-box{
+    width:18px;height:18px;
+    flex-shrink:0;
+    border-radius:6px;
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bus-seat .bs-box svg{
+    width:11px;height:11px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .bus-seat .bs-no{
+    font-size:10px;
     font-weight:700;
     color:#fff;
     background:var(--navy);
-    padding:3px 8px;
+    padding:1px 7px;
     border-radius:999px;
     white-space:nowrap;
   }
-  .room-group-title{
+  .bus-seat .bs-name{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    max-width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bus-seat.checked{
+    background:rgba(255,90,54,0.08);
+    border-color:var(--coral);
+  }
+  .bus-seat.checked .bs-box{background:var(--coral);border-color:var(--coral);}
+  .bus-seat.checked .bs-box svg{opacity:1;transform:scale(1);stroke:#fff;}
+
+  /* -- 숙소 방 카드 그리드 (한 줄 3개) -- */
+  .room-card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .room-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:9px 8px;
+    min-width:0;
+  }
+  .room-card .rc-head{
     display:flex;
     align-items:baseline;
     justify-content:space-between;
-    gap:8px;
-    margin:22px 2px 10px;
+    gap:4px;
+    margin:0 0 6px;
   }
-  .room-group-title:first-of-type{margin-top:0;}
-  .room-group-title .rg-name{
-    font-size:13px;
+  .room-card .rc-no{
+    font-size:11.5px;
     font-weight:700;
     color:var(--ink-soft);
   }
-  .room-group-title .rg-count{
-    font-size:11.5px;
+  .room-card .rc-count{
+    font-size:10px;
     font-weight:700;
     color:var(--coral-deep);
     flex-shrink:0;
   }
+  .room-member{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 0;
+    cursor:pointer;
+    user-select:none;
+  }
+  .room-member .rm-box{
+    width:15px;height:15px;
+    flex-shrink:0;
+    border-radius:5px;
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .room-member .rm-box svg{
+    width:9px;height:9px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .room-member .rm-name{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+  }
+  .room-member.checked .rm-box{background:var(--coral);border-color:var(--coral);}
+  .room-member.checked .rm-box svg{opacity:1;transform:scale(1);stroke:#fff;}
+  .room-member.checked .rm-name{color:var(--coral-deep);}
 
   /* ===== FAQ ===== */
   .faq-item{
@@ -1282,14 +1410,14 @@
       <div class="stat"><span class="label">오사카 날씨</span><span class="value" id="weatherValue">-</span></div>
       <button type="button" class="exchange-btn" id="openExchangeBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h13M7 10l3-3M7 10l3 3"/><path d="M17 14H4M17 14l-3-3M17 14l-3 3"/></svg>
-        환율계산기
+        엔화계산기
       </button>
     </div>
   </header>
 
   <div class="notice-form-overlay" id="exchangeOverlay">
     <div class="notice-form-card">
-      <h3>환율 계산기</h3>
+      <h3>엔화 계산기</h3>
       <p class="nf-label">엔화 (JPY)</p>
       <input type="number" id="jpyInput" class="nf-input" placeholder="0" inputmode="decimal">
       <p class="nf-label">원화 (KRW)</p>
@@ -1426,7 +1554,7 @@
       <div class="more-list">
         <button class="more-item" data-target="roster-select">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">조 편성표</span>
+          <span class="more-text">인원체크 및 조편성표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="missions">
@@ -1472,16 +1600,16 @@
 
     <section id="panel-roster-select" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">조 편성표</h2>
+      <h2 class="sub-title">인원체크 및 조편성표</h2>
       <div class="more-list">
         <button class="more-item" data-target="bus-roster">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
-          <span class="more-text">버스 편성표</span>
+          <span class="more-text">버스 인원 체크</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="room-roster">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
-          <span class="more-text">숙소 편성표</span>
+          <span class="more-text">숙소 인원 체크</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="groups">
@@ -1493,34 +1621,38 @@
     </section>
 
     <section id="panel-bus-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>조 편성표</button>
-      <h2 class="sub-title">버스 편성표</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
+      <h2 class="sub-title">버스 인원 체크</h2>
       <div class="roster-tabs" id="busRosterTabs"></div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
-        <p class="progress-text"><span id="busCheckedCount">0</span>/<span id="busTotalCount">0</span>명 탑승 확인</p>
+        <div class="progress-head">
+          <p class="progress-text"><span id="busCheckedCount">0</span>/<span id="busTotalCount">0</span>명 탑승 확인</p>
+          <button class="roster-reset-btn" id="busResetBtn">초기화</button>
+        </div>
       </div>
       <div id="busRosterList"></div>
-      <button class="roster-reset-btn" id="busResetBtn">이 버스 체크 초기화</button>
     </section>
 
     <section id="panel-room-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>조 편성표</button>
-      <h2 class="sub-title">숙소 편성표</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
+      <h2 class="sub-title">숙소 인원 체크</h2>
       <div class="roster-tabs" id="roomRosterTabs">
         <button class="pill active" data-gender="남학생">남학생</button>
         <button class="pill" data-gender="여학생">여학생</button>
       </div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="roomProgressFill"></div></div>
-        <p class="progress-text"><span id="roomCheckedCount">0</span>/<span id="roomTotalCount">0</span>명 입실 확인</p>
+        <div class="progress-head">
+          <p class="progress-text"><span id="roomCheckedCount">0</span>/<span id="roomTotalCount">0</span>명 입실 확인</p>
+          <button class="roster-reset-btn" id="roomResetBtn">초기화</button>
+        </div>
       </div>
       <div id="roomRosterList"></div>
-      <button class="roster-reset-btn" id="roomResetBtn">이 명단 체크 초기화</button>
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>조 편성표</button>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
       <h2 class="sub-title">조별 명단 관리</h2>
       <p class="group-move-hint">학생 이름을 눌러 선택한 뒤, 옮길 조 제목을 누르면 이동해요.</p>
       <div id="groupList"></div>
@@ -1714,35 +1846,59 @@ const CONTACTS = [
   ["숙소 (오사카 간사이 에어포트 호텔)", "프런트", "0000000000"]
 ];
 
-// 조 편성표 (조 번호, 조장, 성별, 버스 좌석 위치, 숙소 방 번호, 조원 전체)
-// - "방배정.xlsx" 명단을 기준으로 성별이 같은 학생끼리 묶었습니다.
-// - bus/room 값은 예시 배치이며, 실제 버스·객실이 정해지면 그 값만 바꿔주면
-//   아래 "버스 편성표"·"숙소 편성표" 화면에 자동으로 반영됩니다.
-// - gender는 "남" 또는 "여"만 사용하세요. 숙소 편성표의 남학생/여학생 탭 구분에 쓰입니다.
+// 조 편성표 (조 번호, 조장, 조원 전체) — 버스·숙소와 별개로 운영하는 모둠(식사·활동용)입니다.
 const GROUPS = [
-  { no:1, leader:"고용석", gender:"남", bus:"1호차 2열", room:"301호", members:["고용석","김민호","김태원","박민웅","유지상","이승준"] },
-  { no:2, leader:"이진욱", gender:"남", bus:"1호차 4열", room:"302호", members:["이진욱","최건우","신민수","현영관","이금강"] },
-  { no:3, leader:"하유민", gender:"남", bus:"1호차 6열", room:"303호", members:["하유민","박서용","임지율","유승균","박정호"] },
-  { no:4, leader:"이수아", gender:"여", bus:"2호차 2열", room:"304호", members:["이수아","신소율","김은주","박규빈","박서연","박성희"] },
-  { no:5, leader:"박수영", gender:"여", bus:"2호차 4열", room:"305호", members:["박수영","김하영","구은정","최해나","김민지"] },
-  { no:6, leader:"한다해", gender:"여", bus:"2호차 6열", room:"306호", members:["한다해","김세영","서하원","이은서","장은영"] },
-  { no:7, leader:"조하경", gender:"여", bus:"2호차 8열", room:"307호", members:["조하경","박아람","전서현","김서연","김도연"] }
+  { no:1, leader:"박서용", members:["박서용","박정호","유승균","이금강","임지율","하유민"] },
+  { no:2, leader:"현영관", members:["현영관","고용석","김민호","김태원","박민웅"] },
+  { no:3, leader:"신민수", members:["신민수","유지상","이승준","이진욱","최건우"] },
+  { no:4, leader:"김도연", members:["김도연","김민지","김서연","김세영","박아람"] },
+  { no:5, leader:"서하원", members:["서하원","이은서","장은영","전서현","조하경","한다해"] },
+  { no:6, leader:"구은정", members:["구은정","김은주","김하영","박규빈","박서연"] },
+  { no:7, leader:"박성희", members:["박성희","박수영","신소율","이수아","최해나"] }
 ];
+
+// 숙소 편성표 — "방배정.xlsx"의 실제 호수 배정입니다. 기본은 2인 1실이며,
+// 여학생 명단 마지막 3명(전서현·김서연·김도연)만 3인 1실로 묶었습니다.
+// 방이 다시 정해지면 이 배열의 members만 바꿔주면 숙소 인원 체크 화면에 그대로 반영됩니다.
+const ROOMS = {
+  "남학생": [
+    { no:1, members:["고용석","김민호"] },
+    { no:2, members:["김태원","박민웅"] },
+    { no:3, members:["유지상","이승준"] },
+    { no:4, members:["이진욱","최건우"] },
+    { no:5, members:["신민수","현영관"] },
+    { no:6, members:["이금강","하유민"] },
+    { no:7, members:["박서용","임지율"] },
+    { no:8, members:["유승균","박정호"] }
+  ],
+  "여학생": [
+    { no:9, members:["이수아","신소율"] },
+    { no:10, members:["김은주","박규빈"] },
+    { no:11, members:["박서연","박성희"] },
+    { no:12, members:["박수영","김하영"] },
+    { no:13, members:["구은정","최해나"] },
+    { no:14, members:["김민지","한다해"] },
+    { no:15, members:["김세영","서하원"] },
+    { no:16, members:["이은서","장은영"] },
+    { no:17, members:["조하경","박아람"] },
+    { no:18, members:["전서현","김서연","김도연"] }
+  ]
+};
 
 /* ---- 이름 선택 게이트 & 출석/진행률 보고 ---- */
 // 학생 로그인용 명부: 학번은 [학년][반][번호 2자리] 형식입니다 (예: 2학년 1반 1번 = 2101).
 // 반이 여러 개면 두 번째 자리를 반 번호로 바꿔서 관리하세요.
 const ROSTER = [
   // 1학년 (학번 11xx)
-  { name:"김도연", id:"1101" }, { name:"김민지", id:"1102" }, { name:"김서연", id:"1103" }, { name:"김세영", id:"1104" }, { name:"박서용", id:"1105" },
-  { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"박주은", id:"1108" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
-  { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" }, { name:"전서현", id:"1115" },
-  { name:"조하경", id:"1116" }, { name:"하유민", id:"1117" }, { name:"한다해", id:"1118" }, { name:"현영관", id:"1119" },
+  { name:"김도연", id:"1101", gender:"여" }, { name:"김민지", id:"1102", gender:"여" }, { name:"김서연", id:"1103", gender:"여" }, { name:"김세영", id:"1104", gender:"여" }, { name:"박서용", id:"1105", gender:"남" },
+  { name:"박아람", id:"1106", gender:"여" }, { name:"박정호", id:"1107", gender:"남" }, { name:"서하원", id:"1109", gender:"여" }, { name:"유승균", id:"1110", gender:"남" },
+  { name:"이금강", id:"1111", gender:"남" }, { name:"이은서", id:"1112", gender:"여" }, { name:"임지율", id:"1113", gender:"남" }, { name:"장은영", id:"1114", gender:"여" }, { name:"전서현", id:"1115", gender:"여" },
+  { name:"조하경", id:"1116", gender:"여" }, { name:"하유민", id:"1117", gender:"남" }, { name:"한다해", id:"1118", gender:"여" }, { name:"현영관", id:"1119", gender:"남" },
   // 2학년 (학번 21xx)
-  { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김광남", id:"2103" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
-  { name:"김태원", id:"2106" }, { name:"김하영", id:"2107" }, { name:"박규빈", id:"2108" }, { name:"박민웅", id:"2109" }, { name:"박서연", id:"2110" },
-  { name:"박성희", id:"2111" }, { name:"박수영", id:"2112" }, { name:"신민수", id:"2113" }, { name:"신소율", id:"2114" }, { name:"유지상", id:"2115" },
-  { name:"이수아", id:"2116" }, { name:"이승준", id:"2117" }, { name:"이진욱", id:"2118" }, { name:"최건우", id:"2119" }, { name:"최해나", id:"2120" }
+  { name:"고용석", id:"2101", gender:"남" }, { name:"구은정", id:"2102", gender:"여" }, { name:"김민호", id:"2104", gender:"남" }, { name:"김은주", id:"2105", gender:"여" },
+  { name:"김태원", id:"2106", gender:"남" }, { name:"김하영", id:"2107", gender:"여" }, { name:"박규빈", id:"2108", gender:"여" }, { name:"박민웅", id:"2109", gender:"남" }, { name:"박서연", id:"2110", gender:"여" },
+  { name:"박성희", id:"2111", gender:"여" }, { name:"박수영", id:"2112", gender:"여" }, { name:"신민수", id:"2113", gender:"남" }, { name:"신소율", id:"2114", gender:"여" }, { name:"유지상", id:"2115", gender:"남" },
+  { name:"이수아", id:"2116", gender:"여" }, { name:"이승준", id:"2117", gender:"남" }, { name:"이진욱", id:"2118", gender:"남" }, { name:"최건우", id:"2119", gender:"남" }, { name:"최해나", id:"2120", gender:"여" }
 ];
 
 const STUDENT_NAME_KEY = "suhak_student_name";
@@ -2549,7 +2705,7 @@ function renderGroups(){
         <span class="group-no">${g.no}조</span>
         <span class="g-info">
           <p class="g-leader">조장 · ${g.leader}</p>
-          <p class="g-meta">${g.bus} · ${g.room}</p>
+          <p class="g-meta">총 ${g.members.length}명</p>
         </span>
         <span class="chevron">${chevronDown}</span>
       </div>
@@ -2609,31 +2765,20 @@ function saveAttendState(key, state){
 let busAttend = loadAttendState(BUS_ATTEND_KEY);
 let roomAttend = loadAttendState(ROOM_ATTEND_KEY);
 
-// 조(getEffectiveGroups)를 기준으로 "N호차"별 좌석 목록을 만듭니다.
+// 버스 편성표: 1학년 전원 1호차, 2학년 전원 2호차. 학번(학년→번호) 순서대로
+// 좌석 번호를 매깁니다. 학년이 바뀌면 이 함수만 보면 됩니다 — 조 편성과는 무관합니다.
 function getBusRoster(){
-  const groups = getEffectiveGroups();
-  const buses = {};
-  groups.forEach(g => {
-    const busNo = (g.bus || "미배정").split(" ")[0];
-    if(!buses[busNo]) buses[busNo] = [];
-    g.members.forEach((name, i) => {
-      buses[busNo].push({ name, seat: (g.bus || "") + " " + (i + 1) + "번", groupNo: g.no });
-    });
+  const buses = { "1호차": [], "2호차": [] };
+  ROSTER.forEach(s => {
+    const busNo = s.id.charAt(0) === "1" ? "1호차" : "2호차";
+    buses[busNo].push({ name: s.name, seat: (buses[busNo].length + 1) + "번" });
   });
   return buses;
 }
 
-// 조(getEffectiveGroups)를 기준으로 성별 → 호실별 명단을 만듭니다.
+// 숙소 편성표: 위 ROOMS(방배정.xlsx 실제 호수)를 그대로 돌려줍니다.
 function getRoomRoster(){
-  const groups = getEffectiveGroups();
-  const rooms = { "남학생": {}, "여학생": {} };
-  groups.forEach(g => {
-    const genderKey = g.gender === "여" ? "여학생" : "남학생";
-    const roomNo = g.room || "미배정";
-    if(!rooms[genderKey][roomNo]) rooms[genderKey][roomNo] = [];
-    g.members.forEach(name => rooms[genderKey][roomNo].push(name));
-  });
-  return rooms;
+  return ROOMS;
 }
 
 /* -- 버스 편성표 -- */
@@ -2649,25 +2794,42 @@ function renderBusTabs(){
   renderBusList();
 }
 
+// 버스 내부처럼 4명씩 한 열로 묶고, 그 안에서 2명 + 통로 + 2명으로 나눕니다.
+function chunkBusRows(members){
+  const rows = [];
+  for(let i = 0; i < members.length; i += 4){
+    rows.push(members.slice(i, i + 4));
+  }
+  return rows;
+}
+
 function renderBusList(){
   const buses = getBusRoster();
   const members = buses[currentBus] || [];
-  busRosterList.innerHTML = members.map(m => `
-    <div class="check-item" data-name="${m.name}">
-      <span class="box">${checkIcon}</span>
-      <span class="text">${m.name}</span>
-      <span class="seat-badge">${m.seat}</span>
+  const rows = chunkBusRows(members);
+  const seatHtml = (m) => `
+    <div class="bus-seat" data-name="${m.name}">
+      <span class="bs-box">${checkIcon}</span>
+      <span class="bs-no">${m.seat}</span>
+      <span class="bs-name">${m.name}</span>
     </div>
-  `).join("") || '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
-  busRosterList.querySelectorAll(".check-item").forEach(item => {
+  `;
+  busRosterList.innerHTML = rows.length ? `<div class="bus-seat-map">${rows.map(row => `
+    <div class="bus-seat-row">
+      <div class="bus-seat-pair">${row.slice(0, 2).map(seatHtml).join("")}</div>
+      <div class="bus-aisle"></div>
+      <div class="bus-seat-pair">${row.slice(2, 4).map(seatHtml).join("")}</div>
+    </div>
+  `).join("")}</div>` : '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
+  busRosterList.querySelectorAll(".bus-seat").forEach(item => {
     if(busAttend[item.dataset.name]) item.classList.add("checked");
   });
   updateBusProgress();
 }
 
 function updateBusProgress(){
-  const total = busRosterList.querySelectorAll(".check-item").length;
-  const checked = busRosterList.querySelectorAll(".check-item.checked").length;
+  const total = busRosterList.querySelectorAll(".bus-seat").length;
+  const checked = busRosterList.querySelectorAll(".bus-seat.checked").length;
   document.getElementById("busCheckedCount").textContent = checked;
   document.getElementById("busTotalCount").textContent = total;
   document.getElementById("busProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
@@ -2681,7 +2843,7 @@ busRosterTabs.addEventListener("click", (e) => {
 });
 
 busRosterList.addEventListener("click", (e) => {
-  const item = e.target.closest(".check-item");
+  const item = e.target.closest(".bus-seat");
   if(!item) return;
   item.classList.toggle("checked");
   if(item.classList.contains("checked")) busAttend[item.dataset.name] = true;
@@ -2708,29 +2870,30 @@ function renderRoomTabs(){
 }
 
 function renderRoomList(){
-  const rooms = getRoomRoster()[currentRoomGender] || {};
-  const roomNos = Object.keys(rooms).sort();
-  roomRosterList.innerHTML = roomNos.map(roomNo => `
-    <div class="room-group-title">
-      <span class="rg-name">${roomNo}</span>
-      <span class="rg-count">${rooms[roomNo].length}명</span>
-    </div>
-    ${rooms[roomNo].map(name => `
-      <div class="check-item" data-name="${name}">
-        <span class="box">${checkIcon}</span>
-        <span class="text">${name}</span>
+  const rooms = getRoomRoster()[currentRoomGender] || [];
+  roomRosterList.innerHTML = rooms.length ? `<div class="room-card-grid">${rooms.map(r => `
+    <div class="room-card">
+      <div class="rc-head">
+        <span class="rc-no">${r.no}호실</span>
+        <span class="rc-count">${r.members.length}명</span>
       </div>
-    `).join("")}
-  `).join("") || '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
-  roomRosterList.querySelectorAll(".check-item").forEach(item => {
+      ${r.members.map(name => `
+        <div class="room-member" data-name="${name}">
+          <span class="rm-box">${checkIcon}</span>
+          <span class="rm-name">${name}</span>
+        </div>
+      `).join("")}
+    </div>
+  `).join("")}</div>` : '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
+  roomRosterList.querySelectorAll(".room-member").forEach(item => {
     if(roomAttend[item.dataset.name]) item.classList.add("checked");
   });
   updateRoomProgress();
 }
 
 function updateRoomProgress(){
-  const total = roomRosterList.querySelectorAll(".check-item").length;
-  const checked = roomRosterList.querySelectorAll(".check-item.checked").length;
+  const total = roomRosterList.querySelectorAll(".room-member").length;
+  const checked = roomRosterList.querySelectorAll(".room-member.checked").length;
   document.getElementById("roomCheckedCount").textContent = checked;
   document.getElementById("roomTotalCount").textContent = total;
   document.getElementById("roomProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
@@ -2744,7 +2907,7 @@ roomRosterTabs.addEventListener("click", (e) => {
 });
 
 roomRosterList.addEventListener("click", (e) => {
-  const item = e.target.closest(".check-item");
+  const item = e.target.closest(".room-member");
   if(!item) return;
   item.classList.toggle("checked");
   if(item.classList.contains("checked")) roomAttend[item.dataset.name] = true;
@@ -2755,8 +2918,8 @@ roomRosterList.addEventListener("click", (e) => {
 
 document.getElementById("roomResetBtn").addEventListener("click", () => {
   if(!confirm(currentRoomGender + " 출석 체크를 초기화할까요?")) return;
-  const rooms = getRoomRoster()[currentRoomGender] || {};
-  Object.values(rooms).flat().forEach(name => { delete roomAttend[name]; });
+  const rooms = getRoomRoster()[currentRoomGender] || [];
+  rooms.forEach(r => r.members.forEach(name => { delete roomAttend[name]; }));
   saveAttendState(ROOM_ATTEND_KEY, roomAttend);
   renderRoomList();
 });
