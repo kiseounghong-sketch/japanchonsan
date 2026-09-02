@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>2026 청산고등학교 2학년 수학여행 (선생님용)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{
+    --paper:#F5F7F5;
+    --paper-dim:#EAEEEC;
+    --ink:#152238;
+    --ink-soft:#4B5A72;
+    --navy:#1B2A4A;
+    --navy-deep:#0F1930;
+    --coral:#FF5A36;
+    --coral-deep:#E8461F;
+    --mustard:#FFC857;
+    --line: rgba(21,34,56,0.14);
+    --radius: 14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 40px rgba(15,25,48,0.08);
+  }
+
+  /* ===== 티켓 헤더 ===== */
+  .ticket{
+    background:var(--navy);
+    color:#fff;
+    position:relative;
+  }
+  .ticket-top{
+    padding:28px 24px 22px;
+  }
+  .badge{
+    display:inline-block;
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.02em;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.35);
+    color:#fff;
+    padding:5px 12px;
+    border-radius:999px;
+  }
+  .trip-title{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:34px;
+    line-height:1.18;
+    margin:14px 0 6px;
+    letter-spacing:.01em;
+  }
+  .trip-sub{
+    margin:0;
+    font-size:14.5px;
+    color:rgba(255,255,255,0.72);
+    font-weight:500;
+  }
+
+  .perforation{
+    position:relative;
+    height:0;
+    border-top:2px dashed rgba(255,255,255,0.32);
+    margin:0 0;
+  }
+  .notch{
+    position:absolute;
+    top:-11px;
+    width:22px;
+    height:22px;
+    background:var(--paper);
+    border-radius:50%;
+  }
+  .notch.left{left:-11px;}
+  .notch.right{right:-11px;}
+
+  .ticket-bottom{
+    display:flex;
+    padding:18px 24px 22px;
+    gap:8px;
+  }
+  .stat{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .stat .label{
+    font-size:11px;
+    font-weight:700;
+    color:rgba(255,255,255,0.55);
+  }
+  .stat .value{
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+  }
+  .stat.dday .value{color:var(--mustard);}
+
+  /* ===== 컨텐츠 ===== */
+  .content{
+    flex:1;
+    padding:22px 20px 100px;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .day-pills{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .pill{
+    flex:1;
+    padding:10px 0;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .pill.active{
+    background:var(--coral);
+    border-color:var(--coral);
+    color:#fff;
+  }
+
+  .view-toggle{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .view-toggle .pill{font-size:13px;}
+
+  .day-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--coral-deep);
+    margin:0 0 14px 2px;
+  }
+
+  .timeline{
+    list-style:none;
+    margin:0;
+    padding:0;
+    position:relative;
+  }
+  .timeline::before{
+    content:"";
+    position:absolute;
+    left:52px;
+    top:6px;
+    bottom:6px;
+    width:2px;
+    background:var(--line);
+  }
+  .timeline li{
+    position:relative;
+    display:flex;
+    gap:16px;
+    padding:0 0 22px 0;
+  }
+  .timeline li:last-child{padding-bottom:0;}
+  .time{
+    width:52px;
+    flex-shrink:0;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    padding-top:1px;
+  }
+  .dot{
+    position:absolute;
+    left:47px;
+    top:4px;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:var(--coral);
+    border:2px solid var(--paper);
+  }
+  .event{
+    flex:1;
+    padding-left:14px;
+  }
+  .event .name{
+    font-size:15.5px;
+    font-weight:700;
+    margin:0 0 3px;
+  }
+  .event .place{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+
+  /* ===== 길찾기 ===== */
+  .next-stop-card{
+    background:var(--navy);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .next-stop-card .label{
+    font-size:12px;
+    font-weight:700;
+    color:rgba(255,255,255,0.6);
+    margin:0 0 4px;
+  }
+  .next-stop-card .name{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:22px;
+    margin:0 0 14px;
+  }
+
+  /* ===== 오늘의 동선 지도 ===== */
+  .map-section{margin-bottom:18px;}
+  .map-section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .map-section-head .label{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .refresh-btn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:8px 13px;
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  #mapContainer{
+    width:100%;
+    height:260px;
+    border-radius:var(--radius);
+    overflow:hidden;
+    border:1.5px solid var(--line);
+    background:var(--paper-dim);
+  }
+  .map-note{
+    margin:8px 0 0;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    min-height:1.2em;
+  }
+  .leaflet-popup-content{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;margin:8px 10px;}
+  .go-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--coral);
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
+    padding:11px 18px;
+    border-radius:999px;
+  }
+  .go-btn svg{width:16px;height:16px;}
+
+  .findway-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:8px;
+  }
+  .findway-item .fw-info{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .findway-item .fw-time{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .findway-item .fw-name{
+    font-size:14.5px;
+    font-weight:700;
+  }
+  .fw-btn{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:var(--paper-dim);
+    color:var(--ink);
+    text-decoration:none;
+    font-size:12.5px;
+    font-weight:700;
+    padding:8px 12px;
+    border-radius:999px;
+  }
+  .fw-btn svg{width:13px;height:13px;}
+
+  /* ===== 진행률 바 (준비물/미션 공용) ===== */
+  .progress{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:20px;
+  }
+  .progress-bar{
+    height:10px;
+    background:var(--paper-dim);
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:var(--coral);
+    border-radius:999px;
+    transition:width .25s ease;
+  }
+  .progress-text{
+    margin:0;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .progress-text span{color:var(--coral-deep);}
+
+  .group-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:22px 2px 10px;
+  }
+  .group-title:first-of-type{margin-top:0;}
+
+  /* ===== 체크형 아이템 (준비물/미션 공용) ===== */
+  .check-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:13px 14px;
+    margin-bottom:8px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-item .box{
+    width:22px;
+    height:22px;
+    flex-shrink:0;
+    border-radius:7px;
+    border:2px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .check-item .box svg{
+    width:13px;
+    height:13px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .check-item span.text{
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink);
+    transition:color .15s ease;
+  }
+  .check-item.checked .box{
+    background:var(--coral);
+    border-color:var(--coral);
+  }
+  .check-item.checked .box svg{opacity:1;transform:scale(1);}
+  .check-item.checked span.text{
+    color:var(--ink-soft);
+    text-decoration:line-through;
+  }
+  .mission-item{align-items:flex-start;}
+  .mission-item .box{margin-top:1px;}
+  .mission-text{display:flex;flex-direction:column;gap:3px;}
+  .mission-desc{
+    margin:0;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:400;
+  }
+  .mission-item.checked .mission-desc{color:#8b96a8;}
+
+  /* ===== 연락처 ===== */
+  .contact-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .contact-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:15px 16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .contact-card::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:5px;
+    background:var(--coral);
+  }
+  .contact-info .role{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:0 0 3px;
+  }
+  .contact-info .name{
+    font-size:16px;
+    font-weight:700;
+    margin:0;
+  }
+  .call-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--navy);
+    color:#fff;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:700;
+    padding:9px 14px;
+    border-radius:999px;
+    flex-shrink:0;
+  }
+  .call-btn svg{width:14px;height:14px;}
+
+  .emergency-note{
+    margin-top:16px;
+    background:rgba(255,90,54,0.08);
+    border:1.5px dashed var(--coral);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    font-size:13.5px;
+    color:var(--coral-deep);
+    font-weight:600;
+    line-height:1.5;
+  }
+
+  /* ===== 공지사항 ===== */
+  .notice-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:15px 16px;
+    margin-bottom:10px;
+  }
+  .notice-card.important{
+    border-color:var(--coral);
+    background:rgba(255,90,54,0.05);
+  }
+  .notice-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .notice-time{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .notice-chip{
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:var(--coral);
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .notice-delete-btn{
+    margin-left:auto;
+    width:26px;height:26px;
+    border-radius:8px;
+    border:none;
+    background:var(--paper-dim);
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .notice-delete-btn svg{width:13px;height:13px;stroke:var(--ink-soft);}
+  .notice-card .notice-title{
+    font-size:15px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .notice-card .notice-body{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.5;
+  }
+
+  /* ===== 더보기 목록 ===== */
+  .more-list{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .more-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    background:none;
+    border-left:none;border-right:none;border-top:none;
+    width:100%;
+    font-family:inherit;
+    text-align:left;
+  }
+  .more-item:last-child{border-bottom:none;}
+  .more-item .more-icon{
+    width:36px;height:36px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:var(--paper-dim);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .more-item .more-icon svg{width:19px;height:19px;stroke:var(--coral-deep);}
+  .more-item .more-text{
+    flex:1;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .more-item .chevron{width:16px;height:16px;stroke:var(--ink-soft);flex-shrink:0;}
+
+  /* ===== 서브 패널(조편성/미션/FAQ) ===== */
+  .back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    padding:0 0 14px;
+    cursor:pointer;
+  }
+  .back-btn svg{width:15px;height:15px;stroke:var(--ink-soft);}
+  .sub-title{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:22px;
+    margin:0 0 16px;
+  }
+
+  /* ===== 학생현황 ===== */
+  .students-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .refresh-students-btn{
+    background:var(--paper-dim);
+    color:var(--ink);
+    border:none;
+    border-radius:999px;
+    padding:8px 14px;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .students-note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    min-height:1.2em;
+  }
+  .student-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:13px 14px;
+    margin-bottom:8px;
+  }
+  .student-card .s-name{font-size:14.5px;font-weight:700;}
+  .student-card .s-attend{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .student-card .s-attend.done{color:var(--coral-deep);font-weight:700;}
+  .student-card .s-progress{
+    display:flex;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .student-card .s-chip{
+    font-size:11.5px;
+    font-weight:700;
+    background:var(--paper-dim);
+    color:var(--ink);
+    padding:5px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  /* ===== 조 편성표 ===== */
+  .group-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .group-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:15px 16px;
+    cursor:pointer;
+  }
+  .group-no{
+    width:38px;height:38px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .group-head .g-info{flex:1;}
+  .group-head .g-leader{
+    font-size:15px;
+    font-weight:700;
+    margin:0 0 2px;
+  }
+  .group-head .g-meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .group-head .chevron{
+    width:16px;height:16px;
+    stroke:var(--ink-soft);
+    transition:transform .18s ease;
+    flex-shrink:0;
+  }
+  .group-card.open .chevron{transform:rotate(180deg);}
+  .group-body{
+    display:none;
+    padding:0 16px 16px;
+  }
+  .group-card.open .group-body{display:block;}
+  .member-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .member-chip{
+    font-size:12.5px;
+    font-weight:600;
+    background:var(--paper-dim);
+    color:var(--ink);
+    padding:5px 11px;
+    border-radius:999px;
+  }
+
+  /* ===== FAQ ===== */
+  .faq-item{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:8px;
+    overflow:hidden;
+  }
+  .faq-q{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:15px 16px;
+    cursor:pointer;
+    font-size:14.5px;
+    font-weight:700;
+  }
+  .faq-q .plus{
+    flex-shrink:0;
+    width:18px;height:18px;
+    stroke:var(--coral-deep);
+    transition:transform .18s ease;
+  }
+  .faq-item.open .faq-q .plus{transform:rotate(45deg);}
+  .faq-a{
+    display:none;
+    padding:0 16px 16px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+  }
+  .faq-item.open .faq-a{display:block;}
+
+  /* ===== 하단 탭바 ===== */
+  .tabbar{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:0;
+    width:100%;
+    max-width:480px;
+    display:flex;
+    background:#fff;
+    border-top:1.5px solid var(--line);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .tab{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:11px;
+    font-weight:700;
+    color:var(--ink-soft);
+    padding:6px 0;
+    cursor:pointer;
+  }
+  .tab .icon-wrap{position:relative;display:inline-flex;}
+  .tab svg{width:21px;height:21px;stroke:var(--ink-soft);}
+  .tab.active{color:var(--coral-deep);}
+  .tab.active svg{stroke:var(--coral-deep);}
+  .tab .ping{
+    position:absolute;
+    top:-2px;right:-3px;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--coral);
+    border:1.5px solid #fff;
+  }
+
+  /* ===== 공지 작성 (선생님용) ===== */
+  .fab{
+    position:fixed;
+    right:20px;
+    bottom:86px;
+    width:56px;height:56px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-size:28px;
+    line-height:1;
+    box-shadow:0 6px 16px rgba(255,90,54,0.4);
+    cursor:pointer;
+    z-index:40;
+  }
+  .notice-form-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,25,48,0.45);
+    z-index:60;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .notice-form-card{
+    width:100%;
+    max-width:480px;
+    background:#fff;
+    border-radius:20px 20px 0 0;
+    padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .notice-form-card h3{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:20px;
+    margin:0 0 16px;
+  }
+  .nf-label{font-size:13px;font-weight:700;color:var(--ink-soft);margin:14px 0 8px;}
+  .nf-label:first-of-type{margin-top:0;}
+  .urgency-toggle{display:flex;gap:8px;}
+  .urgency-toggle button{
+    flex:1;
+    padding:11px 0;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .urgency-toggle button.active[data-val="false"]{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .urgency-toggle button.active[data-val="true"]{background:var(--coral);border-color:var(--coral);color:#fff;}
+  .nf-input, .nf-textarea{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+  }
+  .nf-textarea{min-height:110px;resize:vertical;line-height:1.5;}
+  .nf-actions{display:flex;gap:10px;margin-top:18px;}
+  .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;}
+  #cancelNoticeBtn{background:var(--paper-dim);color:var(--ink);}
+  #submitNoticeBtn{background:var(--coral);color:#fff;}
+  #noticeStatusMsg{margin-top:12px;text-align:center;font-size:13px;color:var(--ink-soft);min-height:1.3em;}
+  #noticeStatusMsg.ok{color:var(--coral-deep);font-weight:700;}
+
+  /* ===== 이름 선택 게이트 ===== */
+  .name-gate{
+    position:fixed;
+    inset:0;
+    background:var(--navy);
+    z-index:100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .name-gate-card{
+    width:100%;
+    max-width:400px;
+    text-align:center;
+    color:#fff;
+  }
+  .name-gate-card .badge{
+    display:inline-block;
+    font-size:12.5px;
+    font-weight:700;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.35);
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:16px;
+  }
+  .name-gate-card h2{
+    font-family:'Black Han Sans', sans-serif;
+    font-weight:400;
+    font-size:24px;
+    margin:0 0 22px;
+  }
+  .birth-input{
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    border:none;
+    font-family:inherit;
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:0.35em;
+    text-align:center;
+    margin-bottom:14px;
+    color:var(--ink);
+  }
+  .name-gate-card button{
+    width:100%;
+    padding:14px 0;
+    border-radius:999px;
+    border:none;
+    background:var(--coral);
+    color:#fff;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .name-gate-choices{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .name-choice-btn{
+    width:100%;
+    padding:14px 0;
+    border-radius:12px;
+    border:1.5px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  @media (min-width:481px){
+    body{background:var(--paper-dim);}
+  }
+</style>
+</head>
+<body>
+<div class="name-gate" id="nameGate">
+  <div class="name-gate-card" id="nameGateCard">
+    <span class="badge">청산고등학교</span>
+    <h2>학번 4자리를 입력해주세요</h2>
+    <input type="text" id="studentIdInput" class="birth-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="예: 2101">
+    <button id="studentIdConfirmBtn">확인</button>
+  </div>
+</div>
+<div class="app">
+
+  <header class="ticket">
+    <div class="ticket-top">
+      <span class="badge">청산고등학교</span>
+      <h1 class="trip-title">2026 오사카<br>수학여행</h1>
+      <p class="trip-sub">2학년 · 고베·교토 · 3박 4일</p>
+    </div>
+    <div class="perforation"><span class="notch left"></span><span class="notch right"></span></div>
+    <div class="ticket-bottom">
+      <div class="stat"><span class="label">출발</span><span class="value" id="departLabel">10.14(화)</span></div>
+      <div class="stat"><span class="label">도착</span><span class="value" id="returnLabel">10.16(목)</span></div>
+      <div class="stat dday"><span class="label">D-DAY</span><span class="value" id="ddayValue">-</span></div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <section id="panel-notice" class="panel active">
+      <div id="noticeList"></div>
+      <button class="fab" id="newNoticeFab">+</button>
+      <div class="notice-form-overlay" id="noticeFormOverlay">
+        <div class="notice-form-card">
+          <h3>새 공지 작성</h3>
+          <p class="nf-label">긴급 여부</p>
+          <div class="urgency-toggle" id="urgencyToggle">
+            <button type="button" class="active" data-val="false">일반</button>
+            <button type="button" data-val="true">긴급</button>
+          </div>
+          <p class="nf-label">제목</p>
+          <input type="text" class="nf-input" id="noticeTitleInput" placeholder="예: 출발 10분 지연 안내">
+          <p class="nf-label">내용</p>
+          <textarea class="nf-textarea" id="noticeBodyInput" placeholder="학생들에게 전달할 내용을 적어주세요."></textarea>
+          <div class="nf-actions">
+            <button type="button" id="cancelNoticeBtn">취소</button>
+            <button type="button" id="submitNoticeBtn">등록</button>
+          </div>
+          <p id="noticeStatusMsg"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-schedule" class="panel">
+      <div class="day-pills" id="dayPills"></div>
+      <div class="view-toggle" id="viewToggle">
+        <button class="pill active" data-view="timeline">타임라인</button>
+        <button class="pill" data-view="findway">지도</button>
+      </div>
+      <p class="day-label" id="dayLabel"></p>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="findway-view" id="findwayView" style="display:none;">
+        <div class="next-stop-card">
+          <p class="label">지금 갈 곳</p>
+          <p class="name" id="nextStopName">-</p>
+          <a class="go-btn" id="nextStopGoBtn" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            구글지도로 길찾기
+          </a>
+        </div>
+        <div class="map-section">
+          <div class="map-section-head">
+            <p class="label">오늘의 동선</p>
+            <button class="refresh-btn" id="refreshLocationBtn">내 위치 새로고침</button>
+          </div>
+          <div id="mapContainer"></div>
+          <p class="map-note" id="mapNote"></p>
+        </div>
+        <div id="findwayList"></div>
+      </div>
+    </section>
+
+    <section id="panel-checklist" class="panel">
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="progress-text"><span id="checkedCount">0</span>/<span id="totalCount">0</span>개 챙겼어요</p>
+      </div>
+      <div id="checklistGroups"></div>
+    </section>
+
+    <section id="panel-contacts" class="panel">
+      <ul class="contact-list" id="contactList"></ul>
+      <p class="emergency-note">긴급 상황(사고·분실·아픔)이 생기면 당황하지 말고 가장 먼저 담임 선생님 또는 인솔 선생님께 바로 전화하세요.</p>
+    </section>
+
+    <section id="panel-more" class="panel">
+      <div class="more-list">
+        <button class="more-item" data-target="groups">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="more-text">조 편성표</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="missions">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          <span class="more-text">사진 미션</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="faq">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+          <span class="more-text">자주 묻는 질문</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="students">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="more-text">학생현황 (출석·체크리스트)</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section id="panel-groups" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">조 편성표</h2>
+      <div id="groupList"></div>
+    </section>
+
+    <section id="panel-missions" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">사진 미션</h2>
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="missionProgressFill"></div></div>
+        <p class="progress-text"><span id="missionCheckedCount">0</span>/<span id="missionTotalCount">0</span>개 미션 클리어</p>
+      </div>
+      <div id="missionList"></div>
+    </section>
+
+    <section id="panel-faq" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">자주 묻는 질문</h2>
+      <div id="faqList"></div>
+    </section>
+
+    <section id="panel-students" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <div class="students-header">
+        <h2 class="sub-title" style="margin-bottom:0;">학생현황</h2>
+        <button class="refresh-students-btn" id="refreshStudentsBtn">새로고침</button>
+      </div>
+      <p class="students-note" id="studentsNote"></p>
+      <div id="studentList"></div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-panel="notice">
+      <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ping" id="noticePing"></span></span>
+      공지
+    </button>
+    <button class="tab" data-panel="schedule">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+      일정
+    </button>
+    <button class="tab" data-panel="checklist">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+      준비물
+    </button>
+    <button class="tab" data-panel="contacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
+      연락처
+    </button>
+    <button class="tab" data-panel="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      더보기
+    </button>
+  </nav>
+
+</div>
+
+<script>
+/* =========================================================
+   ▼ 아래 데이터만 실제 정보로 바꾸면 그대로 사용할 수 있습니다.
+   ========================================================= */
+
+// 출발일 (D-day 계산 및 상단 날짜 표시에 사용, YYYY-MM-DD)
+const DEPART_DATE = "2026-10-27";
+const RETURN_DATE = "2026-10-30";
+
+// 실시간 공지: 구글시트에 [시간, 긴급여부(TRUE/FALSE), 제목, 내용] 순서로
+// 새 공지를 한 줄씩 추가하면, 이미 페이지를 열어둔 학생들 화면에도
+// 아래 NOTICES_REFRESH_SECONDS 주기로 자동 반영됩니다. 설정 방법:
+// 1) 구글시트 생성 후 공유 설정을 "링크가 있는 모든 사용자 - 뷰어"로 변경
+// 2) 시트 주소가 https://docs.google.com/spreadsheets/d/시트ID/edit... 라면
+//    아래처럼 바꿔서 넣기 (시트1은 실제 하단 탭 이름으로 교체):
+//    https://docs.google.com/spreadsheets/d/시트ID/gviz/tq?tqx=out:csv&sheet=시트1
+// 비워두면 바로 아래 NOTICES 배열이 대신 표시됩니다(오프라인 예비용).
+const NOTICES_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&gid=0";
+const NOTICES_REFRESH_SECONDS = 30; // 페이지를 열어둔 동안 몇 초마다 새 공지를 확인할지
+
+// 학생현황(출석·체크리스트·미션) 시트 주소 — Apps Script가 자동으로 "학생현황" 탭을 만들어줍니다.
+const STUDENT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=학생현황";
+
+// 공지사항 예시 (시트를 연결하지 않았을 때만 사용됩니다. 필요하면 여기 직접 추가하세요)
+const NOTICES = [];
+
+// 일정 (day 숫자별로 [시간, 활동명, 장소, 위도, 경도])
+// 위도·경도는 몰라도 됩니다. null로 두면 "길찾기" 버튼이 좌표 대신
+// 장소 이름으로 구글지도에서 검색해 길을 찾아줍니다.
+// ※ 가정통신문에 분 단위 시간이 없는 구간(고베 관람, 교토 이동 등)은 앞뒤 시간을 참고해
+//   추정해서 채워뒀습니다. 정확한 시간이 있으면 알려주세요.
+const SCHEDULE = {
+  1: {
+    label: "10월 27일 (화)",
+    items: [
+      ["07:00", "학교 집결 및 출발", "청산고등학교", null, null],
+      ["08:00", "청주국제공항 도착, 출국수속", "청주국제공항", 36.7166, 127.4992],
+      ["09:55", "청주국제공항 출발 (TW327)", "청주국제공항", 36.7166, 127.4992],
+      ["11:40", "간사이국제공항 도착", "간사이국제공항", 34.4320, 135.2304],
+      ["12:30", "중식 (현지식, 돈까스)", "현지식당", null, null],
+      ["13:30", "사람과 미래 지진방재센터 견학", "사람과 미래 방재센터", 34.6926, 135.1938],
+      ["15:00", "고베항 지진메모리얼파크 하버랜드", "고베 하버랜드", 34.6813, 135.1830],
+      ["17:30", "호텔로 이동 (약 1시간 30분 소요)", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280],
+      ["19:30", "호텔 체크인 및 석식 (사콘, 야끼니꾸 무제한)", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280]
+    ]
+  },
+  2: {
+    label: "10월 28일 (수)",
+    items: [
+      ["08:00", "호텔 조식 후 출발", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280],
+      ["09:00", "유니버설 스튜디오 재팬(USJ) 자유이용", "유니버설 스튜디오 재팬", 34.6654, 135.4323],
+      ["12:30", "중식 (자유식, 2,000엔)", "USJ 내 식당", null, null],
+      ["18:00", "석식 (자유식, 2,000엔)", "USJ 내 식당", null, null],
+      ["19:30", "USJ 출발, 호텔 투숙 및 휴식", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280]
+    ]
+  },
+  3: {
+    label: "10월 29일 (목)",
+    items: [
+      ["08:00", "호텔 조식 후 교토로 이동", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280],
+      ["09:30", "동지사대학 윤동주·정지용 시비 참배", "동지사대학", 35.0300, 135.7616],
+      ["11:00", "청수사 관람", "기요미즈데라(청수사)", 34.9949, 135.7850],
+      ["12:00", "중식 (자유식)", "청수사 인근", 34.9949, 135.7850],
+      ["13:00", "산넨자카·닌넨자카 관광", "산넨자카", 34.9975, 135.7809],
+      ["14:30", "오사카로 이동 (약 1시간 소요)", "오사카", null, null],
+      ["15:30", "오사카성 차창관람", "오사카성", 34.6873, 135.5259],
+      ["16:30", "도톤보리·신사이바시 자유시간 및 자유석식", "도톤보리", 34.6687, 135.5015],
+      ["19:30", "호텔로 이동 및 휴식", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280]
+    ]
+  },
+  4: {
+    label: "10월 30일 (금)",
+    items: [
+      ["07:00", "호텔 조식", "오사카 간사이 에어포트 호텔", 34.4310, 135.2280],
+      ["08:30", "간사이공항으로 이동", "간사이국제공항", 34.4320, 135.2304],
+      ["09:00", "간사이공항 도착, 출국수속 및 공항 내 자유식", "간사이국제공항", 34.4320, 135.2304],
+      ["12:40", "간사이공항 출발 (TW328)", "간사이국제공항", 34.4320, 135.2304],
+      ["14:30", "청주국제공항 도착", "청주국제공항", 36.7166, 127.4992],
+      ["16:00", "청산고등학교 도착 및 해산", "청산고등학교", null, null]
+    ]
+  }
+};
+
+// 준비물 체크리스트 (그룹명: [항목, 항목, ...])
+const CHECKLIST = {
+  "필수 서류": ["학생증(신분증)", "여행자보험 가입 확인서", "건강보험증 사본"],
+  "의류": ["여벌 옷 2벌", "잠옷", "우산 또는 우비", "편한 운동화", "슬리퍼"],
+  "세면/위생용품": ["칫솔·치약", "수건 2장", "개인 세면도구", "자외선 차단제"],
+  "전자기기": ["휴대폰 충전기", "보조배터리", "이어폰"],
+  "기타": ["용돈", "개인 간식", "멀미약(필요시)", "개인 상비약"]
+};
+
+// 비상 연락망 (역할, 이름, 전화번호)
+const CONTACTS = [
+  ["담임 선생님 (2학년 ○반)", "김○○ 선생님", "01000000000"],
+  ["학년부장 선생님", "이○○ 선생님", "01000000000"],
+  ["여행사 인솔자", "박○○ 팀장", "01000000000"],
+  ["1호차 기사님", "최○○ 기사님", "01000000000"],
+  ["2호차 기사님", "정○○ 기사님", "01000000000"],
+  ["숙소 (오사카 간사이 에어포트 호텔)", "프런트", "0000000000"]
+];
+
+// 조 편성표 (조 번호, 조장, 조원 전체, 버스 좌석, 숙소 방 번호)
+const GROUPS = [
+  { no:1, leader:"홍길동", members:["홍길동","김민지","이서준","박하은","최지우"], bus:"1호차 3열", room:"302호" },
+  { no:2, leader:"정우진", members:["정우진","한소희","오지훈","윤아름","배승현"], bus:"1호차 4열", room:"303호" },
+  { no:3, leader:"강다인", members:["강다인","조은서","임태양","신유진","문가영"], bus:"1호차 5열", room:"304호" },
+  { no:4, leader:"김도현", members:["김도현","이수아","박준서","최나연","정하율"], bus:"2호차 3열", room:"305호" },
+  { no:5, leader:"윤서연", members:["윤서연","한지호","오세영","배민준","서지안"], bus:"2호차 4열", room:"306호" },
+  { no:6, leader:"장예린", members:["장예린","권도윤","임소연","황준혁","노아윤"], bus:"2호차 5열", room:"307호" }
+];
+
+/* ---- 이름 선택 게이트 & 출석/진행률 보고 ---- */
+// 학생 로그인용 명부: 학번은 [학년][반][번호 2자리] 형식입니다 (예: 2학년 1반 1번 = 2101).
+// 반이 여러 개면 두 번째 자리를 반 번호로 바꿔서 관리하세요.
+const ROSTER = [
+  // 1학년 (학번 11xx)
+  { name:"김도연", id:"1101" }, { name:"김민지", id:"1102" }, { name:"김서연", id:"1103" }, { name:"김세영", id:"1104" }, { name:"박서용", id:"1105" },
+  { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"박주은", id:"1108" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
+  { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" }, { name:"전서현", id:"1115" },
+  { name:"조하경", id:"1116" }, { name:"하유민", id:"1117" }, { name:"한다해", id:"1118" }, { name:"현영관", id:"1119" },
+  // 2학년 (학번 21xx)
+  { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김광남", id:"2103" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
+  { name:"김태원", id:"2106" }, { name:"김하영", id:"2107" }, { name:"박규빈", id:"2108" }, { name:"박민웅", id:"2109" }, { name:"박서연", id:"2110" },
+  { name:"박성희", id:"2111" }, { name:"박수영", id:"2112" }, { name:"신민수", id:"2113" }, { name:"신소율", id:"2114" }, { name:"유지상", id:"2115" },
+  { name:"이수아", id:"2116" }, { name:"이승준", id:"2117" }, { name:"이진욱", id:"2118" }, { name:"최건우", id:"2119" }, { name:"최해나", id:"2120" }
+];
+
+const STUDENT_NAME_KEY = "suhak_student_name";
+let studentName = localStorage.getItem(STUDENT_NAME_KEY) || "";
+
+const nameGate = document.getElementById("nameGate");
+const nameGateCard = document.getElementById("nameGateCard");
+
+function hasScriptUrl(){
+  return SCRIPT_URL && SCRIPT_URL.indexOf("여기에") !== 0;
+}
+
+function reportAttendance(){
+  if(!studentName || !hasScriptUrl()) return;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "attendance", name: studentName })
+  }).catch(() => {});
+}
+
+function completeLogin(name){
+  studentName = name;
+  localStorage.setItem(STUDENT_NAME_KEY, studentName);
+  nameGate.style.display = "none";
+  reportAttendance();
+}
+
+function showNameDisambiguation(matches){
+  nameGateCard.innerHTML = `
+    <span class="badge">청산고등학교</span>
+    <h2>동명이인이 있어요.<br>본인 이름을 선택해주세요</h2>
+    <div class="name-gate-choices">
+      ${matches.map(m => `<button type="button" class="name-choice-btn" data-name="${m.name}">${m.name}</button>`).join("")}
+    </div>
+  `;
+  nameGateCard.querySelectorAll(".name-choice-btn").forEach(btn => {
+    btn.addEventListener("click", () => completeLogin(btn.dataset.name));
+  });
+}
+
+// 이 페이지는 선생님 전용 관리 페이지라 학번 로그인 화면을 띄우지 않습니다.
+nameGate.style.display = "none";
+
+document.getElementById("studentIdConfirmBtn").addEventListener("click", () => {
+  const sid = document.getElementById("studentIdInput").value.trim();
+  if(!/^\d{4}$/.test(sid)){
+    alert("학번 4자리를 숫자로 입력해주세요. (예: 2101)");
+    return;
+  }
+  const matches = ROSTER.filter(r => r.id === sid);
+  if(matches.length === 0){
+    alert("등록된 학번을 찾을 수 없어요. 선생님께 확인해주세요.");
+    return;
+  }
+  if(matches.length === 1){
+    completeLogin(matches[0].name);
+  } else {
+    showNameDisambiguation(matches);
+  }
+});
+
+// 사진 미션 (스탬프 투어)
+const MISSIONS = [
+  { title:"USJ 포토스팟 인증샷", desc:"유니버설 스튜디오에서 가장 마음에 드는 포토스팟을 찾아 인증샷을 찍어보세요." },
+  { title:"도톤보리 글리코 간판 앞 점프샷", desc:"도톤보리의 상징, 글리코 간판 앞에서 조원 전체가 다 같이 점프!" },
+  { title:"청수사 전경 인증샷", desc:"청수의 무대에서 교토 시내가 내려다보이는 풍경을 담아보세요." },
+  { title:"현지 음식 인증샷", desc:"일본 현지 음식을 먹는 모습을 찍어보세요." },
+  { title:"호텔 앞 단체 사진", desc:"하루 일정을 마무리하며 호텔 앞에서 오늘의 소감과 함께 찍어보세요." }
+];
+
+// 자주 묻는 질문
+const FAQS = [
+  { q:"멀미약은 어디서 받을 수 있나요?", a:"버스 탑승 전 인솔 선생님께 말씀드리면 나눠드립니다. 미리 먹는 게 효과가 좋으니 출발 30분 전에 받아가세요." },
+  { q:"핸드폰 배터리는 어디서 충전하나요?", a:"버스 안 좌석 USB 단자와 숙소 객실 콘센트를 이용할 수 있습니다. 보조배터리를 챙겨오면 더 편리해요." },
+  { q:"몸이 아프면 어떻게 해야 하나요?", a:"바로 담임 선생님 또는 인솔 선생님께 알려주세요. 연락처 탭에서 바로 전화 연결이 가능합니다." },
+  { q:"자유시간에 개인적으로 이동해도 되나요?", a:"안전을 위해 반드시 배정된 조원과 함께, 사전에 안내된 구역 안에서만 이동해주세요." },
+  { q:"용돈은 얼마 정도 챙기면 좋을까요?", a:"기념품과 간식 구입 등을 고려해 학교 안내문에 적힌 권장 금액을 참고해주세요." }
+];
+
+/* ========================================================= */
+
+const checkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
+const phoneIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+const chevronDown = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+const plusIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+
+function fmtDate(iso){
+  const d = new Date(iso + "T00:00:00");
+  const w = ["일","월","화","수","목","금","토"][d.getDay()];
+  return (d.getMonth()+1) + "." + d.getDate() + "(" + w + ")";
+}
+
+document.getElementById("departLabel").textContent = fmtDate(DEPART_DATE);
+document.getElementById("returnLabel").textContent = fmtDate(RETURN_DATE);
+
+function updateDday(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(DEPART_DATE + "T00:00:00");
+  const diff = Math.round((target - today) / 86400000);
+  document.getElementById("ddayValue").textContent =
+    diff === 0 ? "D-DAY" : diff > 0 ? ("D-" + diff) : ("D+" + Math.abs(diff));
+}
+updateDday();
+
+/* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
+const noticeList = document.getElementById("noticeList");
+
+function renderNotices(list){
+  if(!list.length){
+    noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
+    document.getElementById("noticePing").style.display = "none";
+    return;
+  }
+  noticeList.innerHTML = list.map(n => `
+    <div class="notice-card${n.important ? " important" : ""}">
+      <div class="notice-top">
+        <span class="notice-time">${n.time}</span>
+        ${n.important ? '<span class="notice-chip">긴급</span>' : ""}
+        ${n.row ? `<button class="notice-delete-btn" data-row="${n.row}" title="삭제">${trashIcon}</button>` : ""}
+      </div>
+      <p class="notice-title">${n.title}</p>
+      <p class="notice-body">${n.body}</p>
+    </div>
+  `).join("");
+  document.getElementById("noticePing").style.display = list.some(n => n.important) ? "block" : "none";
+}
+
+noticeList.addEventListener("click", (e) => {
+  const btn = e.target.closest(".notice-delete-btn");
+  if(!btn) return;
+  if(!confirm("이 공지를 삭제할까요?")) return;
+  if(!SCRIPT_URL_READY()) return;
+  btn.disabled = true;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "delete", row: Number(btn.dataset.row) })
+  }).then(() => {
+    setTimeout(loadNotices, 800);
+  }).catch(() => {
+    alert("삭제에 실패했어요. 인터넷 연결을 확인해주세요.");
+    btn.disabled = false;
+  });
+});
+
+function SCRIPT_URL_READY(){
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return false;
+  }
+  return true;
+}
+
+// 구글시트 CSV(콤마 안의 콤마·줄바꿈도 처리하는 간단 파서)
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false;
+      } else field += c;
+    } else if(c === '"'){
+      inQuotes = true;
+    } else if(c === ','){
+      row.push(field); field = "";
+    } else if(c === '\n' || c === '\r'){
+      if(field !== "" || row.length){ row.push(field); rows.push(row); }
+      row = []; field = "";
+      if(c === '\r' && text[i+1] === '\n') i++;
+    } else field += c;
+  }
+  if(field !== "" || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+
+function loadNotices(){
+  if(!NOTICES_SHEET_CSV_URL){
+    renderNotices(NOTICES);
+    return;
+  }
+  fetch(NOTICES_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text);
+      const fresh = [];
+      for(let i = 0; i < rows.length; i++){
+        const r = rows[i];
+        if(r.length >= 3 && r[0] && r[0] !== "시간"){
+          fresh.push({
+            row: i + 1, // 실제 시트 행 번호(1부터 시작) — 삭제 요청에 사용
+            time: r[0] || "",
+            important: /^(TRUE|1|긴급|Y|y)$/i.test((r[1] || "").trim()),
+            title: r[2] || "",
+            body: r[3] || ""
+          });
+        }
+      }
+      fresh.reverse();
+      renderNotices(fresh.length ? fresh : NOTICES);
+    })
+    .catch(() => renderNotices(NOTICES));
+}
+
+loadNotices();
+if(NOTICES_SHEET_CSV_URL){
+  setInterval(loadNotices, NOTICES_REFRESH_SECONDS * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "visible") loadNotices();
+  });
+}
+
+/* ---- 공지 작성 (선생님용) ---- */
+// 구글 Apps Script를 "웹 앱"으로 배포하면 나오는 URL(끝이 /exec)을 여기에 붙여넣으세요.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
+
+let noticeImportant = false;
+const fab = document.getElementById("newNoticeFab");
+const noticeOverlay = document.getElementById("noticeFormOverlay");
+const urgencyToggle = document.getElementById("urgencyToggle");
+const cancelNoticeBtn = document.getElementById("cancelNoticeBtn");
+const submitNoticeBtn = document.getElementById("submitNoticeBtn");
+const noticeStatusMsg = document.getElementById("noticeStatusMsg");
+
+fab.addEventListener("click", () => { noticeOverlay.style.display = "flex"; });
+cancelNoticeBtn.addEventListener("click", () => { noticeOverlay.style.display = "none"; });
+
+urgencyToggle.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  noticeImportant = btn.dataset.val === "true";
+});
+
+submitNoticeBtn.addEventListener("click", () => {
+  const title = document.getElementById("noticeTitleInput").value.trim();
+  const body = document.getElementById("noticeBodyInput").value.trim();
+
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
+    noticeStatusMsg.textContent = "코드 상단 SCRIPT_URL을 먼저 채워주세요.";
+    noticeStatusMsg.className = "";
+    return;
+  }
+  if(!title){
+    noticeStatusMsg.textContent = "제목을 입력해주세요.";
+    noticeStatusMsg.className = "";
+    return;
+  }
+
+  submitNoticeBtn.disabled = true;
+  noticeStatusMsg.textContent = "등록하는 중...";
+  noticeStatusMsg.className = "";
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ title, body, important: noticeImportant })
+  }).then(() => {
+    noticeStatusMsg.textContent = "등록됐어요!";
+    noticeStatusMsg.className = "ok";
+    document.getElementById("noticeTitleInput").value = "";
+    document.getElementById("noticeBodyInput").value = "";
+    urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+    urgencyToggle.querySelector('[data-val="false"]').classList.add("active");
+    noticeImportant = false;
+    setTimeout(() => { noticeOverlay.style.display = "none"; noticeStatusMsg.textContent = ""; }, 900);
+    setTimeout(loadNotices, 1500);
+  }).catch(() => {
+    noticeStatusMsg.textContent = "등록에 실패했어요. 인터넷 연결을 확인해주세요.";
+    noticeStatusMsg.className = "";
+  }).finally(() => {
+    submitNoticeBtn.disabled = false;
+  });
+});
+
+/* ---- 일정 렌더 ---- */
+const dayPills = document.getElementById("dayPills");
+const dayKeys = Object.keys(SCHEDULE);
+let currentDayKey = dayKeys[0];
+
+function renderDay(dayKey){
+  document.getElementById("dayLabel").textContent = SCHEDULE[dayKey].label;
+  const tl = document.getElementById("timeline");
+  tl.innerHTML = SCHEDULE[dayKey].items.map(([time, name, place]) => `
+    <li>
+      <span class="time">${time}</span>
+      <span class="dot"></span>
+      <span class="event">
+        <p class="name">${name}</p>
+        <p class="place">${place}</p>
+      </span>
+    </li>
+  `).join("");
+}
+
+dayPills.innerHTML = dayKeys.map((k,i) =>
+  `<button class="pill${i===0 ? " active":""}" data-day="${k}">Day ${k}</button>`
+).join("");
+
+dayPills.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  dayPills.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  currentDayKey = btn.dataset.day;
+  renderDay(currentDayKey);
+  renderFindway(currentDayKey);
+  if(leafletMap) renderMapForDay(currentDayKey);
+});
+
+renderDay(currentDayKey);
+
+/* ---- 타임라인/지도 뷰 전환 ---- */
+const viewToggle = document.getElementById("viewToggle");
+viewToggle.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  viewToggle.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  const isFindway = btn.dataset.view === "findway";
+  document.getElementById("timeline").style.display = isFindway ? "none" : "";
+  document.getElementById("findwayView").style.display = isFindway ? "block" : "none";
+  if(isFindway){
+    if(!leafletMap){
+      initMap();
+    } else {
+      leafletMap.invalidateSize();
+      renderMapForDay(currentDayKey);
+    }
+  }
+});
+
+/* ---- 길찾기 (구글지도 연동, API 키 필요 없음) ---- */
+// 좌표가 있으면 좌표로, 없으면 장소 이름으로 구글지도 길찾기를 엽니다.
+// 출발지는 비워두면 구글지도가 학생 폰의 현재 위치를 자동으로 사용합니다.
+function mapsUrl(place, lat, lng){
+  const dest = (lat != null && lng != null) ? (lat + "," + lng) : encodeURIComponent(place);
+  return "https://www.google.com/maps/dir/?api=1&destination=" + dest;
+}
+
+function findNextStop(dayKey){
+  const items = SCHEDULE[dayKey].items;
+  const now = new Date();
+  const nowMinutes = now.getHours()*60 + now.getMinutes();
+  for(const it of items){
+    const [h,m] = it[0].split(":").map(Number);
+    if(h*60+m >= nowMinutes) return it;
+  }
+  return items[items.length - 1];
+}
+
+function renderFindway(dayKey){
+  const items = SCHEDULE[dayKey].items;
+  const next = findNextStop(dayKey);
+  document.getElementById("nextStopName").textContent = next[1];
+  document.getElementById("nextStopGoBtn").href = mapsUrl(next[2], next[3], next[4]);
+
+  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng]) => `
+    <div class="findway-item">
+      <span class="fw-info">
+        <span class="fw-time">${time}</span>
+        <span class="fw-name">${name}</span>
+      </span>
+      <a class="fw-btn" href="${mapsUrl(place, lat, lng)}" target="_blank" rel="noopener">${pinIcon}길찾기</a>
+    </div>
+  `).join("");
+}
+
+renderFindway(currentDayKey);
+
+/* ---- 오늘의 동선 지도 (Leaflet + OpenStreetMap, API 키 필요 없음) ---- */
+let leafletMap = null;
+let myLatLng = null;
+let myLocationMarker = null;
+let stopMarkers = [];
+let routeLine = null;
+let highlightLine = null;
+
+const myLocationIcon = L.divIcon({
+  className: "",
+  html: '<div style="background:#FF5A36;width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);"></div>',
+  iconSize: [18,18],
+  iconAnchor: [9,9]
+});
+
+function stopIcon(num){
+  return L.divIcon({
+    className: "",
+    html: '<div style="background:#1B2A4A;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">' + num + '</div>',
+    iconSize: [26,26],
+    iconAnchor: [13,13]
+  });
+}
+
+function stopsWithCoords(dayKey){
+  return SCHEDULE[dayKey].items.filter(it => it[3] != null && it[4] != null);
+}
+
+function initMap(){
+  leafletMap = L.map("mapContainer");
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(leafletMap);
+  leafletMap.setView([33.38, 126.55], 9);
+  renderMapForDay(currentDayKey);
+  requestMyLocation();
+}
+
+function clearMapOverlays(){
+  stopMarkers.forEach(m => leafletMap.removeLayer(m));
+  stopMarkers = [];
+  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine = null; }
+  if(highlightLine){ leafletMap.removeLayer(highlightLine); highlightLine = null; }
+}
+
+function renderMapForDay(dayKey){
+  if(!leafletMap) return;
+  clearMapOverlays();
+  const stops = stopsWithCoords(dayKey);
+  const note = document.getElementById("mapNote");
+  if(stops.length === 0){
+    note.textContent = "이 날 일정에는 좌표가 입력된 장소가 없어요.";
+    return;
+  }
+  note.textContent = "";
+
+  const path = stops.map(it => [it[3], it[4]]);
+  stops.forEach((it, i) => {
+    const marker = L.marker(path[i], { icon: stopIcon(i+1) })
+      .addTo(leafletMap)
+      .bindPopup((i+1) + ". " + it[1]);
+    stopMarkers.push(marker);
+  });
+
+  routeLine = L.polyline(path, { color: "#c7cedb", weight: 4, dashArray: "6 6" }).addTo(leafletMap);
+  leafletMap.fitBounds(routeLine.getBounds(), { padding: [24,24] });
+
+  updateNextStopAndRoute(dayKey);
+}
+
+function updateNextStopAndRoute(dayKey){
+  if(!leafletMap) return;
+  const next = findNextStop(dayKey);
+  if(highlightLine){ leafletMap.removeLayer(highlightLine); highlightLine = null; }
+  if(next && next[3] != null && next[4] != null && myLatLng){
+    highlightLine = L.polyline([myLatLng, [next[3], next[4]]], { color: "#FF5A36", weight: 4 }).addTo(leafletMap);
+  }
+}
+
+function requestMyLocation(){
+  const note = document.getElementById("mapNote");
+  if(!navigator.geolocation){
+    note.textContent = "이 브라우저는 위치 확인을 지원하지 않아요.";
+    return;
+  }
+  note.textContent = "내 위치를 확인하는 중이에요...";
+  navigator.geolocation.getCurrentPosition((pos) => {
+    myLatLng = [pos.coords.latitude, pos.coords.longitude];
+    if(myLocationMarker) leafletMap.removeLayer(myLocationMarker);
+    myLocationMarker = L.marker(myLatLng, { icon: myLocationIcon }).addTo(leafletMap).bindPopup("내 위치");
+    note.textContent = "";
+    updateNextStopAndRoute(currentDayKey);
+  }, () => {
+    note.textContent = "위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용한 뒤 새로고침 버튼을 눌러주세요.";
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+document.getElementById("refreshLocationBtn").addEventListener("click", requestMyLocation);
+
+/* ---- 체크리스트 렌더 ---- */
+const groupsEl = document.getElementById("checklistGroups");
+let totalItems = 0;
+
+groupsEl.innerHTML = Object.entries(CHECKLIST).map(([group, items]) => {
+  totalItems += items.length;
+  return `
+    <p class="group-title">${group}</p>
+    ${items.map(item => `
+      <div class="check-item">
+        <span class="box">${checkIcon}</span>
+        <span class="text">${item}</span>
+      </div>
+    `).join("")}
+  `;
+}).join("");
+
+document.getElementById("totalCount").textContent = totalItems;
+
+function updateProgress(){
+  const checked = groupsEl.querySelectorAll(".check-item.checked").length;
+  document.getElementById("checkedCount").textContent = checked;
+  document.getElementById("progressFill").style.width = (totalItems ? (checked/totalItems*100) : 0) + "%";
+  reportProgress();
+}
+
+groupsEl.addEventListener("click", (e) => {
+  const item = e.target.closest(".check-item");
+  if(!item) return;
+  item.classList.toggle("checked");
+  updateProgress();
+});
+
+/* ---- 연락처 렌더 ---- */
+const contactList = document.getElementById("contactList");
+contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
+  <li class="contact-card">
+    <span class="contact-info">
+      <p class="role">${role}</p>
+      <p class="name">${name}</p>
+    </span>
+    <a class="call-btn" href="tel:${tel}">${phoneIcon}전화</a>
+  </li>
+`).join("");
+
+/* ---- 조 편성표 렌더 ---- */
+const groupList = document.getElementById("groupList");
+groupList.innerHTML = GROUPS.map(g => `
+  <div class="group-card">
+    <div class="group-head">
+      <span class="group-no">${g.no}조</span>
+      <span class="g-info">
+        <p class="g-leader">조장 · ${g.leader}</p>
+        <p class="g-meta">${g.bus} · ${g.room}</p>
+      </span>
+      <span class="chevron">${chevronDown}</span>
+    </div>
+    <div class="group-body">
+      <div class="member-chips">
+        ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+      </div>
+    </div>
+  </div>
+`).join("");
+
+groupList.addEventListener("click", (e) => {
+  const head = e.target.closest(".group-head");
+  if(!head) return;
+  head.closest(".group-card").classList.toggle("open");
+});
+
+/* ---- 사진 미션 렌더 ---- */
+const missionList = document.getElementById("missionList");
+document.getElementById("missionTotalCount").textContent = MISSIONS.length;
+
+missionList.innerHTML = MISSIONS.map(m => `
+  <div class="check-item mission-item">
+    <span class="box">${checkIcon}</span>
+    <span class="mission-text">
+      <span class="text">${m.title}</span>
+      <p class="mission-desc">${m.desc}</p>
+    </span>
+  </div>
+`).join("");
+
+function updateMissionProgress(){
+  const checked = missionList.querySelectorAll(".check-item.checked").length;
+  document.getElementById("missionCheckedCount").textContent = checked;
+  document.getElementById("missionProgressFill").style.width = (MISSIONS.length ? (checked/MISSIONS.length*100) : 0) + "%";
+  reportProgress();
+}
+
+function reportProgress(){
+  if(!studentName || !hasScriptUrl()) return;
+  const checklistChecked = groupsEl.querySelectorAll(".check-item.checked").length;
+  const missionChecked = missionList.querySelectorAll(".check-item.checked").length;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      action: "progress",
+      name: studentName,
+      checklist: checklistChecked + "/" + totalItems,
+      mission: missionChecked + "/" + MISSIONS.length
+    })
+  }).catch(() => {});
+}
+
+missionList.addEventListener("click", (e) => {
+  const item = e.target.closest(".check-item");
+  if(!item) return;
+  item.classList.toggle("checked");
+  updateMissionProgress();
+});
+
+/* ---- FAQ 렌더 ---- */
+const faqList = document.getElementById("faqList");
+faqList.innerHTML = FAQS.map(f => `
+  <div class="faq-item">
+    <div class="faq-q"><span>${f.q}</span><span class="plus">${plusIcon}</span></div>
+    <div class="faq-a">${f.a}</div>
+  </div>
+`).join("");
+
+faqList.addEventListener("click", (e) => {
+  const q = e.target.closest(".faq-q");
+  if(!q) return;
+  q.closest(".faq-item").classList.toggle("open");
+});
+
+/* ---- 탭 & 서브패널 전환 ---- */
+function showPanel(id){
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + id).classList.add("active");
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    showPanel(tab.dataset.panel);
+  });
+});
+
+document.querySelectorAll(".more-item").forEach(item => {
+  item.addEventListener("click", () => {
+    showPanel(item.dataset.target);
+    if(item.dataset.target === "students") loadStudentStatus();
+  });
+});
+
+document.querySelectorAll("[data-back]").forEach(btn => {
+  btn.addEventListener("click", () => showPanel("more"));
+});
+
+/* ---- 학생현황 (선생님용) ---- */
+function renderStudentList(rows){
+  const list = document.getElementById("studentList");
+  if(!rows.length){
+    list.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">아직 접속한 학생이 없어요.</p>';
+    return;
+  }
+  list.innerHTML = rows.map(r => {
+    const name = r[0] || "";
+    const attend = r[1] || "";
+    const checklist = r[2] || "0/0";
+    const mission = r[3] || "0/0";
+    return `
+      <div class="student-card">
+        <span>
+          <p class="s-name">${name}</p>
+          <p class="s-attend${attend ? " done" : ""}">${attend ? "출석 " + attend : "미접속"}</p>
+        </span>
+        <span class="s-progress">
+          <span class="s-chip">준비물 ${checklist}</span>
+          <span class="s-chip">미션 ${mission}</span>
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+function loadStudentStatus(){
+  const note = document.getElementById("studentsNote");
+  note.textContent = "불러오는 중...";
+  fetch(STUDENT_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text).filter(r => r.length >= 1 && r[0] && r[0] !== "이름");
+      renderStudentList(rows);
+      note.textContent = "";
+    })
+    .catch(() => {
+      renderStudentList([]);
+      note.textContent = "아직 불러올 데이터가 없거나 시트 접근에 실패했어요.";
+    });
+}
+
+document.getElementById("refreshStudentsBtn").addEventListener("click", loadStudentStatus);
+</script>
+</body>
+</html>
