@@ -96,6 +96,7 @@
     font-weight:700;
     color:var(--ink-soft);
     margin:0 0 4px;
+    text-align:center;
   }
   .weather-days{
     display:flex;
@@ -118,11 +119,11 @@
     margin:0;
   }
   .weather-day .weather-icon{ color:var(--coral-deep); display:flex; align-items:center; justify-content:center; line-height:0; }
-  .weather-day .weather-icon svg{ width:15px; height:15px; display:block; overflow:visible; }
+  .weather-day .weather-icon svg{ width:16.5px; height:16.5px; display:block; overflow:visible; }
   .weather-day .weather-temp{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:12px;
+    font-size:13.2px;
     color:var(--ink);
     margin:0;
   }
@@ -2396,7 +2397,8 @@ function requestMyLocation(){
     note.textContent = "";
     updateNextStopAndRoute(currentDayKey);
   }, () => {
-    note.textContent = "위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용한 뒤 새로고침 버튼을 눌러주세요.";
+    note.textContent = "위치 권한이 꺼져 있어요. 아래 안내를 참고해 허용한 뒤 새로고침 버튼을 눌러주세요.";
+    showLocationPermissionGuide();
   }, { enableHighAccuracy: true, timeout: 8000 });
 }
 
@@ -2525,6 +2527,37 @@ function openItemGuide(key){
 document.getElementById("closeItemGuideBtn").addEventListener("click", () => {
   document.getElementById("itemGuideOverlay").style.display = "none";
 });
+
+// 위치 권한이 꺼져 있을 때, 기종(아이폰/안드로이드)에 맞는 켜는 방법을 안내합니다.
+function showLocationPermissionGuide(){
+  const ua = navigator.userAgent;
+  let steps;
+  if(/iPhone|iPad|iPod/.test(ua)){
+    steps = [
+      "아이폰 '설정' 앱을 열어요.",
+      "아래로 내려서 지금 쓰고 있는 브라우저(Safari 또는 Chrome)를 찾아 들어가요.",
+      "'위치'를 눌러 '앱 사용 중 허용'으로 바꿔요.",
+      "그래도 안 되면 설정 → 개인정보 보호 및 보안 → 위치 서비스에서도 켜져 있는지 확인해요.",
+      "이 페이지로 돌아와서 버튼을 다시 눌러요."
+    ];
+  } else if(/Android/.test(ua)){
+    steps = [
+      "주소창 왼쪽의 자물쇠(또는 정보) 아이콘을 눌러요.",
+      "'권한' 또는 '사이트 설정'을 눌러요.",
+      "'위치'를 '허용'으로 바꿔요.",
+      "페이지를 새로고침한 뒤 버튼을 다시 눌러요."
+    ];
+  } else {
+    steps = [
+      "브라우저 주소창 근처의 자물쇠 아이콘을 눌러요.",
+      "위치 권한을 '허용'으로 바꿔요.",
+      "페이지를 새로고침한 뒤 다시 눌러요."
+    ];
+  }
+  document.getElementById("itemGuideTitle").textContent = "위치 권한 켜는 방법";
+  document.getElementById("itemGuideSteps").innerHTML = steps.map(s => `<li>${s}</li>`).join("");
+  document.getElementById("itemGuideOverlay").style.display = "flex";
+}
 
 /* ---- 연락처 렌더 ---- */
 const contactList = document.getElementById("contactList");
@@ -2897,7 +2930,7 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
 
     btn.innerHTML = originalHTML;
   }, () => {
-    alert("위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해주세요.");
+    showLocationPermissionGuide();
     btn.innerHTML = originalHTML;
   }, { enableHighAccuracy: false, timeout: 8000 });
 });
