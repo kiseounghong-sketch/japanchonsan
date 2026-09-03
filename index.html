@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>2026 청산고등학교 2학년 수학여행</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1B2A4A">
-<link rel="apple-touch-icon" href="icon-192.png">
+<title>2026 청산고등학교 2학년 수학여행 (선생님용)</title>
+<link rel="manifest" href="manifest-teacher.json">
+<meta name="theme-color" content="#FF5A36">
+<link rel="apple-touch-icon" href="icon-teacher-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="수학여행">
+<meta name="apple-mobile-web-app-title" content="수학여행 관리">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -61,26 +61,17 @@
   .ticket-top{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:10px;
+    justify-content:center;
     padding:12px 16px;
   }
-  .student-name-tag{
-    flex-shrink:0;
-    font-size:13.5px;
-    font-weight:600;
-    color:rgba(255,255,255,0.8);
-    white-space:nowrap;
-  }
   .trip-title{
-    flex:1;
-    min-width:0;
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
     font-size:clamp(14px, 5vw, 19px);
     line-height:1.2;
     margin:0;
     letter-spacing:0;
+    text-align:center;
   }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
@@ -158,6 +149,48 @@
     color:var(--ink);
     cursor:pointer;
   }
+  .exchange-btn-standalone{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    background:#EDE0C8;
+    color:#6B4A2A;
+    border:none;
+    border-radius:var(--radius);
+    padding:13px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    margin-bottom:18px;
+  }
+  .exchange-btn-standalone svg{width:18px;height:18px;stroke:currentColor;}
+  .mission-gallery-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    background:var(--navy);
+    color:#fff;
+    text-decoration:none;
+    border-radius:var(--radius);
+    padding:13px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    margin-bottom:16px;
+    box-sizing:border-box;
+  }
+  .mission-gallery-btn svg{width:18px;height:18px;stroke:currentColor;flex-shrink:0;}
+  .exchange-rate-note{
+    margin:14px 0 0;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
 
   /* ===== 컨텐츠 ===== */
   .content{
@@ -196,6 +229,9 @@
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
     padding-bottom:100px;
+  }
+  #panel-notice .scroll-area{
+    padding-bottom:150px;
   }
 
   .day-pills{
@@ -836,50 +872,19 @@
     padding:2px 8px;
     border-radius:999px;
   }
-  .urgent-toast{
-    position:fixed;
-    left:50%;
-    bottom:calc(20px + env(safe-area-inset-bottom));
-    transform:translateX(-50%) translateY(20px);
-    width:calc(100% - 40px);
-    max-width:440px;
-    background:var(--navy);
-    color:#fff;
-    padding:13px 16px;
-    border-radius:14px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    box-shadow:0 10px 28px rgba(15,25,48,0.35);
-    z-index:90;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .25s ease, transform .25s ease;
-  }
-  .urgent-toast.show{
-    opacity:1;
-    transform:translateX(-50%) translateY(0);
-    pointer-events:auto;
-    cursor:pointer;
-  }
-  .urgent-toast-icon{
-    flex-shrink:0;
-    width:22px;
-    height:22px;
-    border-radius:50%;
-    background:var(--coral);
-    color:#fff;
+  .notice-delete-btn{
+    margin-left:auto;
+    width:26px;height:26px;
+    border-radius:8px;
+    border:none;
+    background:var(--paper-dim);
+    color:var(--ink-soft);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:13px;
-    font-weight:800;
+    cursor:pointer;
   }
-  .urgent-toast-text{
-    font-size:13.5px;
-    font-weight:600;
-    line-height:1.4;
-  }
+  .notice-delete-btn svg{width:13px;height:13px;stroke:var(--ink-soft);}
   .notice-card .notice-title{
     font-size:15px;
     font-weight:700;
@@ -928,14 +933,14 @@
     color:var(--ink);
   }
   .more-item .chevron{width:16px;height:16px;stroke:var(--ink-soft);flex-shrink:0;}
-  .logout-link{
+  .danger-link{
     display:block;
     width:100%;
     background:none;
     border:none;
     font-family:inherit;
     font-size:12.5px;
-    color:var(--ink-soft);
+    color:var(--coral-deep);
     text-decoration:underline;
     text-align:center;
     padding:16px 0 4px;
@@ -962,6 +967,70 @@
     font-weight:400;
     font-size:22px;
     margin:0 0 16px;
+  }
+  .group-move-hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:-10px 0 14px;
+  }
+  .member-chip.selected{
+    background:var(--coral);
+    color:#fff;
+  }
+
+  /* ===== 학생현황 ===== */
+  .students-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .refresh-students-btn{
+    background:var(--paper-dim);
+    color:var(--ink);
+    border:none;
+    border-radius:999px;
+    padding:8px 14px;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .students-note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    min-height:1.2em;
+  }
+  .student-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:13px 14px;
+    margin-bottom:8px;
+  }
+  .student-card .s-name{font-size:14.5px;font-weight:700;}
+  .student-card .s-attend{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .student-card .s-attend.done{color:var(--coral-deep);font-weight:700;}
+  .student-card .s-essential{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+  .student-card .s-essential.warn{color:var(--coral-deep);font-weight:700;}
+  .student-card .s-progress{
+    display:flex;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .student-card .s-chip{
+    font-size:11.5px;
+    font-weight:700;
+    background:var(--paper-dim);
+    color:var(--ink);
+    padding:5px 10px;
+    border-radius:999px;
+    white-space:nowrap;
   }
 
   /* ===== 조 편성표 ===== */
@@ -1025,6 +1094,187 @@
     padding:5px 11px;
     border-radius:999px;
   }
+
+  /* ===== 버스·숙소 인원 체크 ===== */
+  .roster-tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .roster-tabs .pill{flex:1;}
+  .progress-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .progress-head .progress-text{margin:0;}
+  .roster-reset-btn{
+    flex-shrink:0;
+    background:var(--paper-dim);
+    color:var(--coral-deep);
+    border:none;
+    border-radius:999px;
+    padding:7px 12px;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  /* -- 버스 좌석 그리드 (한 열 4자리, 가운데 통로 2·2) -- */
+  .bus-seat-map{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .bus-seat-row{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+  }
+  .bus-seat-pair{
+    flex:1;
+    display:flex;
+    gap:6px;
+    min-width:0;
+  }
+  .bus-aisle{
+    width:16px;
+    flex-shrink:0;
+    position:relative;
+  }
+  .bus-aisle::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:4px;
+    bottom:4px;
+    width:1px;
+    background:var(--line);
+    transform:translateX(-50%);
+  }
+  .bus-seat{
+    flex:0 0 calc(50% - 3px);
+    min-width:0;
+  }
+  .bus-seat{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px 4px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .bus-seat .bs-box{
+    width:18px;height:18px;
+    flex-shrink:0;
+    border-radius:6px;
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bus-seat .bs-box svg{
+    width:11px;height:11px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .bus-seat .bs-no{
+    font-size:10px;
+    font-weight:700;
+    color:#fff;
+    background:var(--navy);
+    padding:1px 7px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .bus-seat .bs-name{
+    font-size:13.75px;
+    font-weight:600;
+    color:var(--ink);
+    max-width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bus-seat.checked{
+    background:rgba(255,90,54,0.08);
+    border-color:var(--coral);
+  }
+  .bus-seat.checked .bs-box{background:var(--coral);border-color:var(--coral);}
+  .bus-seat.checked .bs-box svg{opacity:1;transform:scale(1);stroke:#fff;}
+
+  /* -- 숙소 방 카드 그리드 (한 줄 3개) -- */
+  .room-card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .room-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:9px 8px;
+    min-width:0;
+  }
+  .room-card .rc-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px;
+    margin:0 0 6px;
+  }
+  .room-card .rc-no{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .room-card .rc-count{
+    font-size:10px;
+    font-weight:700;
+    color:var(--coral-deep);
+    flex-shrink:0;
+  }
+  .room-member{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 0;
+    cursor:pointer;
+    user-select:none;
+  }
+  .room-member .rm-box{
+    width:15px;height:15px;
+    flex-shrink:0;
+    border-radius:5px;
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .room-member .rm-box svg{
+    width:9px;height:9px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .room-member .rm-name{
+    font-size:12.65px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+  }
+  .room-member.checked .rm-box{background:var(--coral);border-color:var(--coral);}
+  .room-member.checked .rm-box svg{opacity:1;transform:scale(1);stroke:#fff;}
+  .room-member.checked .rm-name{color:var(--coral-deep);}
 
   /* ===== 서바이벌 일본어 회화 ===== */
   .phrase-category{
@@ -1204,7 +1454,31 @@
     border:1.5px solid #fff;
   }
 
-  /* ===== 오버레이 폼 공용 (환율 계산기 등) ===== */
+  /* ===== 공지 작성 (선생님용) ===== */
+  .fab{
+    position:fixed;
+    right:20px;
+    bottom:86px;
+    width:56px;height:56px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-size:28px;
+    line-height:1;
+    box-shadow:0 6px 16px rgba(255,90,54,0.4);
+    cursor:pointer;
+    z-index:40;
+  }
+  .fab-secondary{
+    bottom:154px;
+    background:var(--navy);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 16px rgba(21,7,140,0.4);
+  }
+  .fab-secondary svg{width:24px;height:24px;}
   .notice-form-overlay{
     position:fixed;
     inset:0;
@@ -1246,6 +1520,21 @@
     cursor:pointer;
   }
   .fx-swap-btn svg{width:16px;height:16px;}
+  .urgency-toggle{display:flex;gap:8px;}
+  .urgency-toggle button{
+    flex:1;
+    padding:11px 0;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .urgency-toggle button.active[data-val="false"]{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .urgency-toggle button.active[data-val="true"]{background:var(--coral);border-color:var(--coral);color:#fff;}
   .nf-input, .nf-textarea{
     width:100%;
     border:1.5px solid var(--line);
@@ -1256,32 +1545,15 @@
     color:var(--ink);
     background:#fff;
   }
+  .nf-textarea{min-height:110px;resize:vertical;line-height:1.5;}
   .nf-actions{display:flex;gap:10px;margin-top:18px;}
-  .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;background:var(--paper-dim);color:var(--ink);}
-  .exchange-rate-note{
-    margin:14px 0 0;
-    font-size:12.5px;
-    color:var(--ink-soft);
-    text-align:center;
-  }
-  .exchange-btn-standalone{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    width:100%;
-    background:#EDE0C8;
-    color:#6B4A2A;
-    border:none;
-    border-radius:var(--radius);
-    padding:13px;
-    font-family:inherit;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-    margin-bottom:18px;
-  }
-  .exchange-btn-standalone svg{width:18px;height:18px;stroke:currentColor;}
+  .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;}
+  #cancelNoticeBtn{background:var(--paper-dim);color:var(--ink);}
+  #submitNoticeBtn{background:var(--coral);color:#fff;}
+  #closeLocationGuideBtn{background:var(--paper-dim);color:var(--ink);}
+  #retryLocationBtn{background:var(--coral);color:#fff;}
+  #noticeStatusMsg{margin-top:12px;text-align:center;font-size:13px;color:var(--ink-soft);min-height:1.3em;}
+  #noticeStatusMsg.ok{color:var(--coral-deep);font-weight:700;}
 
   /* ===== 이름 선택 게이트 ===== */
   .name-gate{
@@ -1378,14 +1650,8 @@
   <header class="ticket">
     <div class="ticket-top">
       <h1 class="trip-title">안전하고 즐거운 청산고 오사카 수학여행</h1>
-      <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
-
-  <div class="urgent-toast" id="urgentToast">
-    <span class="urgent-toast-icon">!</span>
-    <span class="urgent-toast-text" id="urgentToastText"></span>
-  </div>
 
   <div class="notice-form-overlay" id="exchangeOverlay">
     <div class="notice-form-card">
@@ -1416,6 +1682,21 @@
       <ol class="item-guide-steps" id="itemGuideSteps"></ol>
       <div class="nf-actions">
         <button type="button" id="closeItemGuideBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-form-overlay" id="locationGuideOverlay">
+    <div class="notice-form-card">
+      <h3>위치 권한이 필요해요</h3>
+      <ol class="item-guide-steps">
+        <li>휴대폰 <b>설정 → 위치</b>가 꺼져 있다면 켜주세요.</li>
+        <li><b>설정 → 앱 → (지금 쓰는 브라우저) → 권한 → 위치</b>에서 "앱을 사용하는 동안 허용"으로 바꿔주세요.</li>
+        <li>아래 "다시 시도"를 누르면 브라우저가 위치 허용 팝업을 띄워요. 그때 꼭 "허용"을 눌러주세요.</li>
+      </ol>
+      <div class="nf-actions">
+        <button type="button" id="closeLocationGuideBtn">닫기</button>
+        <button type="button" id="retryLocationBtn">다시 시도</button>
       </div>
     </div>
   </div>
@@ -1458,9 +1739,47 @@
             <p class="ac-place" id="assemblyPlace">-</p>
           </div>
         </div>
+        <button class="ac-delete-btn" id="deleteAssemblyBtn">집합 시간 삭제</button>
       </div>
       <div class="scroll-area">
         <div id="noticeList"></div>
+      </div>
+      <button class="fab fab-secondary" id="newAssemblyFab" title="집합 시간 등록">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      </button>
+      <button class="fab" id="newNoticeFab">+</button>
+      <div class="notice-form-overlay" id="assemblyFormOverlay">
+        <div class="notice-form-card">
+          <h3>집합 시간 등록</h3>
+          <p class="nf-label">집합 시각</p>
+          <input type="datetime-local" id="assemblyTimeInput" class="nf-input">
+          <p class="nf-label">집합 장소</p>
+          <input type="text" id="assemblyPlaceInput" class="nf-input" placeholder="예: 호텔 로비">
+          <div class="nf-actions">
+            <button type="button" id="cancelAssemblyBtn">취소</button>
+            <button type="button" id="assemblySubmitBtn">등록</button>
+          </div>
+          <p id="assemblyStatusMsg"></p>
+        </div>
+      </div>
+      <div class="notice-form-overlay" id="noticeFormOverlay">
+        <div class="notice-form-card">
+          <h3>새 공지 작성</h3>
+          <p class="nf-label">긴급 여부</p>
+          <div class="urgency-toggle" id="urgencyToggle">
+            <button type="button" class="active" data-val="false">일반</button>
+            <button type="button" data-val="true">긴급</button>
+          </div>
+          <p class="nf-label">제목</p>
+          <input type="text" class="nf-input" id="noticeTitleInput" placeholder="예: 출발 10분 지연 안내">
+          <p class="nf-label">내용</p>
+          <textarea class="nf-textarea" id="noticeBodyInput" placeholder="학생들에게 전달할 내용을 적어주세요."></textarea>
+          <div class="nf-actions">
+            <button type="button" id="cancelNoticeBtn">취소</button>
+            <button type="button" id="submitNoticeBtn">등록</button>
+          </div>
+          <p id="noticeStatusMsg"></p>
+        </div>
       </div>
     </section>
 
@@ -1533,9 +1852,14 @@
 
     <section id="panel-more" class="panel">
       <div class="more-list">
-        <button class="more-item" data-target="groups">
+        <button class="more-item" data-target="roster-select">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">조 편성표</span>
+          <span class="more-text">인원체크 및 조편성표</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="grade-select">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="more-text">학생현황</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="missions">
@@ -1548,24 +1872,105 @@
           <span class="more-text">자주 묻는 질문</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="more-item" data-target="bus-checklist">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+          <span class="more-text">버스 체크리스트</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="hotel-checklist">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
+          <span class="more-text">숙소 체크리스트</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <button class="more-item" data-target="phrases">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
           <span class="more-text">서바이벌 일본어 회화</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
-      <button class="logout-link" id="logoutBtn">학번을 잘못 입력했나요? 다시 입력하기</button>
+      <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
+      <button class="danger-link" id="resetStudentsBtn">학생현황 데이터 초기화</button>
+    </section>
+
+    <section id="panel-hotel-checklist" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">숙소 체크리스트</h2>
+      <div id="hotelChecklist"></div>
+    </section>
+
+    <section id="panel-bus-checklist" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">버스 체크리스트</h2>
+      <div id="busChecklist"></div>
+    </section>
+
+    <section id="panel-roster-select" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">인원체크 및 조편성표</h2>
+      <div class="more-list">
+        <button class="more-item" data-target="bus-roster">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+          <span class="more-text">버스 인원 체크</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="room-roster">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
+          <span class="more-text">숙소 인원 체크</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="groups">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="more-text">조별 명단 관리</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section id="panel-bus-roster" class="panel sub-panel">
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
+      <h2 class="sub-title">버스 인원 체크</h2>
+      <div class="roster-tabs" id="busRosterTabs"></div>
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
+        <div class="progress-head">
+          <p class="progress-text"><span id="busCheckedCount">0</span>/<span id="busTotalCount">0</span>명 탑승 확인</p>
+          <button class="roster-reset-btn" id="busResetBtn">초기화</button>
+        </div>
+      </div>
+      <div id="busRosterList"></div>
+    </section>
+
+    <section id="panel-room-roster" class="panel sub-panel">
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
+      <h2 class="sub-title">숙소 인원 체크</h2>
+      <div class="roster-tabs" id="roomRosterTabs">
+        <button class="pill active" data-gender="남학생">남학생</button>
+        <button class="pill" data-gender="여학생">여학생</button>
+      </div>
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="roomProgressFill"></div></div>
+        <div class="progress-head">
+          <p class="progress-text"><span id="roomCheckedCount">0</span>/<span id="roomTotalCount">0</span>명 입실 확인</p>
+          <button class="roster-reset-btn" id="roomResetBtn">초기화</button>
+        </div>
+      </div>
+      <div id="roomRosterList"></div>
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
-      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">조 편성표</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
+      <h2 class="sub-title">조별 명단 관리</h2>
+      <p class="group-move-hint">학생 이름을 눌러 선택한 뒤, 옮길 조 제목을 누르면 이동해요.</p>
       <div id="groupList"></div>
     </section>
 
     <section id="panel-missions" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">사진 미션</h2>
+      <a class="mission-gallery-btn" href="https://drive.google.com/drive/folders/1SjVAiSP0UobvNccVGX1pCyUjJL4P6s_Q" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        학생들이 올린 사진 모아보기 (드라이브)
+      </a>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="missionProgressFill"></div></div>
         <p class="progress-text"><span id="missionCheckedCount">0</span>/<span id="missionTotalCount">0</span>개 미션 클리어</p>
@@ -1595,6 +2000,31 @@
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">서바이벌 일본어 회화</h2>
       <div id="phraseList"></div>
+    </section>
+
+    <section id="panel-grade-select" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">학년 선택</h2>
+      <div class="more-list">
+        <button class="more-item" data-grade="1">
+          <span class="more-text">1학년</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-grade="2">
+          <span class="more-text">2학년</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section id="panel-students" class="panel sub-panel">
+      <button class="back-btn" data-back="grade-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>학년 선택</button>
+      <div class="students-header">
+        <h2 class="sub-title" style="margin-bottom:0;" id="studentsGradeTitle">학생현황</h2>
+        <button class="refresh-students-btn" id="refreshStudentsBtn">새로고침</button>
+      </div>
+      <p class="students-note" id="studentsNote"></p>
+      <div id="studentList"></div>
     </section>
 
   </main>
@@ -1642,12 +2072,12 @@ const RETURN_DATE = "2026-10-30";
 //    https://docs.google.com/spreadsheets/d/시트ID/gviz/tq?tqx=out:csv&sheet=시트1
 // 비워두면 바로 아래 NOTICES 배열이 대신 표시됩니다(오프라인 예비용).
 const NOTICES_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&gid=0";
-// 집합 카운트다운 데이터 (선생님용 페이지에서 등록하면 여기로 반영됩니다)
+// 집합 카운트다운 데이터
 const ASSEMBLY_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=집합안내";
 const NOTICES_REFRESH_SECONDS = 30; // 페이지를 열어둔 동안 몇 초마다 새 공지를 확인할지
 
-// 출석/체크리스트·미션 진행률을 시트로 보내는 주소 (선생님용 페이지와 동일한 값)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
+// 학생현황(출석·체크리스트·미션) 시트 주소 — Apps Script가 자동으로 "학생현황" 탭을 만들어줍니다.
+const STUDENT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=학생현황";
 
 // 공지사항 예시 (시트를 연결하지 않았을 때만 사용됩니다. 필요하면 여기 직접 추가하세요)
 const NOTICES = [];
@@ -1751,9 +2181,7 @@ const CONTACTS = [
   ["숙소 (오사카 간사이 에어포트 호텔)", "프런트", "0000000000"]
 ];
 
-// 조 편성표 (조 번호, 조장, 조원 전체) — 선생님용 화면(teacher.html)과 같은 명단입니다.
-// 버스는 학년별(1학년 1호차·2학년 2호차), 숙소는 2인 1실(여학생 마지막 3명만 3인실)로
-// 별도 배정되며, 그 내용은 선생님용 화면의 "인원체크 및 조편성표"에서 확인할 수 있어요.
+// 조 편성표 (조 번호, 조장, 조원 전체) — 버스·숙소와 별개로 운영하는 모둠(식사·활동용)입니다.
 const GROUPS = [
   { no:1, leader:"박서용", members:["박서용","박정호","유승균","이금강","임지율","하유민"] },
   { no:2, leader:"현영관", members:["현영관","고용석","김민호","김태원","박민웅"] },
@@ -1764,20 +2192,48 @@ const GROUPS = [
   { no:7, leader:"박성희", members:["박성희","박수영","신소율","이수아","최해나"] }
 ];
 
+// 숙소 편성표 — "방배정.xlsx"의 실제 호수 배정입니다. 기본은 2인 1실이며,
+// 여학생 명단 마지막 3명(전서현·김서연·김도연)만 3인 1실로 묶었습니다.
+// 방이 다시 정해지면 이 배열의 members만 바꿔주면 숙소 인원 체크 화면에 그대로 반영됩니다.
+const ROOMS = {
+  "남학생": [
+    { no:1, members:["고용석","김민호"] },
+    { no:2, members:["김태원","박민웅"] },
+    { no:3, members:["유지상","이승준"] },
+    { no:4, members:["이진욱","최건우"] },
+    { no:5, members:["신민수","현영관"] },
+    { no:6, members:["이금강","하유민"] },
+    { no:7, members:["박서용","임지율"] },
+    { no:8, members:["유승균","박정호"] }
+  ],
+  "여학생": [
+    { no:9, members:["이수아","신소율"] },
+    { no:10, members:["김은주","박규빈"] },
+    { no:11, members:["박서연","박성희"] },
+    { no:12, members:["박수영","김하영"] },
+    { no:13, members:["구은정","최해나"] },
+    { no:14, members:["김민지","한다해"] },
+    { no:15, members:["김세영","서하원"] },
+    { no:16, members:["이은서","장은영"] },
+    { no:17, members:["조하경","박아람"] },
+    { no:18, members:["전서현","김서연","김도연"] }
+  ]
+};
+
 /* ---- 이름 선택 게이트 & 출석/진행률 보고 ---- */
 // 학생 로그인용 명부: 학번은 [학년][반][번호 2자리] 형식입니다 (예: 2학년 1반 1번 = 2101).
 // 반이 여러 개면 두 번째 자리를 반 번호로 바꿔서 관리하세요.
 const ROSTER = [
   // 1학년 (학번 11xx)
-  { name:"김도연", id:"1101" }, { name:"김민지", id:"1102" }, { name:"김서연", id:"1103" }, { name:"김세영", id:"1104" }, { name:"박서용", id:"1105" },
-  { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
-  { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" }, { name:"전서현", id:"1115" },
-  { name:"조하경", id:"1116" }, { name:"하유민", id:"1117" }, { name:"한다해", id:"1118" }, { name:"현영관", id:"1119" },
+  { name:"김도연", id:"1101", gender:"여" }, { name:"김민지", id:"1102", gender:"여" }, { name:"김서연", id:"1103", gender:"여" }, { name:"김세영", id:"1104", gender:"여" }, { name:"박서용", id:"1105", gender:"남" },
+  { name:"박아람", id:"1106", gender:"여" }, { name:"박정호", id:"1107", gender:"남" }, { name:"서하원", id:"1109", gender:"여" }, { name:"유승균", id:"1110", gender:"남" },
+  { name:"이금강", id:"1111", gender:"남" }, { name:"이은서", id:"1112", gender:"여" }, { name:"임지율", id:"1113", gender:"남" }, { name:"장은영", id:"1114", gender:"여" }, { name:"전서현", id:"1115", gender:"여" },
+  { name:"조하경", id:"1116", gender:"여" }, { name:"하유민", id:"1117", gender:"남" }, { name:"한다해", id:"1118", gender:"여" }, { name:"현영관", id:"1119", gender:"남" },
   // 2학년 (학번 21xx)
-  { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
-  { name:"김태원", id:"2106" }, { name:"김하영", id:"2107" }, { name:"박규빈", id:"2108" }, { name:"박민웅", id:"2109" }, { name:"박서연", id:"2110" },
-  { name:"박성희", id:"2111" }, { name:"박수영", id:"2112" }, { name:"신민수", id:"2113" }, { name:"신소율", id:"2114" }, { name:"유지상", id:"2115" },
-  { name:"이수아", id:"2116" }, { name:"이승준", id:"2117" }, { name:"이진욱", id:"2118" }, { name:"최건우", id:"2119" }, { name:"최해나", id:"2120" }
+  { name:"고용석", id:"2101", gender:"남" }, { name:"구은정", id:"2102", gender:"여" }, { name:"김민호", id:"2104", gender:"남" }, { name:"김은주", id:"2105", gender:"여" },
+  { name:"김태원", id:"2106", gender:"남" }, { name:"김하영", id:"2107", gender:"여" }, { name:"박규빈", id:"2108", gender:"여" }, { name:"박민웅", id:"2109", gender:"남" }, { name:"박서연", id:"2110", gender:"여" },
+  { name:"박성희", id:"2111", gender:"여" }, { name:"박수영", id:"2112", gender:"여" }, { name:"신민수", id:"2113", gender:"남" }, { name:"신소율", id:"2114", gender:"여" }, { name:"유지상", id:"2115", gender:"남" },
+  { name:"이수아", id:"2116", gender:"여" }, { name:"이승준", id:"2117", gender:"남" }, { name:"이진욱", id:"2118", gender:"남" }, { name:"최건우", id:"2119", gender:"남" }, { name:"최해나", id:"2120", gender:"여" }
 ];
 
 const STUDENT_NAME_KEY = "suhak_student_name";
@@ -1787,14 +2243,13 @@ let studentGrade = localStorage.getItem(STUDENT_GRADE_KEY) || "";
 
 const nameGate = document.getElementById("nameGate");
 const nameGateCard = document.getElementById("nameGateCard");
-const nameGateCardOriginalHTML = nameGateCard.innerHTML;
 
-function scriptReady(){
+function hasScriptUrl(){
   return SCRIPT_URL && SCRIPT_URL.indexOf("여기에") !== 0;
 }
 
 function reportAttendance(){
-  if(!studentName || !scriptReady()) return;
+  if(!studentName || !hasScriptUrl()) return;
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -1808,7 +2263,6 @@ function completeLogin(name, grade){
   localStorage.setItem(STUDENT_NAME_KEY, studentName);
   localStorage.setItem(STUDENT_GRADE_KEY, studentGrade);
   nameGate.style.display = "none";
-  document.getElementById("studentNameTag").textContent = studentName;
   reportAttendance();
 }
 
@@ -1825,56 +2279,27 @@ function showNameDisambiguation(matches){
   });
 }
 
-function attachStudentIdConfirm(){
-  document.getElementById("studentIdConfirmBtn").addEventListener("click", () => {
-    const sid = document.getElementById("studentIdInput").value.trim();
-    if(!/^\d{4}$/.test(sid)){
-      alert("학번 4자리를 숫자로 입력해주세요. (예: 2101)");
-      return;
-    }
-    const matches = ROSTER.filter(r => r.id === sid);
-    if(matches.length === 0){
-      alert("등록된 학번을 찾을 수 없어요. 선생님께 확인해주세요.");
-      return;
-    }
-    const grade = sid.charAt(0) === "1" ? "1학년" : "2학년";
-    if(matches.length === 1){
-      completeLogin(matches[0].name, grade);
-    } else {
-      showNameDisambiguation(matches);
-    }
-  });
-}
+// 이 페이지는 선생님 전용 관리 페이지라 학번 로그인 화면을 띄우지 않습니다.
+nameGate.style.display = "none";
 
-function logoutStudent(){
-  if(!confirm("로그아웃하고 학번을 다시 입력할까요? 지금까지 체크한 준비물·미션 기록도 함께 초기화돼요.")) return;
-  localStorage.removeItem(STUDENT_NAME_KEY);
-  localStorage.removeItem(STUDENT_GRADE_KEY);
-  localStorage.removeItem(CHECKLIST_STATE_KEY);
-  localStorage.removeItem(MISSION_STATE_KEY);
-  studentName = "";
-  studentGrade = "";
-  document.getElementById("studentNameTag").textContent = "";
-  nameGateCard.innerHTML = nameGateCardOriginalHTML;
-  attachStudentIdConfirm();
-  nameGate.style.display = "flex";
-  groupsEl.querySelectorAll(".check-item.checked").forEach(el => el.classList.remove("checked"));
-  missionList.querySelectorAll(".check-item.checked").forEach(el => el.classList.remove("checked"));
-  updateProgress();
-  updateMissionProgress();
-}
-
-document.getElementById("logoutBtn").addEventListener("click", logoutStudent);
-
-if(studentName){
-  nameGate.style.display = "none";
-  document.getElementById("studentNameTag").textContent = studentName;
-  reportAttendance();
-} else {
-  nameGate.style.display = "flex";
-}
-
-attachStudentIdConfirm();
+document.getElementById("studentIdConfirmBtn").addEventListener("click", () => {
+  const sid = document.getElementById("studentIdInput").value.trim();
+  if(!/^\d{4}$/.test(sid)){
+    alert("학번 4자리를 숫자로 입력해주세요. (예: 2101)");
+    return;
+  }
+  const matches = ROSTER.filter(r => r.id === sid);
+  if(matches.length === 0){
+    alert("등록된 학번을 찾을 수 없어요. 선생님께 확인해주세요.");
+    return;
+  }
+  const grade = sid.charAt(0) === "1" ? "1학년" : "2학년";
+  if(matches.length === 1){
+    completeLogin(matches[0].name, grade);
+  } else {
+    showNameDisambiguation(matches);
+  }
+});
 
 // 사진 미션 (스탬프 투어)
 const MISSIONS = [
@@ -1923,6 +2348,7 @@ const phoneIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-wid
 const chevronDown = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 const plusIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
 
 function fmtDate(iso){
   const d = new Date(iso + "T00:00:00");
@@ -2007,7 +2433,7 @@ document.getElementById("closeExchangeBtn").addEventListener("click", () => {
   document.getElementById("exchangeOverlay").style.display = "none";
 });
 
-// 엔화/원화 입력칸 위아래 순서를 서로 바꿔주는 버튼
+// 엔화·원화 필드 위아래 순서를 바꿔줍니다 (계산 자체는 항상 양방향으로 동작해요).
 let fxJpyFirst = true;
 function applyFxOrder(){
   const wrap = document.getElementById("fxSwapWrap");
@@ -2032,33 +2458,6 @@ document.getElementById("fxSwapBtn").addEventListener("click", () => {
 /* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
 const noticeList = document.getElementById("noticeList");
 
-// 새로운 긴급 공지가 올라오면 화면 아래에 잠깐 스낵바(토스트)로 알려줍니다.
-// (이미 한 번 봤던 긴급 공지는 이 기기에서 다시 뜨지 않아요.)
-const URGENT_TOAST_SEEN_KEY = "suhak_urgent_toast_seen";
-const urgentToastEl = document.getElementById("urgentToast");
-const urgentToastTextEl = document.getElementById("urgentToastText");
-let urgentToastTimer = null;
-
-function showUrgentToast(title){
-  urgentToastTextEl.textContent = "긴급 공지: " + title;
-  urgentToastEl.classList.add("show");
-  clearTimeout(urgentToastTimer);
-  urgentToastTimer = setTimeout(() => urgentToastEl.classList.remove("show"), 4500);
-}
-urgentToastEl.addEventListener("click", () => {
-  clearTimeout(urgentToastTimer);
-  urgentToastEl.classList.remove("show");
-});
-
-function maybeShowUrgentToast(list){
-  const urgent = list.find(n => n.important);
-  if(!urgent) return;
-  const key = urgent.time + "|" + urgent.title;
-  if(localStorage.getItem(URGENT_TOAST_SEEN_KEY) === key) return;
-  localStorage.setItem(URGENT_TOAST_SEEN_KEY, key);
-  showUrgentToast(urgent.title);
-}
-
 function renderNotices(list){
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
@@ -2070,13 +2469,39 @@ function renderNotices(list){
       <div class="notice-top">
         <span class="notice-time">${n.time}</span>
         ${n.important ? '<span class="notice-chip">긴급</span>' : ""}
+        ${n.row ? `<button class="notice-delete-btn" data-row="${n.row}" title="삭제">${trashIcon}</button>` : ""}
       </div>
       <p class="notice-title">${n.title}</p>
       <p class="notice-body">${n.body}</p>
     </div>
   `).join("");
   document.getElementById("noticePing").style.display = list.some(n => n.important) ? "block" : "none";
-  maybeShowUrgentToast(list);
+}
+
+noticeList.addEventListener("click", (e) => {
+  const btn = e.target.closest(".notice-delete-btn");
+  if(!btn) return;
+  if(!confirm("이 공지를 삭제할까요?")) return;
+  if(!SCRIPT_URL_READY()) return;
+  btn.disabled = true;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "delete", row: Number(btn.dataset.row) })
+  }).then(() => {
+    setTimeout(loadNotices, 800);
+  }).catch(() => {
+    alert("삭제에 실패했어요. 인터넷 연결을 확인해주세요.");
+    btn.disabled = false;
+  });
+});
+
+function SCRIPT_URL_READY(){
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return false;
+  }
+  return true;
 }
 
 // 구글시트 CSV(콤마 안의 콤마·줄바꿈도 처리하는 간단 파서)
@@ -2111,13 +2536,21 @@ function loadNotices(){
   fetch(NOTICES_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
-      const rows = parseCSV(text).filter(r => r.length >= 3 && r[0] && r[0] !== "시간");
-      const fresh = rows.map(r => ({
-        time: r[0] || "",
-        important: /^(TRUE|1|긴급|Y|y)$/i.test((r[1] || "").trim()),
-        title: r[2] || "",
-        body: r[3] || ""
-      })).reverse();
+      const rows = parseCSV(text);
+      const fresh = [];
+      for(let i = 0; i < rows.length; i++){
+        const r = rows[i];
+        if(r.length >= 3 && r[0] && r[0] !== "시간"){
+          fresh.push({
+            row: i + 1, // 실제 시트 행 번호(1부터 시작) — 삭제 요청에 사용
+            time: r[0] || "",
+            important: /^(TRUE|1|긴급|Y|y)$/i.test((r[1] || "").trim()),
+            title: r[2] || "",
+            body: r[3] || ""
+          });
+        }
+      }
+      fresh.reverse();
       renderNotices(fresh.length ? fresh : NOTICES);
     })
     .catch(() => renderNotices(NOTICES));
@@ -2186,8 +2619,134 @@ function loadAssembly(){
     .catch(() => {});
 }
 
+document.getElementById("deleteAssemblyBtn").addEventListener("click", () => {
+  if(!hasScriptUrl()){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return;
+  }
+  if(!confirm("등록된 집합 시간을 삭제할까요?")) return;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "assembly_delete" })
+  }).then(() => {
+    setTimeout(loadAssembly, 800);
+  }).catch(() => {
+    alert("삭제에 실패했어요. 인터넷 연결을 확인해주세요.");
+  });
+});
+
 loadAssembly();
 setInterval(loadAssembly, NOTICES_REFRESH_SECONDS * 1000);
+
+const assemblyOverlay = document.getElementById("assemblyFormOverlay");
+document.getElementById("newAssemblyFab").addEventListener("click", () => {
+  assemblyOverlay.style.display = "flex";
+});
+document.getElementById("cancelAssemblyBtn").addEventListener("click", () => {
+  assemblyOverlay.style.display = "none";
+});
+
+document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
+  const t = document.getElementById("assemblyTimeInput").value;
+  const place = document.getElementById("assemblyPlaceInput").value.trim();
+  const statusEl = document.getElementById("assemblyStatusMsg");
+
+  if(!hasScriptUrl()){
+    statusEl.textContent = "코드 상단 SCRIPT_URL을 먼저 채워주세요.";
+    statusEl.className = "";
+    return;
+  }
+  if(!t || !place){
+    statusEl.textContent = "시간과 장소를 모두 입력해주세요.";
+    statusEl.className = "";
+    return;
+  }
+
+  statusEl.textContent = "등록하는 중...";
+  statusEl.className = "";
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "assembly", targetTime: t, place: place })
+  }).then(() => {
+    statusEl.textContent = "등록됐어요! 학생 화면에 곧 반영됩니다.";
+    statusEl.className = "ok";
+    setTimeout(loadAssembly, 1500);
+    setTimeout(() => {
+      assemblyOverlay.style.display = "none";
+      statusEl.textContent = "";
+      document.getElementById("assemblyPlaceInput").value = "";
+    }, 900);
+  }).catch(() => {
+    statusEl.textContent = "등록에 실패했어요. 인터넷 연결을 확인해주세요.";
+    statusEl.className = "";
+  });
+});
+
+/* ---- 공지 작성 (선생님용) ---- */
+// 구글 Apps Script를 "웹 앱"으로 배포하면 나오는 URL(끝이 /exec)을 여기에 붙여넣으세요.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
+
+let noticeImportant = false;
+const fab = document.getElementById("newNoticeFab");
+const noticeOverlay = document.getElementById("noticeFormOverlay");
+const urgencyToggle = document.getElementById("urgencyToggle");
+const cancelNoticeBtn = document.getElementById("cancelNoticeBtn");
+const submitNoticeBtn = document.getElementById("submitNoticeBtn");
+const noticeStatusMsg = document.getElementById("noticeStatusMsg");
+
+fab.addEventListener("click", () => { noticeOverlay.style.display = "flex"; });
+cancelNoticeBtn.addEventListener("click", () => { noticeOverlay.style.display = "none"; });
+
+urgencyToggle.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  noticeImportant = btn.dataset.val === "true";
+});
+
+submitNoticeBtn.addEventListener("click", () => {
+  const title = document.getElementById("noticeTitleInput").value.trim();
+  const body = document.getElementById("noticeBodyInput").value.trim();
+
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
+    noticeStatusMsg.textContent = "코드 상단 SCRIPT_URL을 먼저 채워주세요.";
+    noticeStatusMsg.className = "";
+    return;
+  }
+  if(!title){
+    noticeStatusMsg.textContent = "제목을 입력해주세요.";
+    noticeStatusMsg.className = "";
+    return;
+  }
+
+  submitNoticeBtn.disabled = true;
+  noticeStatusMsg.textContent = "등록하는 중...";
+  noticeStatusMsg.className = "";
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ title, body, important: noticeImportant })
+  }).then(() => {
+    noticeStatusMsg.textContent = "등록됐어요!";
+    noticeStatusMsg.className = "ok";
+    document.getElementById("noticeTitleInput").value = "";
+    document.getElementById("noticeBodyInput").value = "";
+    urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+    urgencyToggle.querySelector('[data-val="false"]').classList.add("active");
+    noticeImportant = false;
+    setTimeout(() => { noticeOverlay.style.display = "none"; noticeStatusMsg.textContent = ""; }, 900);
+    setTimeout(loadNotices, 1500);
+  }).catch(() => {
+    noticeStatusMsg.textContent = "등록에 실패했어요. 인터넷 연결을 확인해주세요.";
+    noticeStatusMsg.className = "";
+  }).finally(() => {
+    submitNoticeBtn.disabled = false;
+  });
+});
 
 /* ---- 일정 렌더 ---- */
 const dayPills = document.getElementById("dayPills");
@@ -2546,29 +3105,265 @@ contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
 
 /* ---- 조 편성표 렌더 ---- */
 const groupList = document.getElementById("groupList");
-groupList.innerHTML = GROUPS.map(g => `
-  <div class="group-card">
-    <div class="group-head">
-      <span class="group-no">${g.no}조</span>
-      <span class="g-info">
-        <p class="g-leader">조장 · ${g.leader}</p>
-        <p class="g-meta">총 ${g.members.length}명</p>
-      </span>
-      <span class="chevron">${chevronDown}</span>
-    </div>
-    <div class="group-body">
-      <div class="member-chips">
-        ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+
+const GROUP_OVERRIDES_KEY = "teacher_group_overrides";
+function loadGroupOverrides(){
+  try { return JSON.parse(localStorage.getItem(GROUP_OVERRIDES_KEY) || "{}"); } catch(e){ return {}; }
+}
+function saveGroupOverrides(){
+  localStorage.setItem(GROUP_OVERRIDES_KEY, JSON.stringify(groupOverrides));
+}
+let groupOverrides = loadGroupOverrides();
+let selectedStudentForMove = null;
+
+function getEffectiveGroups(){
+  const effective = GROUPS.map(g => ({ ...g, members: [...g.members] }));
+  Object.entries(groupOverrides).forEach(([name, targetNo]) => {
+    effective.forEach(g => { g.members = g.members.filter(m => m !== name); });
+    const target = effective.find(g => g.no === targetNo);
+    if(target && !target.members.includes(name)) target.members.push(name);
+  });
+  return effective;
+}
+
+function renderGroups(){
+  const groups = getEffectiveGroups();
+  groupList.innerHTML = groups.map(g => `
+    <div class="group-card" data-group-no="${g.no}">
+      <div class="group-head">
+        <span class="group-no">${g.no}조</span>
+        <span class="g-info">
+          <p class="g-leader">조장 · ${g.leader}</p>
+          <p class="g-meta">총 ${g.members.length}명</p>
+        </span>
+        <span class="chevron">${chevronDown}</span>
+      </div>
+      <div class="group-body">
+        <div class="member-chips">
+          ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+        </div>
       </div>
     </div>
-  </div>
-`).join("");
+  `).join("");
+}
+
+renderGroups();
+
+function moveStudentToGroup(name, targetNo){
+  groupOverrides[name] = targetNo;
+  saveGroupOverrides();
+  selectedStudentForMove = null;
+  renderGroups();
+  document.querySelectorAll(`.group-card[data-group-no="${targetNo}"]`).forEach(c => c.classList.add("open"));
+}
 
 groupList.addEventListener("click", (e) => {
+  const chip = e.target.closest(".member-chip");
+  if(chip){
+    e.stopPropagation();
+    if(selectedStudentForMove === chip.textContent){
+      selectedStudentForMove = null;
+      chip.classList.remove("selected");
+      return;
+    }
+    groupList.querySelectorAll(".member-chip.selected").forEach(c => c.classList.remove("selected"));
+    selectedStudentForMove = chip.textContent;
+    chip.classList.add("selected");
+    return;
+  }
   const head = e.target.closest(".group-head");
   if(!head) return;
-  head.closest(".group-card").classList.toggle("open");
+  const card = head.closest(".group-card");
+  if(selectedStudentForMove){
+    moveStudentToGroup(selectedStudentForMove, parseInt(card.dataset.groupNo, 10));
+    return;
+  }
+  card.classList.toggle("open");
 });
+
+/* ---- 버스 편성표 / 숙소 편성표 (선생님 전용 출석 체크, 이 기기에만 저장) ---- */
+const BUS_ATTEND_KEY = "teacher_bus_attendance";
+const ROOM_ATTEND_KEY = "teacher_room_attendance";
+
+function loadAttendState(key){
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
+}
+function saveAttendState(key, state){
+  localStorage.setItem(key, JSON.stringify(state));
+}
+let busAttend = loadAttendState(BUS_ATTEND_KEY);
+let roomAttend = loadAttendState(ROOM_ATTEND_KEY);
+
+// 버스 편성표: 1학년 전원 1호차, 2학년 전원 2호차. 학번(학년→번호) 순서대로
+// 좌석 번호를 매깁니다. 학년이 바뀌면 이 함수만 보면 됩니다 — 조 편성과는 무관합니다.
+function getBusRoster(){
+  const buses = { "1호차": [], "2호차": [] };
+  ROSTER.forEach(s => {
+    const busNo = s.id.charAt(0) === "1" ? "1호차" : "2호차";
+    buses[busNo].push({ name: s.name, seat: (buses[busNo].length + 1) + "번" });
+  });
+  return buses;
+}
+
+// 숙소 편성표: 위 ROOMS(방배정.xlsx 실제 호수)를 그대로 돌려줍니다.
+function getRoomRoster(){
+  return ROOMS;
+}
+
+/* -- 버스 편성표 -- */
+let currentBus = null;
+const busRosterTabs = document.getElementById("busRosterTabs");
+const busRosterList = document.getElementById("busRosterList");
+
+function renderBusTabs(){
+  const buses = getBusRoster();
+  const busNames = Object.keys(buses).sort();
+  if(!currentBus || !buses[currentBus]) currentBus = busNames[0];
+  busRosterTabs.innerHTML = busNames.map(b => `<button class="pill${b === currentBus ? " active" : ""}" data-bus="${b}">${b}</button>`).join("");
+  renderBusList();
+}
+
+// 버스 내부처럼 4명씩 한 열로 묶고, 그 안에서 2명 + 통로 + 2명으로 나눕니다.
+function chunkBusRows(members){
+  const rows = [];
+  for(let i = 0; i < members.length; i += 4){
+    rows.push(members.slice(i, i + 4));
+  }
+  return rows;
+}
+
+function renderBusList(){
+  const buses = getBusRoster();
+  const members = buses[currentBus] || [];
+  const rows = chunkBusRows(members);
+  const seatHtml = (m) => `
+    <div class="bus-seat" data-name="${m.name}">
+      <span class="bs-box">${checkIcon}</span>
+      <span class="bs-no">${m.seat}</span>
+      <span class="bs-name">${m.name}</span>
+    </div>
+  `;
+  busRosterList.innerHTML = rows.length ? `<div class="bus-seat-map">${rows.map(row => `
+    <div class="bus-seat-row">
+      <div class="bus-seat-pair">${row.slice(0, 2).map(seatHtml).join("")}</div>
+      <div class="bus-aisle"></div>
+      <div class="bus-seat-pair">${row.slice(2, 4).map(seatHtml).join("")}</div>
+    </div>
+  `).join("")}</div>` : '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
+  busRosterList.querySelectorAll(".bus-seat").forEach(item => {
+    if(busAttend[item.dataset.name]) item.classList.add("checked");
+  });
+  updateBusProgress();
+}
+
+function updateBusProgress(){
+  const total = busRosterList.querySelectorAll(".bus-seat").length;
+  const checked = busRosterList.querySelectorAll(".bus-seat.checked").length;
+  document.getElementById("busCheckedCount").textContent = checked;
+  document.getElementById("busTotalCount").textContent = total;
+  document.getElementById("busProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
+}
+
+busRosterTabs.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentBus = btn.dataset.bus;
+  renderBusTabs();
+});
+
+busRosterList.addEventListener("click", (e) => {
+  const item = e.target.closest(".bus-seat");
+  if(!item) return;
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) busAttend[item.dataset.name] = true;
+  else delete busAttend[item.dataset.name];
+  saveAttendState(BUS_ATTEND_KEY, busAttend);
+  updateBusProgress();
+});
+
+document.getElementById("busResetBtn").addEventListener("click", () => {
+  if(!confirm((currentBus || "이 버스") + " 탑승 체크를 초기화할까요?")) return;
+  (getBusRoster()[currentBus] || []).forEach(m => { delete busAttend[m.name]; });
+  saveAttendState(BUS_ATTEND_KEY, busAttend);
+  renderBusList();
+});
+
+/* -- 숙소 편성표 -- */
+let currentRoomGender = "남학생";
+const roomRosterTabs = document.getElementById("roomRosterTabs");
+const roomRosterList = document.getElementById("roomRosterList");
+
+function renderRoomTabs(){
+  roomRosterTabs.querySelectorAll(".pill").forEach(p => p.classList.toggle("active", p.dataset.gender === currentRoomGender));
+  renderRoomList();
+}
+
+function renderRoomList(){
+  const rooms = getRoomRoster()[currentRoomGender] || [];
+  roomRosterList.innerHTML = rooms.length ? `<div class="room-card-grid">${rooms.map(r => `
+    <div class="room-card">
+      <div class="rc-head">
+        <span class="rc-no">${r.no}호실</span>
+        <span class="rc-count">${r.members.length}명</span>
+      </div>
+      ${r.members.map(name => `
+        <div class="room-member" data-name="${name}">
+          <span class="rm-box">${checkIcon}</span>
+          <span class="rm-name">${name}</span>
+        </div>
+      `).join("")}
+    </div>
+  `).join("")}</div>` : '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">배정된 학생이 없어요.</p>';
+  roomRosterList.querySelectorAll(".room-member").forEach(item => {
+    if(roomAttend[item.dataset.name]) item.classList.add("checked");
+  });
+  updateRoomProgress();
+}
+
+function updateRoomProgress(){
+  const total = roomRosterList.querySelectorAll(".room-member").length;
+  const checked = roomRosterList.querySelectorAll(".room-member.checked").length;
+  document.getElementById("roomCheckedCount").textContent = checked;
+  document.getElementById("roomTotalCount").textContent = total;
+  document.getElementById("roomProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
+}
+
+roomRosterTabs.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentRoomGender = btn.dataset.gender;
+  renderRoomTabs();
+});
+
+roomRosterList.addEventListener("click", (e) => {
+  const item = e.target.closest(".room-member");
+  if(!item) return;
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) roomAttend[item.dataset.name] = true;
+  else delete roomAttend[item.dataset.name];
+  saveAttendState(ROOM_ATTEND_KEY, roomAttend);
+  updateRoomProgress();
+});
+
+document.getElementById("roomResetBtn").addEventListener("click", () => {
+  if(!confirm(currentRoomGender + " 출석 체크를 초기화할까요?")) return;
+  const rooms = getRoomRoster()[currentRoomGender] || [];
+  rooms.forEach(r => r.members.forEach(name => { delete roomAttend[name]; }));
+  saveAttendState(ROOM_ATTEND_KEY, roomAttend);
+  renderRoomList();
+});
+
+// "조 편성표" 더보기 메뉴에서 버스/숙소 편성표로 들어갈 때마다
+// 조별 명단 관리에서 바뀐 내용(이동한 학생 등)을 바로 반영해 다시 그립니다.
+document.querySelectorAll('.more-item[data-target="bus-roster"]').forEach(btn => {
+  btn.addEventListener("click", renderBusTabs);
+});
+document.querySelectorAll('.more-item[data-target="room-roster"]').forEach(btn => {
+  btn.addEventListener("click", renderRoomTabs);
+});
+
+renderBusTabs();
+renderRoomTabs();
 
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
@@ -2623,7 +3418,7 @@ function getMissingEssentials(){
 }
 
 function reportProgress(){
-  if(!studentName || !scriptReady()) return;
+  if(!studentName || !hasScriptUrl()) return;
   const checklistTotal = groupsEl.querySelectorAll(".check-item").length;
   const checklistChecked = groupsEl.querySelectorAll(".check-item.checked").length;
   const missionChecked = missionList.querySelectorAll(".check-item.checked").length;
@@ -2676,7 +3471,7 @@ async function uploadMissionPhoto(missionTitle, file, statusEl, itemEl){
   statusEl.textContent = "업로드 중...";
   statusEl.className = "mission-photo-status uploading";
   try {
-    if(!scriptReady()) throw new Error("no-script-url");
+    if(!hasScriptUrl()) throw new Error("no-script-url");
     const base64 = await compressImageFile(file, 1600, 0.72);
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
@@ -2857,13 +3652,149 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-document.querySelectorAll(".more-item").forEach(item => {
+document.querySelectorAll(".more-item[data-target]").forEach(item => {
   item.addEventListener("click", () => showPanel(item.dataset.target));
 });
 
 document.querySelectorAll("[data-back]").forEach(btn => {
   btn.addEventListener("click", () => showPanel(btn.dataset.back || "more"));
 });
+
+document.querySelectorAll("#panel-grade-select [data-grade]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentGrade = btn.dataset.grade;
+    document.getElementById("studentsGradeTitle").textContent = currentGrade + "학년 학생현황";
+    showPanel("students");
+    loadStudentStatus();
+  });
+});
+
+/* ---- 학생현황 (선생님용, 학년별 전체 명단 기준) ---- */
+let currentGrade = "1";
+let studentDataMap = {};
+
+function renderStudentList(){
+  const list = document.getElementById("studentList");
+  const students = ROSTER.filter(s => s.id.charAt(0) === currentGrade);
+  if(!students.length){
+    list.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">해당 학년 명단이 없어요.</p>';
+    return;
+  }
+  list.innerHTML = students.map(s => {
+    const data = studentDataMap[s.name];
+    const checklist = data ? (data.checklist || "0/0") : "0/0";
+    const essential = data ? (data.essential || "") : "";
+    const essentialMissing = essential.indexOf("미비") === 0;
+    const essentialText = essential ? essential : "아직 확인 전";
+    return `
+      <div class="student-card">
+        <span>
+          <p class="s-name">${s.name}</p>
+          <p class="s-essential${essentialMissing ? " warn" : ""}">${essentialText}</p>
+        </span>
+        <span class="s-progress">
+          <span class="s-chip">준비물 ${checklist}</span>
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+function loadStudentStatus(){
+  const note = document.getElementById("studentsNote");
+  note.textContent = "불러오는 중...";
+  fetch(STUDENT_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text).filter(r => r.length >= 1 && r[0] && r[0] !== "이름");
+      studentDataMap = {};
+      rows.forEach(r => {
+        studentDataMap[r[0]] = { checklist: r[2] || "0/0", essential: r[5] || "" };
+      });
+      renderStudentList();
+      note.textContent = "";
+    })
+    .catch(() => {
+      renderStudentList();
+      note.textContent = "아직 불러올 데이터가 없거나 시트 접근에 실패했어요.";
+    });
+}
+
+document.getElementById("refreshStudentsBtn").addEventListener("click", loadStudentStatus);
+
+document.getElementById("resetNoticesBtn").addEventListener("click", () => {
+  if(!hasScriptUrl()){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return;
+  }
+  if(!confirm("정말로 공지사항(집합 시간 포함) 데이터를 지울까요? 되돌릴 수 없어요.")) return;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "reset_notices" })
+  }).then(() => {
+    alert("공지 초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
+  }).catch(() => {
+    alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
+  });
+});
+
+document.getElementById("resetStudentsBtn").addEventListener("click", () => {
+  if(!hasScriptUrl()){
+    alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
+    return;
+  }
+  if(!confirm("정말로 학생현황(체크리스트·미션) 데이터를 지울까요? 되돌릴 수 없어요.")) return;
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "reset_students" })
+  }).then(() => {
+    alert("학생현황 초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
+  }).catch(() => {
+    alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
+  });
+});
+
+/* ---- 숙소·버스 체크리스트 (선생님 전용, 이 기기에만 저장) ---- */
+const HOTEL_CHECKLIST = [
+  "방 열쇠(카드키) 전달 확인",
+  "귀중품 보관 안내 완료",
+  "취침 점호 시간 안내",
+  "조식 시간 및 장소 안내",
+  "체크아웃 시 개인 물품 분실 여부 확인",
+  "객실 파손·분실물 확인"
+];
+const BUS_CHECKLIST = [
+  "탑승 전 인원수 확인",
+  "안전벨트 착용 확인",
+  "하차 시 소지품·좌석 분실물 확인",
+  "다음 이동 시간 및 장소 공지"
+];
+
+function renderSimpleChecklist(containerId, storageKey, items){
+  const container = document.getElementById(containerId);
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch(e){ return []; } })();
+  container.innerHTML = items.map(text => `
+    <div class="check-item">
+      <span class="box">${checkIcon}</span>
+      <span class="text">${text}</span>
+    </div>
+  `).join("");
+  container.querySelectorAll(".check-item").forEach(item => {
+    if(saved.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+  });
+  container.addEventListener("click", (e) => {
+    const item = e.target.closest(".check-item");
+    if(!item) return;
+    item.classList.toggle("checked");
+    const checkedTexts = Array.from(container.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
+    localStorage.setItem(storageKey, JSON.stringify(checkedTexts));
+  });
+}
+
+renderSimpleChecklist("hotelChecklist", "teacher_hotel_checklist", HOTEL_CHECKLIST);
+renderSimpleChecklist("busChecklist", "teacher_bus_checklist", BUS_CHECKLIST);
 
 /* ---- SOS: 카카오톡으로 내 위치 보내기 ---- */
 // 카카오 개발자센터(developers.kakao.com)에서 발급받은 JavaScript 키를 입력하세요.
@@ -2872,10 +3803,10 @@ if(window.Kakao && !Kakao.isInitialized() && KAKAO_JS_KEY.indexOf("여기에") !
   Kakao.init(KAKAO_JS_KEY);
 }
 
-document.getElementById("kakaoSosBtn").addEventListener("click", () => {
-  const btn = document.getElementById("kakaoSosBtn");
-  const originalHTML = btn.innerHTML;
+const kakaoSosBtnEl = document.getElementById("kakaoSosBtn");
+const KAKAO_SOS_BTN_ORIGINAL_HTML = kakaoSosBtnEl.innerHTML;
 
+kakaoSosBtnEl.addEventListener("click", () => {
   if(!window.Kakao || !Kakao.isInitialized()){
     alert("카카오톡 공유 기능이 아직 설정되지 않았어요. 선생님께 문의해주세요.");
     return;
@@ -2884,8 +3815,27 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
     alert("이 브라우저는 위치 확인을 지원하지 않아요.");
     return;
   }
+  attemptSendLocation();
+});
 
-  btn.textContent = "내 위치 확인 중...";
+function attemptSendLocation(){
+  // 브라우저가 지원하면, 위치 팝업을 띄우기 전에 이미 차단된 상태인지 먼저 확인해서
+  // 학생이 매번 실패하는 대신 바로 해결 방법을 볼 수 있게 합니다.
+  if(navigator.permissions && navigator.permissions.query){
+    navigator.permissions.query({ name: "geolocation" }).then((status) => {
+      if(status.state === "denied"){
+        showLocationPermissionGuide();
+      } else {
+        requestLocationAndSend();
+      }
+    }).catch(() => requestLocationAndSend());
+  } else {
+    requestLocationAndSend();
+  }
+}
+
+function requestLocationAndSend(){
+  kakaoSosBtnEl.textContent = "내 위치 확인 중...";
 
   navigator.geolocation.getCurrentPosition((pos) => {
     const lat = pos.coords.latitude;
@@ -2901,11 +3851,22 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
       ]
     });
 
-    btn.innerHTML = originalHTML;
+    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
   }, () => {
-    alert("위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해주세요.");
-    btn.innerHTML = originalHTML;
+    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
+    showLocationPermissionGuide();
   }, { enableHighAccuracy: false, timeout: 8000 });
+}
+
+function showLocationPermissionGuide(){
+  document.getElementById("locationGuideOverlay").style.display = "flex";
+}
+document.getElementById("closeLocationGuideBtn").addEventListener("click", () => {
+  document.getElementById("locationGuideOverlay").style.display = "none";
+});
+document.getElementById("retryLocationBtn").addEventListener("click", () => {
+  document.getElementById("locationGuideOverlay").style.display = "none";
+  attemptSendLocation();
 });
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록

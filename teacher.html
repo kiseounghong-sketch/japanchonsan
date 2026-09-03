@@ -1550,6 +1550,8 @@
   .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;}
   #cancelNoticeBtn{background:var(--paper-dim);color:var(--ink);}
   #submitNoticeBtn{background:var(--coral);color:#fff;}
+  #closeLocationGuideBtn{background:var(--paper-dim);color:var(--ink);}
+  #retryLocationBtn{background:var(--coral);color:#fff;}
   #noticeStatusMsg{margin-top:12px;text-align:center;font-size:13px;color:var(--ink-soft);min-height:1.3em;}
   #noticeStatusMsg.ok{color:var(--coral-deep);font-weight:700;}
 
@@ -1680,6 +1682,21 @@
       <ol class="item-guide-steps" id="itemGuideSteps"></ol>
       <div class="nf-actions">
         <button type="button" id="closeItemGuideBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-form-overlay" id="locationGuideOverlay">
+    <div class="notice-form-card">
+      <h3>위치 권한이 필요해요</h3>
+      <ol class="item-guide-steps">
+        <li>휴대폰 <b>설정 → 위치</b>가 꺼져 있다면 켜주세요.</li>
+        <li><b>설정 → 앱 → (지금 쓰는 브라우저) → 권한 → 위치</b>에서 "앱을 사용하는 동안 허용"으로 바꿔주세요.</li>
+        <li>아래 "다시 시도"를 누르면 브라우저가 위치 허용 팝업을 띄워요. 그때 꼭 "허용"을 눌러주세요.</li>
+      </ol>
+      <div class="nf-actions">
+        <button type="button" id="closeLocationGuideBtn">닫기</button>
+        <button type="button" id="retryLocationBtn">다시 시도</button>
       </div>
     </div>
   </div>
@@ -3786,10 +3803,10 @@ if(window.Kakao && !Kakao.isInitialized() && KAKAO_JS_KEY.indexOf("여기에") !
   Kakao.init(KAKAO_JS_KEY);
 }
 
-document.getElementById("kakaoSosBtn").addEventListener("click", () => {
-  const btn = document.getElementById("kakaoSosBtn");
-  const originalHTML = btn.innerHTML;
+const kakaoSosBtnEl = document.getElementById("kakaoSosBtn");
+const KAKAO_SOS_BTN_ORIGINAL_HTML = kakaoSosBtnEl.innerHTML;
 
+kakaoSosBtnEl.addEventListener("click", () => {
   if(!window.Kakao || !Kakao.isInitialized()){
     alert("카카오톡 공유 기능이 아직 설정되지 않았어요. 선생님께 문의해주세요.");
     return;
@@ -3798,8 +3815,27 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
     alert("이 브라우저는 위치 확인을 지원하지 않아요.");
     return;
   }
+  attemptSendLocation();
+});
 
-  btn.textContent = "내 위치 확인 중...";
+function attemptSendLocation(){
+  // 브라우저가 지원하면, 위치 팝업을 띄우기 전에 이미 차단된 상태인지 먼저 확인해서
+  // 학생이 매번 실패하는 대신 바로 해결 방법을 볼 수 있게 합니다.
+  if(navigator.permissions && navigator.permissions.query){
+    navigator.permissions.query({ name: "geolocation" }).then((status) => {
+      if(status.state === "denied"){
+        showLocationPermissionGuide();
+      } else {
+        requestLocationAndSend();
+      }
+    }).catch(() => requestLocationAndSend());
+  } else {
+    requestLocationAndSend();
+  }
+}
+
+function requestLocationAndSend(){
+  kakaoSosBtnEl.textContent = "내 위치 확인 중...";
 
   navigator.geolocation.getCurrentPosition((pos) => {
     const lat = pos.coords.latitude;
@@ -3815,11 +3851,22 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
       ]
     });
 
-    btn.innerHTML = originalHTML;
+    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
   }, () => {
-    alert("위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해주세요.");
-    btn.innerHTML = originalHTML;
+    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
+    showLocationPermissionGuide();
   }, { enableHighAccuracy: false, timeout: 8000 });
+}
+
+function showLocationPermissionGuide(){
+  document.getElementById("locationGuideOverlay").style.display = "flex";
+}
+document.getElementById("closeLocationGuideBtn").addEventListener("click", () => {
+  document.getElementById("locationGuideOverlay").style.display = "none";
+});
+document.getElementById("retryLocationBtn").addEventListener("click", () => {
+  document.getElementById("locationGuideOverlay").style.display = "none";
+  attemptSendLocation();
 });
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
