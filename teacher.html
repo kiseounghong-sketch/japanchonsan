@@ -87,6 +87,7 @@
     font-weight:700;
     color:var(--ink-soft);
     margin:0 0 4px;
+    text-align:center;
   }
   .weather-days{
     display:flex;
@@ -789,7 +790,7 @@
   .assembly-card .ac-countdown{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:48px;
+    font-size:43px;
     letter-spacing:.02em;
     color:var(--mustard);
     margin:0 0 10px;
@@ -810,7 +811,7 @@
     margin:0 0 2px;
   }
   .assembly-card .ac-place{
-    font-size:16px;
+    font-size:19.2px;
     font-weight:700;
     margin:0;
     white-space:nowrap;
@@ -844,7 +845,7 @@
   }
   .assembly-card.urgent .ac-countdown{ color:#fff; }
   .assembly-card.overdue{ background:#7a1f1f; }
-  .assembly-card.overdue .ac-countdown{ font-size:26px; color:#fff; }
+  .assembly-card.overdue .ac-countdown{ font-size:23px; color:#fff; }
   @keyframes assemblyPulse{
     0%,100%{ box-shadow:0 0 0 0 rgba(255,90,54,0.55); }
     50%{ box-shadow:0 0 0 12px rgba(255,90,54,0); }
@@ -2630,10 +2631,14 @@ let assemblyCountdownInterval = null;
 function showAssembly(place, lat, lng){
   document.getElementById("assemblyCard").style.display = "block";
   const placeEl = document.getElementById("assemblyPlace");
-  if(lat && lng){
-    placeEl.innerHTML = `<a class="place-map-link" href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
+  if(place){
+    // 좌표가 있으면 좌표로, 없으면 장소 이름으로 목적지를 잡아서
+    // 항상 "도보 길찾기"가 바로 시작되는 구글 지도 링크를 만들어줍니다.
+    const destination = (lat && lng) ? `${lat},${lng}` : encodeURIComponent(place);
+    const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking`;
+    placeEl.innerHTML = `<a class="place-map-link" href="${mapUrl}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
   } else {
-    placeEl.textContent = place;
+    placeEl.textContent = "-";
   }
   document.getElementById("assemblyTimeLabel").textContent = formatTimeHM(assemblyTarget);
   updateAssemblyCountdown();
