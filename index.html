@@ -88,45 +88,46 @@
     background:#fff;
     border:1.5px solid var(--line);
     border-radius:var(--radius);
-    padding:14px 16px;
-    margin-bottom:14px;
+    padding:7px 12px;
+    margin-bottom:8px;
   }
   .weather-card .weather-title{
-    font-size:12px;
+    font-size:10px;
     font-weight:700;
     color:var(--ink-soft);
-    margin:0 0 10px;
+    margin:0 0 4px;
   }
   .weather-days{
     display:flex;
     align-items:stretch;
-    gap:10px;
+    gap:6px;
   }
   .weather-day{
     flex:1;
     display:flex;
-    flex-direction:column;
+    flex-direction:row;
     align-items:center;
-    gap:3px;
+    justify-content:center;
+    gap:5px;
     text-align:center;
   }
   .weather-day .weather-day-label{
-    font-size:11.5px;
+    font-size:10px;
     font-weight:700;
     color:var(--ink-soft);
-    margin:0 0 2px;
+    margin:0;
   }
   .weather-day .weather-icon{ color:var(--coral-deep); display:flex; align-items:center; justify-content:center; line-height:0; }
-  .weather-day .weather-icon svg{ width:30px; height:30px; display:block; overflow:visible; }
+  .weather-day .weather-icon svg{ width:15px; height:15px; display:block; overflow:visible; }
   .weather-day .weather-temp{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:15px;
+    font-size:12px;
     color:var(--ink);
-    margin:2px 0 0;
+    margin:0;
   }
   .weather-day .weather-desc{
-    font-size:11.5px;
+    font-size:9.5px;
     font-weight:600;
     color:var(--ink-soft);
     margin:0;
@@ -135,6 +136,27 @@
     width:1px;
     background:var(--line);
     align-self:stretch;
+  }
+  .quick-faq-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .quick-faq-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:11px 6px;
+    font-family:inherit;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+    cursor:pointer;
   }
 
   /* ===== 컨텐츠 ===== */
@@ -1436,6 +1458,10 @@
           </div>
         </div>
       </div>
+      <div class="quick-faq-row">
+        <button type="button" class="quick-faq-btn" id="openEmergencyFaqBtn">🚨 비상상황 FAQ</button>
+        <button type="button" class="quick-faq-btn" id="openMannerFaqBtn">🙏 매너·에티켓 FAQ</button>
+      </div>
       <div class="assembly-card" id="assemblyCard" style="display:none;">
         <p class="ac-label">집합까지 남은 시간</p>
         <p class="ac-countdown" id="assemblyCountdown">--:--</p>
@@ -1568,6 +1594,18 @@
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">자주 묻는 질문</h2>
       <div id="faqList"></div>
+    </section>
+
+    <section id="panel-emergency-faq" class="panel sub-panel">
+      <button class="back-btn" data-back="notice"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>공지</button>
+      <h2 class="sub-title">🚨 비상상황 FAQ</h2>
+      <div id="emergencyFaqList"></div>
+    </section>
+
+    <section id="panel-etiquette-faq" class="panel sub-panel">
+      <button class="back-btn" data-back="notice"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>공지</button>
+      <h2 class="sub-title">🙏 매너·에티켓 FAQ</h2>
+      <div id="mannerFaqList"></div>
     </section>
 
     <section id="panel-phrases" class="panel sub-panel">
@@ -1847,14 +1885,20 @@ const FAQS = [
   { q:"핸드폰 배터리는 어디서 충전하나요?", a:"버스 안 좌석 USB 단자와 숙소 객실 콘센트를 이용할 수 있습니다. 보조배터리를 챙겨오면 더 편리해요." },
   { q:"몸이 아프면 어떻게 해야 하나요?", a:"바로 담임 선생님 또는 인솔 선생님께 알려주세요. 연락처 탭에서 바로 전화 연결이 가능합니다." },
   { q:"자유시간에 개인적으로 이동해도 되나요?", a:"안전을 위해 반드시 배정된 조원과 함께, 사전에 안내된 구역 안에서만 이동해주세요." },
-  { q:"용돈은 얼마 정도 챙기면 좋을까요?", a:"기념품과 간식 구입 등을 고려해 학교 안내문에 적힌 권장 금액을 참고해주세요." },
+  { q:"용돈은 얼마 정도 챙기면 좋을까요?", a:"기념품과 간식 구입 등을 고려해 학교 안내문에 적힌 권장 금액을 참고해주세요." }
+];
 
-  { q:"🚨 [비상] 일행과 떨어져 길을 잃었어요!", a:"절대 당황해서 이리저리 돌아다니지 마세요! 그 자리에 멈춰서 [연락처] 탭의 '선생님께 내 위치 보내기(또는 전화)'를 이용해 바로 연락하세요. 와이파이나 데이터가 안 터진다면 가까운 편의점 직원이나 '코반(KOBAN, 파출소)'에 가서 선생님 전화번호나 호텔 이름이 적힌 화면을 보여주세요." },
-  { q:"🚨 [비상] 여권을 잃어버렸어요!", a:"여권이 없으면 한국으로 돌아가는 비행기를 탈 수 없습니다. 잃어버린 것을 안 즉시 혼자 찾으려 하지 말고 <strong>무조건 담임 선생님께 제일 먼저</strong> 알리세요. (미리 찍어둔 여권 사본 사진이 있다면 영사관에서 임시 여권을 발급받는 데 큰 도움이 됩니다.)" },
-  { q:"🚨 [비상] 지진이 났어요! 흔들려요!", a:"당황해서 밖으로 무작정 뛰어나가지 마세요. 1) 가방이나 겉옷으로 <strong>머리를 가장 먼저 보호</strong>하고 2) 튼튼한 탁자 아래나 유리창이 없는 안전한 벽 쪽으로 몸을 숨기세요. 3) 흔들림이 멈추면 선생님이나 현지 안내원(호텔, USJ 직원 등)의 지시에 따라 계단(엘리베이터 금지)으로 대피합니다." },
-  { q:"🚨 [비상] 몸이 너무 아프거나 다쳤어요.", a:"참지 말고 즉시 주변 친구나 선생님께 알리세요. 현지 약국(드럭스토어)에서 파는 약을 함부로 사 먹지 말고, 반드시 선생님과 상의해야 합니다. 수학여행 단체 보험이 들어있으니 병원비 걱정 말고 아프면 바로 이야기하세요!" },
-  { q:"🚨 [비상] 지갑이나 스마트폰을 소매치기당하거나 잃어버렸어요.", a:"일본은 분실물을 되찾을 확률이 꽤 높은 편입니다. 잃어버린 것을 깨달은 즉시 선생님께 알리고, 동선이 기억난다면 방문했던 가게나 USJ 분실물 센터, 또는 근처 '코반(파출소)'에 선생님·가이드와 함께 가서 분실 신고를 하세요." },
+// 공지 탭 상단 "비상상황 FAQ" 버튼에서 보여주는 목록입니다.
+const EMERGENCY_FAQS = [
+  { q:"🚨 일행과 떨어져 길을 잃었어요!", a:"절대 당황해서 이리저리 돌아다니지 마세요! 그 자리에 멈춰서 [연락처] 탭의 '선생님께 내 위치 보내기(또는 전화)'를 이용해 바로 연락하세요. 와이파이나 데이터가 안 터진다면 가까운 편의점 직원이나 '코반(KOBAN, 파출소)'에 가서 선생님 전화번호나 호텔 이름이 적힌 화면을 보여주세요." },
+  { q:"🚨 여권을 잃어버렸어요!", a:"여권이 없으면 한국으로 돌아가는 비행기를 탈 수 없습니다. 잃어버린 것을 안 즉시 혼자 찾으려 하지 말고 <strong>무조건 담임 선생님께 제일 먼저</strong> 알리세요. (미리 찍어둔 여권 사본 사진이 있다면 영사관에서 임시 여권을 발급받는 데 큰 도움이 됩니다.)" },
+  { q:"🚨 지진이 났어요! 흔들려요!", a:"당황해서 밖으로 무작정 뛰어나가지 마세요. 1) 가방이나 겉옷으로 <strong>머리를 가장 먼저 보호</strong>하고 2) 튼튼한 탁자 아래나 유리창이 없는 안전한 벽 쪽으로 몸을 숨기세요. 3) 흔들림이 멈추면 선생님이나 현지 안내원(호텔, USJ 직원 등)의 지시에 따라 계단(엘리베이터 금지)으로 대피합니다." },
+  { q:"🚨 몸이 너무 아프거나 다쳤어요.", a:"참지 말고 즉시 주변 친구나 선생님께 알리세요. 현지 약국(드럭스토어)에서 파는 약을 함부로 사 먹지 말고, 반드시 선생님과 상의해야 합니다. 수학여행 단체 보험이 들어있으니 병원비 걱정 말고 아프면 바로 이야기하세요!" },
+  { q:"🚨 지갑이나 스마트폰을 소매치기당하거나 잃어버렸어요.", a:"일본은 분실물을 되찾을 확률이 꽤 높은 편입니다. 잃어버린 것을 깨달은 즉시 선생님께 알리고, 동선이 기억난다면 방문했던 가게나 USJ 분실물 센터, 또는 근처 '코반(파출소)'에 선생님·가이드와 함께 가서 분실 신고를 하세요." }
+];
 
+// 공지 탭 상단 "매너·에티켓 FAQ" 버튼에서 보여주는 목록입니다.
+const MANNER_FAQS = [
   { q:"면세(Tax-Free) 받으려면 뭐가 필요해요?", a:"면세 할인을 받으려면 실물 여권이 꼭 필요해요. 면세로 산 물건은 밀봉된 봉투에 담아주는데, 한국에 도착할 때까지 뜯으면 안 돼요!" },
   { q:"에스컬레이터는 어느 쪽에 서야 해요?", a:"오사카(간사이) 지역에서는 에스컬레이터를 탈 때 오른쪽에 서고 왼쪽을 비워둬요. (한국과 반대!) 급한 사람이 왼쪽으로 지나갈 수 있게 비워두는 문화예요." },
   { q:"편의점·식당에서 계산할 땐 어떻게 해요?", a:"현금이나 카드를 점원 손에 직접 건네지 마세요. 계산대에 놓인 작은 쟁반('코인 트레이')에 올려두면 점원도 그 쟁반을 통해 거스름돈을 돌려줘요." },
@@ -2682,19 +2726,31 @@ updateProgress();
 updateMissionProgress();
 
 /* ---- FAQ 렌더 ---- */
-const faqList = document.getElementById("faqList");
-faqList.innerHTML = FAQS.map(f => `
-  <div class="faq-item">
-    <div class="faq-q"><span>${f.q}</span><span class="plus">${plusIcon}</span></div>
-    <div class="faq-a">${f.a}</div>
-  </div>
-`).join("");
+function renderFaqList(container, items){
+  container.innerHTML = items.map(f => `
+    <div class="faq-item">
+      <div class="faq-q"><span>${f.q}</span><span class="plus">${plusIcon}</span></div>
+      <div class="faq-a">${f.a}</div>
+    </div>
+  `).join("");
+  container.addEventListener("click", (e) => {
+    const q = e.target.closest(".faq-q");
+    if(!q) return;
+    q.closest(".faq-item").classList.toggle("open");
+  });
+}
 
-faqList.addEventListener("click", (e) => {
-  const q = e.target.closest(".faq-q");
-  if(!q) return;
-  q.closest(".faq-item").classList.toggle("open");
-});
+const faqList = document.getElementById("faqList");
+renderFaqList(faqList, FAQS);
+
+const emergencyFaqList = document.getElementById("emergencyFaqList");
+renderFaqList(emergencyFaqList, EMERGENCY_FAQS);
+
+const mannerFaqList = document.getElementById("mannerFaqList");
+renderFaqList(mannerFaqList, MANNER_FAQS);
+
+document.getElementById("openEmergencyFaqBtn").addEventListener("click", () => showPanel("emergency-faq"));
+document.getElementById("openMannerFaqBtn").addEventListener("click", () => showPanel("etiquette-faq"));
 
 /* ---- 서바이벌 일본어 회화 ---- */
 const PHRASES = [
@@ -2800,7 +2856,7 @@ document.querySelectorAll(".more-item").forEach(item => {
 });
 
 document.querySelectorAll("[data-back]").forEach(btn => {
-  btn.addEventListener("click", () => showPanel("more"));
+  btn.addEventListener("click", () => showPanel(btn.dataset.back || "more"));
 });
 
 /* ---- SOS: 카카오톡으로 내 위치 보내기 ---- */
