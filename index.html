@@ -513,6 +513,30 @@
     padding:3px 8px;
     border-radius:999px;
   }
+  .item-guide-btn{
+    flex-shrink:0;
+    font-family:inherit;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--navy);
+    background:var(--paper-dim);
+    border:none;
+    padding:4px 10px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .item-guide-steps{
+    margin:14px 0 0;
+    padding-left:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .item-guide-steps li{
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--ink);
+  }
   .custom-item-remove{
     margin-left:auto;
     flex-shrink:0;
@@ -571,6 +595,36 @@
     font-weight:400;
   }
   .mission-item.checked .mission-desc{color:#8b96a8;}
+  .mission-photo-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:6px;
+  }
+  .mission-photo-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    flex-shrink:0;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--navy);
+    background:var(--paper-dim);
+    border:none;
+    padding:5px 11px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .mission-photo-btn svg{width:13px;height:13px;flex-shrink:0;}
+  .mission-photo-status{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .mission-photo-status.uploading{color:var(--ink-soft);}
+  .mission-photo-status.done{color:var(--coral-deep);font-weight:700;}
+  .mission-photo-status.failed{color:#c0392b;}
 
   /* ===== 연락처 ===== */
   .contact-list{
@@ -759,6 +813,50 @@
     padding:2px 8px;
     border-radius:999px;
   }
+  .urgent-toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(20px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(20px);
+    width:calc(100% - 40px);
+    max-width:440px;
+    background:var(--navy);
+    color:#fff;
+    padding:13px 16px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 10px 28px rgba(15,25,48,0.35);
+    z-index:90;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .urgent-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+    cursor:pointer;
+  }
+  .urgent-toast-icon{
+    flex-shrink:0;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:800;
+  }
+  .urgent-toast-text{
+    font-size:13.5px;
+    font-weight:600;
+    line-height:1.4;
+  }
   .notice-card .notice-title{
     font-size:15px;
     font-weight:700;
@@ -919,13 +1017,55 @@
     border-radius:12px;
     padding:14px 16px;
     margin-bottom:8px;
+    cursor:pointer;
+    user-select:none;
   }
+  .phrase-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .phrase-checkbox{
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    border-radius:6px;
+    border:2px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .phrase-checkbox svg{
+    width:12px;height:12px;
+    opacity:0;
+    transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .phrase-card.checked .phrase-checkbox{background:var(--coral);border-color:var(--coral);}
+  .phrase-card.checked .phrase-checkbox svg{opacity:1;transform:scale(1);stroke:#fff;}
+  .phrase-chevron{
+    width:16px;
+    height:16px;
+    flex-shrink:0;
+    color:var(--ink-soft);
+    transition:transform .2s ease;
+  }
+  .phrase-card.collapsed .phrase-chevron{transform:rotate(-90deg);}
   .phrase-card .phrase-jp{
     font-size:17px;
     font-weight:700;
     color:var(--ink);
-    margin:0 0 3px;
+    margin:0;
+    flex:1;
+    min-width:0;
   }
+  .phrase-body{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--line);
+  }
+  .phrase-card.collapsed .phrase-body{display:none;}
   .phrase-card .phrase-pronounce{
     font-size:13px;
     font-weight:600;
@@ -1209,6 +1349,11 @@
     </button>
   </nav>
 
+  <div class="urgent-toast" id="urgentToast">
+    <span class="urgent-toast-icon">!</span>
+    <span class="urgent-toast-text" id="urgentToastText"></span>
+  </div>
+
   <div class="notice-form-overlay" id="exchangeOverlay">
     <div class="notice-form-card">
       <h3>엔화 계산기</h3>
@@ -1228,6 +1373,16 @@
       <p class="exchange-rate-note">오늘 환율: 100엔 = <span id="rateDisplay">900</span>원 (실시간 자동 조회, 실제 은행 환전 시 수수료가 붙어요)</p>
       <div class="nf-actions">
         <button type="button" id="closeExchangeBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-form-overlay" id="itemGuideOverlay">
+    <div class="notice-form-card">
+      <h3 id="itemGuideTitle">안내</h3>
+      <ol class="item-guide-steps" id="itemGuideSteps"></ol>
+      <div class="nf-actions">
+        <button type="button" id="closeItemGuideBtn">닫기</button>
       </div>
     </div>
   </div>
@@ -1483,23 +1638,35 @@ const SCHEDULE = {
 };
 
 // 준비물 체크리스트 (그룹명: [항목, 항목, ...])
-// 준비물 체크리스트 (그룹명: [{ text, essential }])
+// 준비물 체크리스트 (그룹명: [{ text, essential, guide }])
 // essential:true인 항목은 학생 화면에 "필수" 표시가 뜨고,
 // 선생님용 "학생현황"에는 이 항목들만 따로 빠졌는지 표시됩니다.
+// guide가 있으면 항목 옆에 작은 "안내" 버튼이 붙고, 누르면 ITEM_GUIDES의 안내문이 떠요.
 const CHECKLIST = {
   "필수 품목": [
     { text:"여권", essential:true },
-    { text:"티웨이앱 설치 → 모바일 항공권 발급", essential:true },
-    { text:"운동화 (슬리퍼 X)", essential:true }
-  ],
-  "세면/위생용품": [
-    { text:"칫솔·치약", essential:false },
-    { text:"자외선 차단제", essential:false }
+    { text:"모바일 항공권", essential:true, guide:"mobile-ticket" },
+    { text:"운동화 (슬리퍼 X)", essential:true },
+    { text:"개념", essential:true }
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
     { text:"110V 어댑터(돼지코)", essential:false }
   ]
+};
+
+// 위 CHECKLIST의 guide 키와 짝지어지는 안내 팝업 내용입니다.
+const ITEM_GUIDES = {
+  "mobile-ticket": {
+    title: "모바일 항공권 발급 안내",
+    steps: [
+      "앱스토어·플레이스토어에서 '티웨이항공' 앱(티웨이앱)을 설치해요.",
+      "회원가입 또는 로그인 후 '나의 예약'에서 이번 수학여행 항공편을 확인해요.",
+      "예약 상세 화면에서 '모바일 탑승권(모바일 체크인)'을 눌러 발급받아요.",
+      "발급된 모바일 탑승권 화면을 캡처하거나 저장해두면 공항에서 바로 보여줄 수 있어요.",
+      "출발 전날까지 발급이 안 되면 선생님께 꼭 알려주세요."
+    ]
+  }
 };
 
 // 비상 연락망 (역할, 이름, 전화번호)
@@ -1764,6 +1931,33 @@ document.getElementById("fxSwapBtn").addEventListener("click", () => {
 /* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
 const noticeList = document.getElementById("noticeList");
 
+// 새로운 긴급 공지가 올라오면 화면 아래에 잠깐 스낵바(토스트)로 알려줍니다.
+// (이미 한 번 봤던 긴급 공지는 이 기기에서 다시 뜨지 않아요.)
+const URGENT_TOAST_SEEN_KEY = "suhak_urgent_toast_seen";
+const urgentToastEl = document.getElementById("urgentToast");
+const urgentToastTextEl = document.getElementById("urgentToastText");
+let urgentToastTimer = null;
+
+function showUrgentToast(title){
+  urgentToastTextEl.textContent = "긴급 공지: " + title;
+  urgentToastEl.classList.add("show");
+  clearTimeout(urgentToastTimer);
+  urgentToastTimer = setTimeout(() => urgentToastEl.classList.remove("show"), 4500);
+}
+urgentToastEl.addEventListener("click", () => {
+  clearTimeout(urgentToastTimer);
+  urgentToastEl.classList.remove("show");
+});
+
+function maybeShowUrgentToast(list){
+  const urgent = list.find(n => n.important);
+  if(!urgent) return;
+  const key = urgent.time + "|" + urgent.title;
+  if(localStorage.getItem(URGENT_TOAST_SEEN_KEY) === key) return;
+  localStorage.setItem(URGENT_TOAST_SEEN_KEY, key);
+  showUrgentToast(urgent.title);
+}
+
 function renderNotices(list){
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
@@ -1781,6 +1975,7 @@ function renderNotices(list){
     </div>
   `).join("");
   document.getElementById("noticePing").style.display = list.some(n => n.important) ? "block" : "none";
+  maybeShowUrgentToast(list);
 }
 
 // 구글시트 CSV(콤마 안의 콤마·줄바꿈도 처리하는 간단 파서)
@@ -2140,6 +2335,7 @@ function renderChecklist(){
       <div class="check-item" data-essential="${item.essential ? "true" : "false"}">
         <span class="box">${checkIcon}</span>
         <span class="text">${item.text}</span>
+        ${item.guide ? `<button type="button" class="item-guide-btn" data-guide-key="${item.guide}">안내</button>` : ""}
         ${item.essential ? '<span class="essential-badge">필수</span>' : ""}
       </div>
     `).join("")}
@@ -2211,11 +2407,28 @@ function updateProgress(){
 
 groupsEl.addEventListener("click", (e) => {
   if(e.target.closest(".custom-item-remove")) return;
+  const guideBtn = e.target.closest(".item-guide-btn");
+  if(guideBtn){
+    e.stopPropagation();
+    openItemGuide(guideBtn.dataset.guideKey);
+    return;
+  }
   const item = e.target.closest(".check-item");
   if(!item) return;
   item.classList.toggle("checked");
   saveChecklistState();
   updateProgress();
+});
+
+function openItemGuide(key){
+  const guide = ITEM_GUIDES[key];
+  if(!guide) return;
+  document.getElementById("itemGuideTitle").textContent = guide.title;
+  document.getElementById("itemGuideSteps").innerHTML = guide.steps.map(s => `<li>${s}</li>`).join("");
+  document.getElementById("itemGuideOverlay").style.display = "flex";
+}
+document.getElementById("closeItemGuideBtn").addEventListener("click", () => {
+  document.getElementById("itemGuideOverlay").style.display = "none";
 });
 
 /* ---- 연락처 렌더 ---- */
@@ -2266,6 +2479,14 @@ missionList.innerHTML = MISSIONS.map(m => `
     <span class="mission-text">
       <span class="text">${m.title}</span>
       <p class="mission-desc">${m.desc}</p>
+      <div class="mission-photo-row">
+        <label class="mission-photo-btn">
+          <input type="file" accept="image/*" capture="environment" class="mission-photo-input" data-mission="${m.title.replace(/"/g, "&quot;")}" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          사진 올리기
+        </label>
+        <span class="mission-photo-status"></span>
+      </div>
     </span>
   </div>
 `).join("");
@@ -2321,11 +2542,93 @@ function reportProgress(){
 }
 
 missionList.addEventListener("click", (e) => {
+  if(e.target.closest(".mission-photo-btn")) return;
   const item = e.target.closest(".check-item");
   if(!item) return;
   item.classList.toggle("checked");
   saveMissionState();
   updateMissionProgress();
+});
+
+// 사진을 올리면 리사이즈해서(용량 절약) 기존 SCRIPT_URL(Apps Script)로 보내고,
+// 성공하면 구글 드라이브에 미션별 폴더로 자동 정리되고 미션도 자동으로 체크돼요.
+function compressImageFile(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read-failed"));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("decode-failed"));
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality).split(",")[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadMissionPhoto(missionTitle, file, statusEl, itemEl){
+  statusEl.textContent = "업로드 중...";
+  statusEl.className = "mission-photo-status uploading";
+  try {
+    if(!scriptReady()) throw new Error("no-script-url");
+    const base64 = await compressImageFile(file, 1600, 0.72);
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "missionPhoto",
+        name: studentName || "이름 미확인",
+        mission: missionTitle,
+        mimeType: "image/jpeg",
+        data: base64
+      })
+    });
+    const result = await res.json();
+    if(!result || !result.ok) throw new Error((result && result.error) || "upload-failed");
+    statusEl.textContent = "업로드 완료 ✓";
+    statusEl.className = "mission-photo-status done";
+    if(!itemEl.classList.contains("checked")){
+      itemEl.classList.add("checked");
+      saveMissionState();
+      updateMissionProgress();
+    }
+  } catch(err){
+    console.error("미션 사진 업로드 실패:", err);
+    statusEl.textContent = "업로드 실패 (" + describeUploadError(err) + ")";
+    statusEl.className = "mission-photo-status failed";
+  }
+}
+
+// 실패 이유를 화면에서 바로 알아볼 수 있게 원인별 안내 문구로 바꿔줍니다.
+function describeUploadError(err){
+  const msg = (err && err.message) || String(err);
+  if(msg === "no-script-url") return "스크립트 주소가 설정되지 않음";
+  if(msg === "decode-failed" || msg === "read-failed") return "사진 파일을 읽지 못함, 다른 사진으로 시도";
+  if(/Failed to fetch|NetworkError|Load failed/i.test(msg)) return "서버 연결 실패, 배포 권한(모든 사용자)을 확인해주세요";
+  if(/Unexpected token|JSON/i.test(msg)) return "서버 응답 오류, 배포가 최신 버전인지 확인해주세요";
+  return msg;
+}
+
+missionList.querySelectorAll(".mission-photo-input").forEach(input => {
+  input.addEventListener("click", (e) => e.stopPropagation());
+  input.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const item = input.closest(".check-item");
+    const statusEl = item.querySelector(".mission-photo-status");
+    uploadMissionPhoto(input.dataset.mission, file, statusEl, item);
+    input.value = "";
+  });
 });
 
 // 페이지를 새로 열었을 때 복원된 체크 상태로 진행률 표시줄과 학생현황을 한 번 갱신
@@ -2375,16 +2678,50 @@ const PHRASES = [
   ]}
 ];
 
-document.getElementById("phraseList").innerHTML = PHRASES.map(cat => `
+// 회화 카드 암기 체크는 이 기기에만 저장됩니다.
+const PHRASE_CHECK_KEY = "suhak_phrase_checked";
+function loadPhraseChecked(){
+  try { return JSON.parse(localStorage.getItem(PHRASE_CHECK_KEY) || "[]"); } catch(e){ return []; }
+}
+function savePhraseChecked(){
+  localStorage.setItem(PHRASE_CHECK_KEY, JSON.stringify(phraseChecked));
+}
+let phraseChecked = loadPhraseChecked();
+
+const phraseListEl = document.getElementById("phraseList");
+phraseListEl.innerHTML = PHRASES.map(cat => `
   <p class="phrase-category-title">${cat.category}</p>
   ${cat.items.map(p => `
-    <div class="phrase-card">
-      <p class="phrase-jp">${p.jp}</p>
-      <p class="phrase-pronounce">${p.pronounce}</p>
-      <p class="phrase-kr">${p.kr}</p>
+    <div class="phrase-card${phraseChecked.includes(p.jp) ? " checked" : ""}" data-jp="${p.jp.replace(/"/g, "&quot;")}">
+      <div class="phrase-head">
+        <span class="phrase-checkbox">${checkIcon}</span>
+        <p class="phrase-jp">${p.jp}</p>
+        <svg class="phrase-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="phrase-body">
+        <p class="phrase-pronounce">${p.pronounce}</p>
+        <p class="phrase-kr">${p.kr}</p>
+      </div>
     </div>
   `).join("")}
 `).join("");
+
+phraseListEl.addEventListener("click", (e) => {
+  const card = e.target.closest(".phrase-card");
+  if(!card) return;
+  if(e.target.closest(".phrase-checkbox")){
+    card.classList.toggle("checked");
+    const jp = card.dataset.jp;
+    if(card.classList.contains("checked")){
+      if(!phraseChecked.includes(jp)) phraseChecked.push(jp);
+    } else {
+      phraseChecked = phraseChecked.filter(x => x !== jp);
+    }
+    savePhraseChecked();
+    return;
+  }
+  card.classList.toggle("collapsed");
+});
 
 /* ---- 탭 & 서브패널 전환 ---- */
 function showPanel(id){
