@@ -1,0 +1,14 @@
+{
+  "name": "청산고 수학여행 (선생님용)",
+  "short_name": "수학여행 관리",
+  "start_url": "./teacher.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FF5A36",
+  "theme_color": "#FF5A36",
+  "icons": [
+    { "src": "icon-teacher-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-teacher-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-teacher-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
