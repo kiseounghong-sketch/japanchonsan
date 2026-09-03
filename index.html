@@ -781,6 +781,15 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
+  .ac-place .place-map-link{
+    color:inherit;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .ac-place .place-map-link svg{width:13px;height:13px;flex-shrink:0;}
   .ac-delete-btn{
     margin-top:12px;
     background:rgba(255,255,255,0.15);
@@ -2151,9 +2160,14 @@ if(NOTICES_SHEET_CSV_URL){
 let assemblyTarget = null;
 let assemblyCountdownInterval = null;
 
-function showAssembly(place){
+function showAssembly(place, lat, lng){
   document.getElementById("assemblyCard").style.display = "block";
-  document.getElementById("assemblyPlace").textContent = place;
+  const placeEl = document.getElementById("assemblyPlace");
+  if(lat && lng){
+    placeEl.innerHTML = `<a class="place-map-link" href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
+  } else {
+    placeEl.textContent = place;
+  }
   document.getElementById("assemblyTimeLabel").textContent = formatTimeHM(assemblyTarget);
   updateAssemblyCountdown();
   if(assemblyCountdownInterval) clearInterval(assemblyCountdownInterval);
@@ -2197,7 +2211,7 @@ function loadAssembly(){
       const target = new Date(rows[0][0]);
       if(isNaN(target.getTime())){ hideAssembly(); return; }
       assemblyTarget = target;
-      showAssembly(rows[0][1] || "");
+      showAssembly(rows[0][1] || "", rows[0][3], rows[0][4]);
     })
     .catch(() => {});
 }

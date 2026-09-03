@@ -817,6 +817,15 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
+  .ac-place .place-map-link{
+    color:inherit;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .ac-place .place-map-link svg{width:13px;height:13px;flex-shrink:0;}
   .ac-delete-btn{
     margin-top:12px;
     background:rgba(255,255,255,0.15);
@@ -1505,6 +1514,49 @@
   }
   .nf-label{font-size:13px;font-weight:700;color:var(--ink-soft);margin:14px 0 8px;}
   .nf-label:first-of-type{margin-top:0;}
+  .location-capture-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    margin-top:10px;
+    background:var(--paper-dim);
+    color:var(--ink);
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:11px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .location-capture-btn svg{width:16px;height:16px;flex-shrink:0;}
+  .location-capture-status{
+    margin:8px 0 0;
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    min-height:1.2em;
+  }
+  .location-capture-status.ok{color:var(--coral-deep);font-weight:700;}
+  .assembly-location-map{
+    width:100%;
+    height:200px;
+    border-radius:var(--radius);
+    overflow:hidden;
+    border:1.5px solid var(--line);
+    margin-top:10px;
+    position:relative;
+    z-index:0;
+    isolation:isolate;
+  }
+  .location-capture-hint{
+    margin:6px 0 0;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
   .fx-swap-wrap{display:flex;flex-direction:column;}
   .fx-swap-wrap .nf-label{margin:0 0 8px;}
   .fx-swap-btn{
@@ -1755,6 +1807,13 @@
           <input type="datetime-local" id="assemblyTimeInput" class="nf-input">
           <p class="nf-label">집합 장소</p>
           <input type="text" id="assemblyPlaceInput" class="nf-input" placeholder="예: 호텔 로비">
+          <button type="button" id="captureAssemblyLocationBtn" class="location-capture-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            지금 서 있는 위치를 구글지도 링크로 등록
+          </button>
+          <p class="location-capture-status" id="assemblyLocationStatus"></p>
+          <div id="assemblyLocationMap" class="assembly-location-map" style="display:none;"></div>
+          <p class="location-capture-hint" id="assemblyLocationHint" style="display:none;">지도를 누르거나 마커를 드래그해서 위치를 조정할 수 있어요.</p>
           <div class="nf-actions">
             <button type="button" id="cancelAssemblyBtn">취소</button>
             <button type="button" id="assemblySubmitBtn">등록</button>
@@ -2568,9 +2627,14 @@ if(NOTICES_SHEET_CSV_URL){
 let assemblyTarget = null;
 let assemblyCountdownInterval = null;
 
-function showAssembly(place){
+function showAssembly(place, lat, lng){
   document.getElementById("assemblyCard").style.display = "block";
-  document.getElementById("assemblyPlace").textContent = place;
+  const placeEl = document.getElementById("assemblyPlace");
+  if(lat && lng){
+    placeEl.innerHTML = `<a class="place-map-link" href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
+  } else {
+    placeEl.textContent = place;
+  }
   document.getElementById("assemblyTimeLabel").textContent = formatTimeHM(assemblyTarget);
   updateAssemblyCountdown();
   if(assemblyCountdownInterval) clearInterval(assemblyCountdownInterval);
@@ -2614,7 +2678,7 @@ function loadAssembly(){
       const target = new Date(rows[0][0]);
       if(isNaN(target.getTime())){ hideAssembly(); return; }
       assemblyTarget = target;
-      showAssembly(rows[0][1] || "");
+      showAssembly(rows[0][1] || "", rows[0][3], rows[0][4]);
     })
     .catch(() => {});
 }
@@ -2640,12 +2704,64 @@ loadAssembly();
 setInterval(loadAssembly, NOTICES_REFRESH_SECONDS * 1000);
 
 const assemblyOverlay = document.getElementById("assemblyFormOverlay");
+let assemblyLat = null;
+let assemblyLng = null;
+
 document.getElementById("newAssemblyFab").addEventListener("click", () => {
   assemblyOverlay.style.display = "flex";
 });
 document.getElementById("cancelAssemblyBtn").addEventListener("click", () => {
   assemblyOverlay.style.display = "none";
 });
+
+let assemblyLocationMapInstance = null;
+let assemblyLocationMarker = null;
+
+document.getElementById("captureAssemblyLocationBtn").addEventListener("click", () => {
+  const locStatusEl = document.getElementById("assemblyLocationStatus");
+  if(!navigator.geolocation){
+    locStatusEl.textContent = "이 기기는 위치 확인을 지원하지 않아요.";
+    locStatusEl.className = "location-capture-status";
+    return;
+  }
+  locStatusEl.textContent = "위치 확인 중...";
+  locStatusEl.className = "location-capture-status";
+  navigator.geolocation.getCurrentPosition((pos) => {
+    assemblyLat = pos.coords.latitude;
+    assemblyLng = pos.coords.longitude;
+    locStatusEl.textContent = "✓ 위치가 등록됐어요. 필요하면 아래 지도에서 위치를 조정하세요.";
+    locStatusEl.className = "location-capture-status ok";
+    showAssemblyLocationMap(assemblyLat, assemblyLng);
+  }, () => {
+    locStatusEl.textContent = "위치를 가져오지 못했어요. 위치 권한을 확인해주세요.";
+    locStatusEl.className = "location-capture-status";
+  }, { enableHighAccuracy: true, timeout: 8000 });
+});
+
+function showAssemblyLocationMap(lat, lng){
+  document.getElementById("assemblyLocationMap").style.display = "block";
+  document.getElementById("assemblyLocationHint").style.display = "block";
+
+  if(!assemblyLocationMapInstance){
+    assemblyLocationMapInstance = L.map("assemblyLocationMap", { attributionControl: false }).setView([lat, lng], 17);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(assemblyLocationMapInstance);
+    assemblyLocationMarker = L.marker([lat, lng], { draggable: true }).addTo(assemblyLocationMapInstance);
+    assemblyLocationMarker.on("dragend", () => {
+      const pos = assemblyLocationMarker.getLatLng();
+      assemblyLat = pos.lat;
+      assemblyLng = pos.lng;
+    });
+    assemblyLocationMapInstance.on("click", (e) => {
+      assemblyLocationMarker.setLatLng(e.latlng);
+      assemblyLat = e.latlng.lat;
+      assemblyLng = e.latlng.lng;
+    });
+  } else {
+    assemblyLocationMapInstance.setView([lat, lng], 17);
+    assemblyLocationMarker.setLatLng([lat, lng]);
+    setTimeout(() => assemblyLocationMapInstance.invalidateSize(), 100);
+  }
+}
 
 document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
   const t = document.getElementById("assemblyTimeInput").value;
@@ -2668,7 +2784,7 @@ document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
-    body: JSON.stringify({ action: "assembly", targetTime: t, place: place })
+    body: JSON.stringify({ action: "assembly", targetTime: t, place: place, lat: assemblyLat, lng: assemblyLng })
   }).then(() => {
     statusEl.textContent = "등록됐어요! 학생 화면에 곧 반영됩니다.";
     statusEl.className = "ok";
@@ -2677,6 +2793,11 @@ document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
       assemblyOverlay.style.display = "none";
       statusEl.textContent = "";
       document.getElementById("assemblyPlaceInput").value = "";
+      document.getElementById("assemblyLocationStatus").textContent = "";
+      document.getElementById("assemblyLocationMap").style.display = "none";
+      document.getElementById("assemblyLocationHint").style.display = "none";
+      assemblyLat = null;
+      assemblyLng = null;
     }, 900);
   }).catch(() => {
     statusEl.textContent = "등록에 실패했어요. 인터넷 연결을 확인해주세요.";
