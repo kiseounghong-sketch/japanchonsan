@@ -96,7 +96,6 @@
     font-weight:700;
     color:var(--ink-soft);
     margin:0 0 4px;
-    text-align:center;
   }
   .weather-days{
     display:flex;
@@ -119,11 +118,11 @@
     margin:0;
   }
   .weather-day .weather-icon{ color:var(--coral-deep); display:flex; align-items:center; justify-content:center; line-height:0; }
-  .weather-day .weather-icon svg{ width:16.5px; height:16.5px; display:block; overflow:visible; }
+  .weather-day .weather-icon svg{ width:15px; height:15px; display:block; overflow:visible; }
   .weather-day .weather-temp{
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
-    font-size:13.2px;
+    font-size:12px;
     color:var(--ink);
     margin:0;
   }
@@ -172,7 +171,7 @@
     height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
-    padding:16px 20px 24px;
+    padding:16px 20px 100px;
     box-sizing:border-box;
   }
   /* 공지·일정(지도)·준비물 탭은 위쪽을 고정하고 아래 목록만 스크롤되게 함 */
@@ -196,7 +195,7 @@
     min-height:0;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
-    padding-bottom:24px;
+    padding-bottom:100px;
   }
 
   .day-pills{
@@ -1165,11 +1164,17 @@
 
   /* ===== 하단 탭바 ===== */
   .tabbar{
-    flex-shrink:0;
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:0;
+    width:100%;
+    max-width:480px;
     display:flex;
     background:#fff;
-    border-bottom:1.5px solid var(--line);
-    padding:3px 6px;
+    border-top:1.5px solid var(--line);
+    padding:3px 6px calc(3px + env(safe-area-inset-bottom));
+    z-index:50;
   }
   .tab{
     flex:1;
@@ -1376,29 +1381,6 @@
       <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
-
-  <nav class="tabbar">
-    <button class="tab active" data-panel="notice">
-      <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ping" id="noticePing"></span></span>
-      공지
-    </button>
-    <button class="tab" data-panel="schedule">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
-      일정
-    </button>
-    <button class="tab" data-panel="checklist">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-      준비물
-    </button>
-    <button class="tab" data-panel="contacts">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
-      연락처
-    </button>
-    <button class="tab" data-panel="more">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      더보기
-    </button>
-  </nav>
 
   <div class="urgent-toast" id="urgentToast">
     <span class="urgent-toast-icon">!</span>
@@ -1616,6 +1598,29 @@
     </section>
 
   </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-panel="notice">
+      <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ping" id="noticePing"></span></span>
+      공지
+    </button>
+    <button class="tab" data-panel="schedule">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
+      일정
+    </button>
+    <button class="tab" data-panel="checklist">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+      준비물
+    </button>
+    <button class="tab" data-panel="contacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
+      연락처
+    </button>
+    <button class="tab" data-panel="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      더보기
+    </button>
+  </nav>
 
 </div>
 
@@ -2397,8 +2402,7 @@ function requestMyLocation(){
     note.textContent = "";
     updateNextStopAndRoute(currentDayKey);
   }, () => {
-    note.textContent = "위치 권한이 꺼져 있어요. 아래 안내를 참고해 허용한 뒤 새로고침 버튼을 눌러주세요.";
-    showLocationPermissionGuide();
+    note.textContent = "위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용한 뒤 새로고침 버튼을 눌러주세요.";
   }, { enableHighAccuracy: true, timeout: 8000 });
 }
 
@@ -2527,37 +2531,6 @@ function openItemGuide(key){
 document.getElementById("closeItemGuideBtn").addEventListener("click", () => {
   document.getElementById("itemGuideOverlay").style.display = "none";
 });
-
-// 위치 권한이 꺼져 있을 때, 기종(아이폰/안드로이드)에 맞는 켜는 방법을 안내합니다.
-function showLocationPermissionGuide(){
-  const ua = navigator.userAgent;
-  let steps;
-  if(/iPhone|iPad|iPod/.test(ua)){
-    steps = [
-      "아이폰 '설정' 앱을 열어요.",
-      "아래로 내려서 지금 쓰고 있는 브라우저(Safari 또는 Chrome)를 찾아 들어가요.",
-      "'위치'를 눌러 '앱 사용 중 허용'으로 바꿔요.",
-      "그래도 안 되면 설정 → 개인정보 보호 및 보안 → 위치 서비스에서도 켜져 있는지 확인해요.",
-      "이 페이지로 돌아와서 버튼을 다시 눌러요."
-    ];
-  } else if(/Android/.test(ua)){
-    steps = [
-      "주소창 왼쪽의 자물쇠(또는 정보) 아이콘을 눌러요.",
-      "'권한' 또는 '사이트 설정'을 눌러요.",
-      "'위치'를 '허용'으로 바꿔요.",
-      "페이지를 새로고침한 뒤 버튼을 다시 눌러요."
-    ];
-  } else {
-    steps = [
-      "브라우저 주소창 근처의 자물쇠 아이콘을 눌러요.",
-      "위치 권한을 '허용'으로 바꿔요.",
-      "페이지를 새로고침한 뒤 다시 눌러요."
-    ];
-  }
-  document.getElementById("itemGuideTitle").textContent = "위치 권한 켜는 방법";
-  document.getElementById("itemGuideSteps").innerHTML = steps.map(s => `<li>${s}</li>`).join("");
-  document.getElementById("itemGuideOverlay").style.display = "flex";
-}
 
 /* ---- 연락처 렌더 ---- */
 const contactList = document.getElementById("contactList");
@@ -2930,7 +2903,7 @@ document.getElementById("kakaoSosBtn").addEventListener("click", () => {
 
     btn.innerHTML = originalHTML;
   }, () => {
-    showLocationPermissionGuide();
+    alert("위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해주세요.");
     btn.innerHTML = originalHTML;
   }, { enableHighAccuracy: false, timeout: 8000 });
 });
