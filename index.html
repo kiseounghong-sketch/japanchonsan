@@ -96,6 +96,7 @@
     font-weight:700;
     color:var(--ink-soft);
     margin:0 0 4px;
+    text-align:center;
   }
   .weather-days{
     display:flex;
@@ -774,7 +775,7 @@
     margin:0 0 2px;
   }
   .assembly-card .ac-place{
-    font-size:19px;
+    font-size:19.2px;
     font-weight:700;
     margin:0;
     white-space:nowrap;
@@ -790,6 +791,11 @@
     gap:4px;
   }
   .ac-place .place-map-link svg{width:13px;height:13px;flex-shrink:0;}
+  .ac-map-hint{
+    margin:8px 0 0;
+    font-size:10.5px;
+    color:rgba(255,255,255,0.5);
+  }
   .ac-delete-btn{
     margin-top:12px;
     background:rgba(255,255,255,0.15);
@@ -808,7 +814,7 @@
   }
   .assembly-card.urgent .ac-countdown{ color:#fff; }
   .assembly-card.overdue{ background:#7a1f1f; }
-  .assembly-card.overdue .ac-countdown{ font-size:26px; color:#fff; }
+  .assembly-card.overdue .ac-countdown{ font-size:23px; color:#fff; }
   @keyframes assemblyPulse{
     0%,100%{ box-shadow:0 0 0 0 rgba(255,90,54,0.55); }
     50%{ box-shadow:0 0 0 12px rgba(255,90,54,0); }
@@ -1483,6 +1489,7 @@
             <p class="ac-place" id="assemblyPlace">-</p>
           </div>
         </div>
+        <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
       </div>
       <div class="scroll-area">
         <div id="noticeList"></div>
@@ -2163,10 +2170,14 @@ let assemblyCountdownInterval = null;
 function showAssembly(place, lat, lng){
   document.getElementById("assemblyCard").style.display = "block";
   const placeEl = document.getElementById("assemblyPlace");
-  if(lat && lng){
-    placeEl.innerHTML = `<a class="place-map-link" href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
+  if(place){
+    // 좌표가 있으면 좌표로, 없으면 장소 이름으로 목적지를 잡아서
+    // 항상 "도보 길찾기"가 바로 시작되는 구글 지도 링크를 만들어줍니다.
+    const destination = (lat && lng) ? `${lat},${lng}` : encodeURIComponent(place);
+    const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking`;
+    placeEl.innerHTML = `<a class="place-map-link" href="${mapUrl}" target="_blank" rel="noopener">${place}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`;
   } else {
-    placeEl.textContent = place;
+    placeEl.textContent = "-";
   }
   document.getElementById("assemblyTimeLabel").textContent = formatTimeHM(assemblyTarget);
   updateAssemblyCountdown();
@@ -2353,17 +2364,43 @@ const myLocationIcon = L.divIcon({
   iconAnchor: [9,9]
 });
 
-function stopIcon(num){
+function stopIcon(content, isEmoji){
+  const fontSize = isEmoji ? "13px" : "12px";
   return L.divIcon({
     className: "",
-    html: '<div style="background:#1B2A4A;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">' + num + '</div>',
+    html: '<div style="background:#1B2A4A;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:' + fontSize + ';font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">' + content + '</div>',
     iconSize: [26,26],
     iconAnchor: [13,13]
   });
 }
 
+// 학교·공항·호텔처럼 여러 일정이 같은 자리에 겹치는 곳은 숫자 대신
+// 알아보기 쉬운 이모티콘으로 표시하고, 나머지 주요 일정만 순서대로 번호를 매깁니다.
+const CATEGORY_EMOJI = { school: "🏫", airport: "✈️", hotel: "🏨" };
+function stopCategory(place){
+  if(place === "청산고등학교") return "school";
+  if(place.includes("공항")) return "airport";
+  if(place.includes("호텔")) return "hotel";
+  return null;
+}
+
+// 같은 좌표에 일정이 여러 개 겹치면 마커는 하나만 만들고(맨 처음 것을 대표로),
+// 그 자리에 있었던 일정 이름은 모아서 팝업에 같이 보여줍니다.
 function stopsWithCoords(dayKey){
-  return SCHEDULE[dayKey].items.filter(it => it[3] != null && it[4] != null);
+  const seen = new Set();
+  const result = [];
+  SCHEDULE[dayKey].items.forEach(it => {
+    if(it[3] == null || it[4] == null) return;
+    const key = it[3] + "," + it[4];
+    if(seen.has(key)) return;
+    seen.add(key);
+    result.push(it);
+  });
+  return result;
+}
+
+function stopsAtSameCoord(dayKey, lat, lng){
+  return SCHEDULE[dayKey].items.filter(it => it[3] === lat && it[4] === lng).map(it => it[1]);
 }
 
 function initMap(){
@@ -2396,10 +2433,21 @@ function renderMapForDay(dayKey){
   note.textContent = "";
 
   const path = stops.map(it => [it[3], it[4]]);
+  let seq = 0;
   stops.forEach((it, i) => {
-    const marker = L.marker(path[i], { icon: stopIcon(i+1) })
-      .addTo(leafletMap)
-      .bindPopup((i+1) + ". " + it[1]);
+    const emoji = CATEGORY_EMOJI[stopCategory(it[2])];
+    const label = stopsAtSameCoord(dayKey, it[3], it[4]).join(" · ");
+    let marker;
+    if(emoji){
+      marker = L.marker(path[i], { icon: stopIcon(emoji, true) })
+        .addTo(leafletMap)
+        .bindPopup(label);
+    } else {
+      seq++;
+      marker = L.marker(path[i], { icon: stopIcon(seq, false) })
+        .addTo(leafletMap)
+        .bindPopup(seq + ". " + label);
+    }
     stopMarkers.push(marker);
   });
 
