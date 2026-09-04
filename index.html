@@ -395,10 +395,30 @@
     border-color:var(--coral);
     background:rgba(255,90,54,0.06);
   }
+  .findway-item .fw-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .findway-item .fw-marker{
+    flex-shrink:0;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11.5px;
+    font-weight:700;
+  }
   .findway-item .fw-info{
     display:flex;
     flex-direction:column;
     gap:2px;
+    min-width:0;
   }
   .findway-item .fw-time{
     font-size:12px;
@@ -905,6 +925,20 @@
     color:var(--ink-soft);
     margin:0;
     line-height:1.5;
+  }
+  .notice-card .notice-link{
+    color:var(--coral-deep);
+    font-weight:700;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    word-break:break-all;
+  }
+  .notice-card .notice-photo{
+    display:block;
+    max-width:100%;
+    border-radius:12px;
+    margin-top:8px;
+    border:1.5px solid var(--line);
   }
 
   /* ===== 더보기 목록 ===== */
@@ -2091,6 +2125,27 @@ function maybeShowUrgentToast(list){
   showUrgentToast(urgent.title);
 }
 
+// 공지 제목·내용 안에 있는 인터넷 주소를 자동으로 눌러지는 링크로 바꿔줍니다.
+// (문장 끝의 마침표·쉼표·괄호 등은 링크에서 제외합니다)
+// 사진 링크(드라이브에 올린 공지 사진 등)라면 링크 대신 사진 자체를 보여줍니다.
+function isImageUrl(url){
+  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || /drive\.google\.com\/uc\?/.test(url) || /googleusercontent\.com/.test(url);
+}
+function linkify(text){
+  if(!text) return text;
+  return text.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/g, (match) => {
+    const trailing = match.match(/[),.!?，。]+$/);
+    const clean = trailing ? match.slice(0, -trailing[0].length) : match;
+    const suffix = trailing ? trailing[0] : "";
+    if(!clean) return match;
+    const href = clean.startsWith("http") ? clean : "https://" + clean;
+    if(isImageUrl(href)){
+      return `<a href="${href}" target="_blank" rel="noopener"><img src="${href}" class="notice-photo" loading="lazy" alt="공지 첨부 사진"></a>${suffix}`;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener" class="notice-link">${clean}</a>${suffix}`;
+  });
+}
+
 function renderNotices(list){
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
@@ -2103,8 +2158,8 @@ function renderNotices(list){
         <span class="notice-time">${n.time}</span>
         ${n.important ? '<span class="notice-chip">긴급</span>' : ""}
       </div>
-      <p class="notice-title">${n.title}</p>
-      <p class="notice-body">${n.body}</p>
+      <p class="notice-title">${linkify(n.title)}</p>
+      <p class="notice-body">${linkify(n.body)}</p>
     </div>
   `).join("");
   document.getElementById("noticePing").style.display = list.some(n => n.important) ? "block" : "none";
@@ -2295,6 +2350,42 @@ function mapsUrl(place, lat, lng){
   return "https://www.google.com/maps/dir/?api=1&destination=" + dest;
 }
 
+// 학교·공항·호텔처럼 여러 일정이 같은 자리에 겹치는 곳과, 이동·식사 일정은
+// 숫자 대신 알아보기 쉬운 이모티콘으로 표시하고, 나머지 주요 일정만 순서대로
+// 번호를 매깁니다. (지도 마커와 아래 목록이 항상 같은 이모티콘을 쓰도록 이 로직 하나만 씁니다.)
+const CATEGORY_EMOJI = { school: "🏫", airport: "✈️", hotel: "🏨", transit: "🚌", meal: "🍴" };
+function stopCategory(name, place){
+  if(place === "청산고등학교") return "school";
+  if(place.includes("공항")) return "airport";
+  if(place.includes("호텔")) return "hotel";
+  if(name.includes("이동")) return "transit";
+  if(name.startsWith("중식") || name.startsWith("조식") || name.startsWith("석식")) return "meal";
+  return null;
+}
+
+// 하루 일정 items 배열과 같은 길이로, 각 항목이 지도(또는 목록)에서 어떤 번호나
+// 이모티콘으로 표시되는지 돌려줍니다. 이모티콘 대상은 좌표가 없어도(자유식처럼
+// 특정 장소가 없는 일정도) 항상 표시되고, 번호는 좌표가 있는 주요 일정에만 붙습니다.
+function getStopMarkerLabels(dayKey){
+  const items = SCHEDULE[dayKey].items;
+  const coordToNumber = new Map();
+  let seq = 0;
+  items.forEach(it => {
+    if(it[3] == null || it[4] == null) return;
+    if(stopCategory(it[1], it[2])) return;
+    const key = it[3] + "," + it[4];
+    if(coordToNumber.has(key)) return;
+    seq++;
+    coordToNumber.set(key, String(seq));
+  });
+  return items.map(it => {
+    const emoji = CATEGORY_EMOJI[stopCategory(it[1], it[2])];
+    if(emoji) return emoji;
+    if(it[3] == null || it[4] == null) return null;
+    return coordToNumber.get(it[3] + "," + it[4]) || null;
+  });
+}
+
 function findNextStop(dayKey){
   const items = SCHEDULE[dayKey].items;
   const now = new Date();
@@ -2308,15 +2399,19 @@ function findNextStop(dayKey){
 
 function renderFindway(dayKey){
   const items = SCHEDULE[dayKey].items;
+  const labels = getStopMarkerLabels(dayKey);
   const next = findNextStop(dayKey);
   document.getElementById("nextStopName").textContent = next[1];
   document.getElementById("nextStopGoBtn").href = mapsUrl(next[2], next[3], next[4]);
 
-  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng]) => `
+  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng], i) => `
     <div class="findway-item" data-lat="${lat != null ? lat : ""}" data-lng="${lng != null ? lng : ""}">
-      <span class="fw-info">
-        <span class="fw-time">${time}</span>
-        <span class="fw-name">${name}</span>
+      <span class="fw-left">
+        ${labels[i] ? `<span class="fw-marker">${labels[i]}</span>` : ""}
+        <span class="fw-info">
+          <span class="fw-time">${time}</span>
+          <span class="fw-name">${name}</span>
+        </span>
       </span>
       <a class="fw-btn" href="${mapsUrl(place, lat, lng)}" target="_blank" rel="noopener">${pinIcon}길찾기</a>
     </div>
@@ -2374,16 +2469,6 @@ function stopIcon(content, isEmoji){
   });
 }
 
-// 학교·공항·호텔처럼 여러 일정이 같은 자리에 겹치는 곳은 숫자 대신
-// 알아보기 쉬운 이모티콘으로 표시하고, 나머지 주요 일정만 순서대로 번호를 매깁니다.
-const CATEGORY_EMOJI = { school: "🏫", airport: "✈️", hotel: "🏨" };
-function stopCategory(place){
-  if(place === "청산고등학교") return "school";
-  if(place.includes("공항")) return "airport";
-  if(place.includes("호텔")) return "hotel";
-  return null;
-}
-
 // 같은 좌표에 일정이 여러 개 겹치면 마커는 하나만 만들고(맨 처음 것을 대표로),
 // 그 자리에 있었던 일정 이름은 모아서 팝업에 같이 보여줍니다.
 function stopsWithCoords(dayKey){
@@ -2435,7 +2520,7 @@ function renderMapForDay(dayKey){
   const path = stops.map(it => [it[3], it[4]]);
   let seq = 0;
   stops.forEach((it, i) => {
-    const emoji = CATEGORY_EMOJI[stopCategory(it[2])];
+    const emoji = CATEGORY_EMOJI[stopCategory(it[1], it[2])];
     const label = stopsAtSameCoord(dayKey, it[3], it[4]).join(" · ");
     let marker;
     if(emoji){

@@ -431,10 +431,30 @@
     border-color:var(--coral);
     background:rgba(255,90,54,0.06);
   }
+  .findway-item .fw-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .findway-item .fw-marker{
+    flex-shrink:0;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11.5px;
+    font-weight:700;
+  }
   .findway-item .fw-info{
     display:flex;
     flex-direction:column;
     gap:2px;
+    min-width:0;
   }
   .findway-item .fw-time{
     font-size:12px;
@@ -910,6 +930,20 @@
     color:var(--ink-soft);
     margin:0;
     line-height:1.5;
+  }
+  .notice-card .notice-link{
+    color:var(--coral-deep);
+    font-weight:700;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    word-break:break-all;
+  }
+  .notice-card .notice-photo{
+    display:block;
+    max-width:100%;
+    border-radius:12px;
+    margin-top:8px;
+    border:1.5px solid var(--line);
   }
 
   /* ===== 더보기 목록 ===== */
@@ -1604,6 +1638,57 @@
     background:#fff;
   }
   .nf-textarea{min-height:110px;resize:vertical;line-height:1.5;}
+  .notice-photo-attach{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .notice-photo-attach-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    flex-shrink:0;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--navy);
+    background:var(--paper-dim);
+    border:none;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .notice-photo-attach-status{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .notice-photo-attach-status.done{color:var(--coral-deep);font-weight:700;}
+  .notice-photo-attach-status.failed{color:#c0392b;}
+  .notice-photo-preview-wrap{
+    margin-top:10px;
+    position:relative;
+    display:inline-block;
+  }
+  .notice-photo-preview-wrap img{
+    max-width:140px;
+    max-height:140px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    display:block;
+  }
+  #noticePhotoRemoveBtn{
+    margin-top:6px;
+    display:block;
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--coral-deep);
+    cursor:pointer;
+    padding:0;
+  }
   .nf-actions{display:flex;gap:10px;margin-top:18px;}
   .nf-actions button{flex:1;padding:13px 0;border-radius:999px;font-family:inherit;font-size:14.5px;font-weight:700;border:none;cursor:pointer;}
   #cancelNoticeBtn{background:var(--paper-dim);color:var(--ink);}
@@ -1840,6 +1925,18 @@
           <input type="text" class="nf-input" id="noticeTitleInput" placeholder="예: 출발 10분 지연 안내">
           <p class="nf-label">내용</p>
           <textarea class="nf-textarea" id="noticeBodyInput" placeholder="학생들에게 전달할 내용을 적어주세요."></textarea>
+          <p class="nf-label">사진 (선택)</p>
+          <div class="notice-photo-attach">
+            <label class="notice-photo-attach-btn">
+              <input type="file" accept="image/*" id="noticePhotoInput" hidden>
+              📷 사진 선택
+            </label>
+            <span class="notice-photo-attach-status" id="noticePhotoStatus"></span>
+          </div>
+          <div class="notice-photo-preview-wrap" id="noticePhotoPreviewWrap" style="display:none;">
+            <img id="noticePhotoPreview" alt="첨부한 사진 미리보기">
+            <button type="button" id="noticePhotoRemoveBtn">✕ 사진 제거</button>
+          </div>
           <div class="nf-actions">
             <button type="button" id="cancelNoticeBtn">취소</button>
             <button type="button" id="submitNoticeBtn">등록</button>
@@ -2524,6 +2621,27 @@ document.getElementById("fxSwapBtn").addEventListener("click", () => {
 /* ---- 공지사항 렌더 (구글시트 연동 시 주기적으로 새로고침) ---- */
 const noticeList = document.getElementById("noticeList");
 
+// 공지 제목·내용 안에 있는 인터넷 주소를 자동으로 눌러지는 링크로 바꿔줍니다.
+// (문장 끝의 마침표·쉼표·괄호 등은 링크에서 제외합니다)
+// 사진 링크(드라이브에 올린 공지 사진 등)라면 링크 대신 사진 자체를 보여줍니다.
+function isImageUrl(url){
+  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || /drive\.google\.com\/uc\?/.test(url) || /googleusercontent\.com/.test(url);
+}
+function linkify(text){
+  if(!text) return text;
+  return text.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/g, (match) => {
+    const trailing = match.match(/[),.!?，。]+$/);
+    const clean = trailing ? match.slice(0, -trailing[0].length) : match;
+    const suffix = trailing ? trailing[0] : "";
+    if(!clean) return match;
+    const href = clean.startsWith("http") ? clean : "https://" + clean;
+    if(isImageUrl(href)){
+      return `<a href="${href}" target="_blank" rel="noopener"><img src="${href}" class="notice-photo" loading="lazy" alt="공지 첨부 사진"></a>${suffix}`;
+    }
+    return `<a href="${href}" target="_blank" rel="noopener" class="notice-link">${clean}</a>${suffix}`;
+  });
+}
+
 function renderNotices(list){
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
@@ -2537,8 +2655,8 @@ function renderNotices(list){
         ${n.important ? '<span class="notice-chip">긴급</span>' : ""}
         ${n.row ? `<button class="notice-delete-btn" data-row="${n.row}" title="삭제">${trashIcon}</button>` : ""}
       </div>
-      <p class="notice-title">${n.title}</p>
-      <p class="notice-body">${n.body}</p>
+      <p class="notice-title">${linkify(n.title)}</p>
+      <p class="notice-body">${linkify(n.body)}</p>
     </div>
   `).join("");
   document.getElementById("noticePing").style.display = list.some(n => n.important) ? "block" : "none";
@@ -2829,7 +2947,10 @@ const submitNoticeBtn = document.getElementById("submitNoticeBtn");
 const noticeStatusMsg = document.getElementById("noticeStatusMsg");
 
 fab.addEventListener("click", () => { noticeOverlay.style.display = "flex"; });
-cancelNoticeBtn.addEventListener("click", () => { noticeOverlay.style.display = "none"; });
+cancelNoticeBtn.addEventListener("click", () => {
+  noticeOverlay.style.display = "none";
+  resetNoticePhoto();
+});
 
 urgencyToggle.addEventListener("click", (e) => {
   const btn = e.target.closest("button");
@@ -2839,9 +2960,54 @@ urgencyToggle.addEventListener("click", (e) => {
   noticeImportant = btn.dataset.val === "true";
 });
 
+// ---- 공지 사진 첨부 (선택) ----
+// 사진을 고르면 바로 업로드해서 드라이브 링크를 받아두고,
+// "등록"을 누를 때 그 링크를 공지 내용 맨 아래에 자동으로 붙여줍니다.
+let noticePhotoUrl = null;
+const noticePhotoInput = document.getElementById("noticePhotoInput");
+const noticePhotoStatus = document.getElementById("noticePhotoStatus");
+const noticePhotoPreviewWrap = document.getElementById("noticePhotoPreviewWrap");
+const noticePhotoPreview = document.getElementById("noticePhotoPreview");
+
+function resetNoticePhoto(){
+  noticePhotoUrl = null;
+  noticePhotoInput.value = "";
+  noticePhotoStatus.textContent = "";
+  noticePhotoStatus.className = "notice-photo-attach-status";
+  noticePhotoPreviewWrap.style.display = "none";
+  noticePhotoPreview.src = "";
+}
+
+noticePhotoInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  noticePhotoStatus.textContent = "업로드 중...";
+  noticePhotoStatus.className = "notice-photo-attach-status";
+  try {
+    if(!hasScriptUrl()) throw new Error("no-script-url");
+    const base64 = await compressImageFile(file, 1600, 0.72);
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "noticePhoto", mimeType: "image/jpeg", data: base64 })
+    });
+    const result = await res.json();
+    if(!result || !result.ok) throw new Error((result && result.error) || "upload-failed");
+    noticePhotoUrl = result.url;
+    noticePhotoStatus.textContent = "업로드 완료 ✓";
+    noticePhotoStatus.className = "notice-photo-attach-status done";
+    noticePhotoPreview.src = "data:image/jpeg;base64," + base64;
+    noticePhotoPreviewWrap.style.display = "block";
+  } catch(err){
+    noticePhotoStatus.textContent = "업로드 실패 (" + describeUploadError(err) + ")";
+    noticePhotoStatus.className = "notice-photo-attach-status failed";
+  }
+});
+
+document.getElementById("noticePhotoRemoveBtn").addEventListener("click", resetNoticePhoto);
+
 submitNoticeBtn.addEventListener("click", () => {
   const title = document.getElementById("noticeTitleInput").value.trim();
-  const body = document.getElementById("noticeBodyInput").value.trim();
+  let body = document.getElementById("noticeBodyInput").value.trim();
 
   if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
     noticeStatusMsg.textContent = "코드 상단 SCRIPT_URL을 먼저 채워주세요.";
@@ -2852,6 +3018,10 @@ submitNoticeBtn.addEventListener("click", () => {
     noticeStatusMsg.textContent = "제목을 입력해주세요.";
     noticeStatusMsg.className = "";
     return;
+  }
+
+  if(noticePhotoUrl){
+    body = body ? (body + "\n" + noticePhotoUrl) : noticePhotoUrl;
   }
 
   submitNoticeBtn.disabled = true;
@@ -2867,6 +3037,7 @@ submitNoticeBtn.addEventListener("click", () => {
     noticeStatusMsg.className = "ok";
     document.getElementById("noticeTitleInput").value = "";
     document.getElementById("noticeBodyInput").value = "";
+    resetNoticePhoto();
     urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
     urgencyToggle.querySelector('[data-val="false"]').classList.add("active");
     noticeImportant = false;
@@ -2945,6 +3116,42 @@ function mapsUrl(place, lat, lng){
   return "https://www.google.com/maps/dir/?api=1&destination=" + dest;
 }
 
+// 학교·공항·호텔처럼 여러 일정이 같은 자리에 겹치는 곳과, 이동·식사 일정은
+// 숫자 대신 알아보기 쉬운 이모티콘으로 표시하고, 나머지 주요 일정만 순서대로
+// 번호를 매깁니다. (지도 마커와 아래 목록이 항상 같은 이모티콘을 쓰도록 이 로직 하나만 씁니다.)
+const CATEGORY_EMOJI = { school: "🏫", airport: "✈️", hotel: "🏨", transit: "🚌", meal: "🍴" };
+function stopCategory(name, place){
+  if(place === "청산고등학교") return "school";
+  if(place.includes("공항")) return "airport";
+  if(place.includes("호텔")) return "hotel";
+  if(name.includes("이동")) return "transit";
+  if(name.startsWith("중식") || name.startsWith("조식") || name.startsWith("석식")) return "meal";
+  return null;
+}
+
+// 하루 일정 items 배열과 같은 길이로, 각 항목이 지도(또는 목록)에서 어떤 번호나
+// 이모티콘으로 표시되는지 돌려줍니다. 이모티콘 대상은 좌표가 없어도(자유식처럼
+// 특정 장소가 없는 일정도) 항상 표시되고, 번호는 좌표가 있는 주요 일정에만 붙습니다.
+function getStopMarkerLabels(dayKey){
+  const items = SCHEDULE[dayKey].items;
+  const coordToNumber = new Map();
+  let seq = 0;
+  items.forEach(it => {
+    if(it[3] == null || it[4] == null) return;
+    if(stopCategory(it[1], it[2])) return;
+    const key = it[3] + "," + it[4];
+    if(coordToNumber.has(key)) return;
+    seq++;
+    coordToNumber.set(key, String(seq));
+  });
+  return items.map(it => {
+    const emoji = CATEGORY_EMOJI[stopCategory(it[1], it[2])];
+    if(emoji) return emoji;
+    if(it[3] == null || it[4] == null) return null;
+    return coordToNumber.get(it[3] + "," + it[4]) || null;
+  });
+}
+
 function findNextStop(dayKey){
   const items = SCHEDULE[dayKey].items;
   const now = new Date();
@@ -2958,15 +3165,19 @@ function findNextStop(dayKey){
 
 function renderFindway(dayKey){
   const items = SCHEDULE[dayKey].items;
+  const labels = getStopMarkerLabels(dayKey);
   const next = findNextStop(dayKey);
   document.getElementById("nextStopName").textContent = next[1];
   document.getElementById("nextStopGoBtn").href = mapsUrl(next[2], next[3], next[4]);
 
-  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng]) => `
+  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng], i) => `
     <div class="findway-item" data-lat="${lat != null ? lat : ""}" data-lng="${lng != null ? lng : ""}">
-      <span class="fw-info">
-        <span class="fw-time">${time}</span>
-        <span class="fw-name">${name}</span>
+      <span class="fw-left">
+        ${labels[i] ? `<span class="fw-marker">${labels[i]}</span>` : ""}
+        <span class="fw-info">
+          <span class="fw-time">${time}</span>
+          <span class="fw-name">${name}</span>
+        </span>
       </span>
       <a class="fw-btn" href="${mapsUrl(place, lat, lng)}" target="_blank" rel="noopener">${pinIcon}길찾기</a>
     </div>
@@ -3024,16 +3235,6 @@ function stopIcon(content, isEmoji){
   });
 }
 
-// 학교·공항·호텔처럼 여러 일정이 같은 자리에 겹치는 곳은 숫자 대신
-// 알아보기 쉬운 이모티콘으로 표시하고, 나머지 주요 일정만 순서대로 번호를 매깁니다.
-const CATEGORY_EMOJI = { school: "🏫", airport: "✈️", hotel: "🏨" };
-function stopCategory(place){
-  if(place === "청산고등학교") return "school";
-  if(place.includes("공항")) return "airport";
-  if(place.includes("호텔")) return "hotel";
-  return null;
-}
-
 // 같은 좌표에 일정이 여러 개 겹치면 마커는 하나만 만들고(맨 처음 것을 대표로),
 // 그 자리에 있었던 일정 이름은 모아서 팝업에 같이 보여줍니다.
 function stopsWithCoords(dayKey){
@@ -3085,7 +3286,7 @@ function renderMapForDay(dayKey){
   const path = stops.map(it => [it[3], it[4]]);
   let seq = 0;
   stops.forEach((it, i) => {
-    const emoji = CATEGORY_EMOJI[stopCategory(it[2])];
+    const emoji = CATEGORY_EMOJI[stopCategory(it[1], it[2])];
     const label = stopsAtSameCoord(dayKey, it[3], it[4]).join(" · ");
     let marker;
     if(emoji){
