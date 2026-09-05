@@ -944,6 +944,25 @@
     border-radius:12px;
     margin-top:8px;
     border:1.5px solid var(--line);
+    cursor:pointer;
+  }
+  .photo-lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(10,14,26,0.92);
+    z-index:120;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+    cursor:zoom-out;
+  }
+  .photo-lightbox.show{display:flex;}
+  .photo-lightbox img{
+    max-width:100%;
+    max-height:100%;
+    border-radius:10px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
   }
 
   /* ===== 더보기 목록 ===== */
@@ -1829,6 +1848,10 @@
     </div>
   </div>
 
+  <div class="photo-lightbox" id="photoLightbox">
+    <img id="photoLightboxImg" alt="확대된 사진">
+  </div>
+
   <div class="notice-form-overlay" id="locationGuideOverlay">
     <div class="notice-form-card">
       <h3>위치 권한이 필요해요</h3>
@@ -2623,9 +2646,10 @@ const noticeList = document.getElementById("noticeList");
 
 // 공지 제목·내용 안에 있는 인터넷 주소를 자동으로 눌러지는 링크로 바꿔줍니다.
 // (문장 끝의 마침표·쉼표·괄호 등은 링크에서 제외합니다)
-// 사진 링크(드라이브에 올린 공지 사진 등)라면 링크 대신 사진 자체를 보여줍니다.
+// 사진 링크(드라이브에 올린 공지 사진 등)라면 링크 대신 사진 자체를 보여주고,
+// 누르면 크게 볼 수 있게 합니다(아래 photoLightbox 참고).
 function isImageUrl(url){
-  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || /drive\.google\.com\/uc\?/.test(url) || /googleusercontent\.com/.test(url);
+  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || /drive\.google\.com\/(uc|thumbnail)\?/.test(url) || /googleusercontent\.com/.test(url);
 }
 function linkify(text){
   if(!text) return text;
@@ -2636,11 +2660,27 @@ function linkify(text){
     if(!clean) return match;
     const href = clean.startsWith("http") ? clean : "https://" + clean;
     if(isImageUrl(href)){
-      return `<a href="${href}" target="_blank" rel="noopener"><img src="${href}" class="notice-photo" loading="lazy" alt="공지 첨부 사진"></a>${suffix}`;
+      return `<img src="${href}" class="notice-photo" loading="lazy" alt="공지 첨부 사진 (눌러서 크게 보기)">${suffix}`;
     }
     return `<a href="${href}" target="_blank" rel="noopener" class="notice-link">${clean}</a>${suffix}`;
   });
 }
+
+// 공지 사진을 누르면 화면 전체 크기로 크게 보여줍니다.
+const photoLightbox = document.getElementById("photoLightbox");
+const photoLightboxImg = document.getElementById("photoLightboxImg");
+document.addEventListener("click", (e) => {
+  const img = e.target.closest(".notice-photo");
+  if(img){
+    photoLightboxImg.src = img.src;
+    photoLightbox.classList.add("show");
+    return;
+  }
+  if(e.target.closest("#photoLightbox")){
+    photoLightbox.classList.remove("show");
+    photoLightboxImg.src = "";
+  }
+});
 
 function renderNotices(list){
   if(!list.length){
