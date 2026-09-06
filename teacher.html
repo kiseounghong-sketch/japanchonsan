@@ -153,13 +153,36 @@
     background:#fff;
     border:1.5px solid var(--line);
     border-radius:12px;
-    padding:11px 6px;
+    padding:11px 4px;
     font-family:inherit;
-    font-size:12px;
+    font-size:11.5px;
     font-weight:700;
     color:var(--ink);
     cursor:pointer;
   }
+  .quick-faq-btn.sos-btn{
+    flex:0 0 auto;
+    padding:11px 14px;
+    background:var(--coral);
+    border-color:var(--coral);
+    color:#fff;
+    font-size:12.5px;
+  }
+  .sos-all-link{
+    display:block;
+    width:100%;
+    text-align:center;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--coral-deep);
+    background:none;
+    border:none;
+    padding:12px 0 2px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  #sosContactList{max-height:52vh;overflow-y:auto;}
   .exchange-btn-standalone{
     display:flex;
     align-items:center;
@@ -1895,6 +1918,17 @@
     </div>
   </header>
 
+  <div class="notice-form-overlay" id="sosOverlay">
+    <div class="notice-form-card">
+      <h3>🆘 긴급 SOS</h3>
+      <ul class="contact-list" id="sosContactList"></ul>
+      <button type="button" class="sos-all-link" id="sosAllContactsBtn">전체 연락처 보기</button>
+      <div class="nf-actions">
+        <button type="button" id="closeSosBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <div class="notice-form-overlay" id="exchangeOverlay">
     <div class="notice-form-card">
       <h3>엔화 계산기</h3>
@@ -1969,6 +2003,7 @@
         </div>
       </div>
       <div class="quick-faq-row">
+        <button type="button" class="quick-faq-btn sos-btn" id="openSosBtn">🆘 SOS</button>
         <button type="button" class="quick-faq-btn" id="openEmergencyFaqBtn">🚨 비상상황 FAQ</button>
         <button type="button" class="quick-faq-btn" id="openMannerFaqBtn">🙏 매너·에티켓 FAQ</button>
       </div>
@@ -3805,15 +3840,36 @@ document.getElementById("closeItemGuideBtn").addEventListener("click", () => {
 
 /* ---- 연락처 렌더 ---- */
 const contactList = document.getElementById("contactList");
-contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
+function contactCardHtml(role, name, tel){
+  return `
   <li class="contact-card">
     <span class="contact-info">
       <p class="role">${role}</p>
       <p class="name">${name}</p>
     </span>
     <a class="call-btn" href="tel:${tel}">${phoneIcon}전화</a>
-  </li>
-`).join("");
+  </li>`;
+}
+contactList.innerHTML = CONTACTS.map(([role, name, tel]) => contactCardHtml(role, name, tel)).join("");
+
+/* ---- 긴급 SOS (공지 탭) ---- */
+const SOS_CONTACTS = [
+  ["일본 경찰 (범죄·사고 신고)", "110", "110"],
+  ["일본 소방·구급 (화재·응급환자)", "119", "119"],
+  ["외교부 영사콜센터 (24시간, 해외 유료전화)", "+82-2-3210-0404", "+82-2-3210-0404"]
+];
+const sosList = [CONTACTS[0], CONTACTS[2], ...SOS_CONTACTS].filter(Boolean);
+document.getElementById("sosContactList").innerHTML =
+  sosList.map(([role, name, tel]) => contactCardHtml(role, name, tel)).join("");
+
+const sosOverlay = document.getElementById("sosOverlay");
+document.getElementById("openSosBtn").addEventListener("click", () => { sosOverlay.style.display = "flex"; });
+document.getElementById("closeSosBtn").addEventListener("click", () => { sosOverlay.style.display = "none"; });
+sosOverlay.addEventListener("click", (e) => { if(e.target === sosOverlay) sosOverlay.style.display = "none"; });
+document.getElementById("sosAllContactsBtn").addEventListener("click", () => {
+  sosOverlay.style.display = "none";
+  showPanel("contacts");
+});
 
 /* ---- 조 편성표 렌더 ---- */
 const groupList = document.getElementById("groupList");
