@@ -201,6 +201,25 @@
     margin-bottom:18px;
   }
   .exchange-btn-standalone svg{width:18px;height:18px;stroke:currentColor;}
+  .students-nav-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:var(--radius);
+    padding:14px 16px;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:700;
+    cursor:pointer;
+    margin-bottom:12px;
+  }
+  .students-nav-btn > span{flex:1;text-align:left;}
+  .students-nav-btn svg{width:20px;height:20px;flex-shrink:0;}
+  .students-nav-btn .nav-chevron{width:16px;height:16px;opacity:.7;}
   .mission-gallery-btn{
     display:flex;
     align-items:center;
@@ -1565,6 +1584,18 @@
   }
   .nl-group-label:first-child{margin-top:0;}
 
+  /* 슬림 진행률 바 (공간 절약) */
+  .progress.progress-slim{ padding:8px 12px; margin-bottom:10px; }
+  .progress.progress-slim .progress-bar{ height:5px; margin:6px 0 0; }
+  .progress.progress-slim .progress-text{ font-size:12px; }
+
+  /* 학생 명렬표: 스크롤 없이 한 화면에 (3열 · 촘촘) */
+  .namelist-panel #nameListList .roster-grid{ grid-template-columns:repeat(3, 1fr); gap:5px; }
+  .namelist-panel #nameListList .room-member{ padding:7px 5px; gap:4px; }
+  .namelist-panel #nameListList .rm-num{ font-size:9.5px; }
+  .namelist-panel #nameListList .rm-name{ font-size:11.5px; }
+  .namelist-panel #nameListList .rm-box{ width:13px; height:13px; }
+
   /* 조편성표 항목(카테고리) 탭 */
   .group-cat-bar{
     display:flex;
@@ -2316,6 +2347,11 @@
     </section>
 
     <section id="panel-checklist" class="panel">
+      <button type="button" class="students-nav-btn" id="openStudentsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>학생 준비 현황 보기</span>
+        <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <p class="progress-text"><span id="checkedCount">0</span>/<span id="totalCount">0</span>개 챙겼어요</p>
@@ -2358,11 +2394,6 @@
           <span class="more-text">인원배정 및 인원체크</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <button class="more-item" data-target="grade-select">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">학생현황</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
         <button class="more-item" data-target="missions">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
           <span class="more-text">사진 미션</span>
@@ -2395,7 +2426,7 @@
         </button>
       </div>
       <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
-      <button class="danger-link" id="resetStudentsBtn">학생현황 데이터 초기화</button>
+      <button class="danger-link" id="resetStudentsBtn">학생 준비 현황 데이터 초기화</button>
     </section>
 
     <section id="panel-hotel-checklist" class="panel sub-panel">
@@ -2492,20 +2523,19 @@
       <button class="group-add-btn" id="groupAddBtn" type="button">+ 조 추가</button>
     </section>
 
-    <section id="panel-name-list" class="panel sub-panel">
+    <section id="panel-name-list" class="panel sub-panel namelist-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">학생 명렬표</h2>
-      <p class="group-move-hint">학년별 출석 확인용이에요. 이름을 탭하면 체크됩니다. (이 기기에만 저장)</p>
       <div class="roster-tabs" id="nameListTabs">
         <button class="pill active" data-grade="1학년">1학년</button>
         <button class="pill" data-grade="2학년">2학년</button>
       </div>
-      <div class="progress">
-        <div class="progress-bar"><div class="progress-fill" id="nameListProgressFill"></div></div>
+      <div class="progress progress-slim">
         <div class="progress-head">
           <p class="progress-text"><span id="nameListCheckedCount">0</span>/<span id="nameListTotalCount">0</span>명 확인</p>
           <button class="roster-reset-btn" id="nameListResetBtn">초기화</button>
         </div>
+        <div class="progress-bar"><div class="progress-fill" id="nameListProgressFill"></div></div>
       </div>
       <div id="nameListList"></div>
     </section>
@@ -2549,8 +2579,9 @@
     </section>
 
     <section id="panel-grade-select" class="panel sub-panel">
-      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">학년 선택</h2>
+      <button class="back-btn" data-back="checklist"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>준비물</button>
+      <h2 class="sub-title">학생 준비 현황</h2>
+      <p class="students-note">학년을 선택하면 학생별 준비물·미션 체크 현황을 볼 수 있어요.</p>
       <div class="more-list">
         <button class="more-item" data-grade="1">
           <span class="more-text">1학년</span>
@@ -2564,9 +2595,9 @@
     </section>
 
     <section id="panel-students" class="panel sub-panel">
-      <button class="back-btn" data-back="grade-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>학년 선택</button>
+      <button class="back-btn" data-back="grade-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>학생 준비 현황</button>
       <div class="students-header">
-        <h2 class="sub-title" style="margin-bottom:0;" id="studentsGradeTitle">학생현황</h2>
+        <h2 class="sub-title" style="margin-bottom:0;" id="studentsGradeTitle">학생 준비 현황</h2>
         <button class="refresh-students-btn" id="refreshStudentsBtn">새로고침</button>
       </div>
       <p class="students-note" id="studentsNote"></p>
@@ -2945,7 +2976,7 @@ const phoneIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-wid
 const chevronDown = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 const plusIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 const pinIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
-const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
 
 function fmtDate(iso){
   const d = new Date(iso + "T00:00:00");
@@ -3026,6 +3057,7 @@ krwInput.addEventListener("input", () => {
 document.getElementById("openExchangeBtn").addEventListener("click", () => {
   document.getElementById("exchangeOverlay").style.display = "flex";
 });
+document.getElementById("openStudentsBtn").addEventListener("click", () => showPanel("grade-select"));
 document.getElementById("closeExchangeBtn").addEventListener("click", () => {
   document.getElementById("exchangeOverlay").style.display = "none";
 });
@@ -5093,7 +5125,7 @@ document.querySelectorAll("[data-back]").forEach(btn => {
 document.querySelectorAll("#panel-grade-select [data-grade]").forEach(btn => {
   btn.addEventListener("click", () => {
     currentGrade = btn.dataset.grade;
-    document.getElementById("studentsGradeTitle").textContent = currentGrade + "학년 학생현황";
+    document.getElementById("studentsGradeTitle").textContent = currentGrade + "학년 학생 준비 현황";
     showPanel("students");
     loadStudentStatus();
   });
@@ -5174,13 +5206,13 @@ document.getElementById("resetStudentsBtn").addEventListener("click", () => {
     alert("코드 상단 SCRIPT_URL을 먼저 채워주세요.");
     return;
   }
-  if(!confirm("정말로 학생현황(체크리스트·미션) 데이터를 지울까요? 되돌릴 수 없어요.")) return;
+  if(!confirm("정말로 학생 준비 현황(체크리스트·미션) 데이터를 지울까요? 되돌릴 수 없어요.")) return;
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({ action: "reset_students" })
   }).then(() => {
-    alert("학생현황 초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
+    alert("학생 준비 현황 초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
   }).catch(() => {
     alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
   });
