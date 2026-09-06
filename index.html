@@ -1229,6 +1229,53 @@
     padding:5px 11px;
     border-radius:999px;
   }
+  .member-chip.me{
+    background:var(--coral);
+    color:#fff;
+  }
+  /* 조편성표 항목 탭 */
+  .group-cat-tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin-bottom:12px;
+    padding-bottom:2px;
+  }
+  .group-cat-tabs .pill{
+    flex:0 0 auto;
+    padding:6px 12px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  .group-cat-tabs .pill.active{
+    background:var(--coral);
+    border-color:var(--coral);
+    color:#fff;
+  }
+  .group-card.mine{
+    border-color:var(--coral);
+    border-width:2px;
+  }
+  .group-card.mine .group-no{background:var(--coral);}
+  .my-group-badge{
+    display:inline-block;
+    margin-left:6px;
+    font-size:10.5px;
+    font-weight:800;
+    color:#fff;
+    background:var(--coral);
+    padding:2px 7px;
+    border-radius:999px;
+    vertical-align:middle;
+  }
 
   /* ===== 숙소 방 배정 / 버스 좌석표 ===== */
   .roster-tabs{
@@ -1927,17 +1974,17 @@
       <div class="more-list">
         <button class="more-item" data-target="groups">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">조 편성표</span>
+          <span class="more-text">조편성표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="rooms">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></span>
-          <span class="more-text">숙소 방 배정</span>
+          <span class="more-text">숙소배정표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="bus">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 12h18"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="16.5" cy="20" r="1.5"/></svg></span>
-          <span class="more-text">버스 좌석표</span>
+          <span class="more-text">버스좌석표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="missions">
@@ -1966,20 +2013,21 @@
 
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">조 편성표</h2>
+      <h2 class="sub-title">조편성표</h2>
+      <div class="group-cat-tabs" id="groupCatTabs"></div>
       <div id="groupList"></div>
     </section>
 
     <section id="panel-rooms" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">숙소 방 배정</h2>
+      <h2 class="sub-title">숙소배정표</h2>
       <div class="roster-tabs" id="roomGenderTabs"></div>
       <div class="room-card-grid" id="roomsList"></div>
     </section>
 
     <section id="panel-bus" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">버스 좌석표</h2>
+      <h2 class="sub-title">버스좌석표</h2>
       <div class="roster-tabs" id="busTabs"></div>
       <div id="busList"></div>
     </section>
@@ -2699,6 +2747,46 @@ function applyBusOverrides(baseBuses){
   return eff;
 }
 
+/* ===== 조편성표(항목별) — 선생님용에서 저장하면 시트를 통해 여기로 반영 (읽기 전용) ===== */
+const GROUP_CFG_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=조편성";
+const GROUP_CFG_LS_KEY = "suhak_group_config";
+const DEFAULT_CATEGORIES = ["공항", "편의점투어(1일차)", "편의점투어(2일차)", "쇼핑몰투어(3일차)", "유니버셜 스튜디오", "산넨자카·닌넨자카", "도톤보리", "간사이 공항"];
+function gradeGroups(){
+  const g1 = ROSTER.filter(s => s.id.charAt(0) === "1").map(s => s.name);
+  const g2 = ROSTER.filter(s => s.id.charAt(0) === "2").map(s => s.name);
+  return [g1, g2];
+}
+function defaultGroupConfig(){
+  const cfg = { categories: DEFAULT_CATEGORIES.slice(), data: {} };
+  cfg.categories.forEach(c => { cfg.data[c] = gradeGroups().map(a => a.slice()); });
+  return cfg;
+}
+function normalizeGroupConfig(cfg){
+  if(!cfg || !Array.isArray(cfg.categories) || !cfg.categories.length || !cfg.data) return defaultGroupConfig();
+  cfg.categories.forEach(c => {
+    if(!Array.isArray(cfg.data[c]) || !cfg.data[c].length) cfg.data[c] = gradeGroups().map(a => a.slice());
+  });
+  return cfg;
+}
+let groupConfig = (function(){
+  try { return normalizeGroupConfig(JSON.parse(localStorage.getItem(GROUP_CFG_LS_KEY) || "null")); }
+  catch(e){ return defaultGroupConfig(); }
+})();
+let currentGroupCat = groupConfig.categories[0];
+function fetchGroupConfig(){
+  return fetch(GROUP_CFG_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text);
+      const cell = rows[1] && rows[1][0];
+      if(!cell) return;
+      groupConfig = normalizeGroupConfig(JSON.parse(cell));
+      try { localStorage.setItem(GROUP_CFG_LS_KEY, JSON.stringify(groupConfig)); } catch(e){}
+      if(!groupConfig.categories.includes(currentGroupCat)) currentGroupCat = groupConfig.categories[0];
+    })
+    .catch(() => {});
+}
+
 function loadNotices(){
   if(!NOTICES_SHEET_CSV_URL){
     renderNotices(NOTICES);
@@ -3323,33 +3411,49 @@ document.getElementById("sosAllContactsBtn").addEventListener("click", () => {
   showPanel("contacts");
 });
 
-/* ---- 조 편성표 렌더 ---- */
+/* ---- 조편성표 렌더 (항목별 · 읽기 전용 · 내 조 표시) ---- */
 const groupList = document.getElementById("groupList");
+const groupCatTabs = document.getElementById("groupCatTabs");
+
+function renderGroupCatTabs(){
+  groupCatTabs.innerHTML = groupConfig.categories.map(c =>
+    `<button type="button" class="pill${c === currentGroupCat ? " active" : ""}" data-cat="${c.replace(/"/g,"&quot;")}">${c}</button>`
+  ).join("");
+}
+
 function renderGroupList(){
-  groupList.innerHTML = applyGroupOverrides(GROUPS).map(g => `
-    <div class="group-card">
+  renderGroupCatTabs();
+  const groups = groupConfig.data[currentGroupCat] || [];
+  const myIdx = groups.findIndex(g => g.includes(studentName));
+  groupList.innerHTML = groups.map((members, idx) => {
+    const mine = idx === myIdx;
+    return `
+    <div class="group-card open${mine ? " mine" : ""}">
       <div class="group-head">
-        <span class="group-no">${g.no}조</span>
+        <span class="group-no">${idx + 1}조</span>
         <span class="g-info">
-          <p class="g-leader">조장 · ${g.leader}</p>
-          <p class="g-meta">총 ${g.members.length}명</p>
+          <p class="g-leader">${idx + 1}조${mine ? ` <span class="my-group-badge">내 조</span>` : ""}</p>
+          <p class="g-meta">총 ${members.length}명</p>
         </span>
-        <span class="chevron">${chevronDown}</span>
       </div>
       <div class="group-body">
         <div class="member-chips">
-          ${g.members.map(m => `<span class="member-chip${m === studentName ? " me" : ""}">${m}</span>`).join("")}
+          ${members.map(m => `<span class="member-chip${m === studentName ? " me" : ""}">${m}</span>`).join("")}
         </div>
       </div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
+  // 내 조가 있으면 맨 위로 스크롤되도록 살짝 안내
+  const mineCard = groupList.querySelector(".group-card.mine");
+  if(mineCard) mineCard.scrollIntoView({ block: "nearest" });
 }
 renderGroupList();
 
-groupList.addEventListener("click", (e) => {
-  const head = e.target.closest(".group-head");
-  if(!head) return;
-  head.closest(".group-card").classList.toggle("open");
+groupCatTabs.addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentGroupCat = btn.dataset.cat;
+  renderGroupList();
 });
 
 /* ---- 숙소 방 배정 (2인 1실, 여학생 마지막 방만 3인) ---- */
@@ -3458,9 +3562,8 @@ renderRoomsList();
 renderBusTabs();
 renderBusList();
 
-// 선생님이 시트에 저장한 배정 변경을 불러와 조/방/버스 화면을 다시 그립니다.
+// 선생님이 시트에 저장한 배정 변경을 불러와 방/버스 화면을 다시 그립니다.
 function refreshAssignmentViews(){
-  if(typeof renderGroupList === "function") renderGroupList();
   const my = findMyRoom();
   if(my) currentRoomGender = my.gender;
   renderRoomGenderTabs();
@@ -3469,6 +3572,13 @@ function refreshAssignmentViews(){
   renderBusList();
 }
 fetchAssignOverrides().then(refreshAssignmentViews);
+// 조편성표(항목별)도 시트에서 불러와 다시 그립니다.
+function refreshGroupView(){
+  // 내가 속한 항목이 없으면 첫 항목 유지
+  if(!groupConfig.categories.includes(currentGroupCat)) currentGroupCat = groupConfig.categories[0];
+  renderGroupList();
+}
+fetchGroupConfig().then(refreshGroupView);
 
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
@@ -3816,8 +3926,11 @@ function showPanel(id){
     renderBusList();
   }
   // 조/방/버스를 열 때 시트에서 최신 배정을 한 번 더 확인해 반영합니다.
-  if(id === "groups" || id === "rooms" || id === "bus"){
+  if(id === "rooms" || id === "bus"){
     fetchAssignOverrides().then(refreshAssignmentViews);
+  }
+  if(id === "groups"){
+    fetchGroupConfig().then(refreshGroupView);
   }
 }
 

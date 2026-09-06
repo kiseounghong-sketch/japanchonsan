@@ -1565,6 +1565,79 @@
   }
   .nl-group-label:first-child{margin-top:0;}
 
+  /* 조편성표 항목(카테고리) 탭 */
+  .group-cat-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .group-cat-tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    flex:1;
+    padding-bottom:2px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .group-cat-tabs .pill{
+    flex:0 0 auto;
+    padding:6px 12px;
+    white-space:nowrap;
+  }
+  .group-cat-add{
+    flex-shrink:0;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:6px 12px;
+    font-family:inherit;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .group-cat-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:8px;
+  }
+  .group-card .group-head{position:relative;}
+  .group-del-btn{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border:none;
+    border-radius:8px;
+    background:var(--paper-dim);
+    color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .group-del-btn svg{width:13px;height:13px;}
+  .group-card.drag-over{
+    outline:2.5px dashed var(--coral);
+    outline-offset:2px;
+  }
+  .group-empty-hint{
+    font-size:11.5px;
+    color:var(--ink-faint,var(--ink-soft));
+    padding:6px 2px;
+  }
+  .group-add-btn{
+    display:block;
+    width:100%;
+    margin-top:4px;
+    background:var(--paper-dim);
+    color:var(--navy);
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:11px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
   /* ===== 서바이벌 일본어 회화 ===== */
   .phrase-category{
     background:#fff;
@@ -2400,7 +2473,14 @@
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">조편성표</h2>
-      <p class="group-move-hint">이름을 <b>탭</b>하면 출석 체크, <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 조가 맞바뀌어요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
+      <div class="group-cat-bar">
+        <div class="group-cat-tabs" id="groupCatTabs"></div>
+        <button class="group-cat-add" id="groupCatAddBtn" type="button">+ 항목</button>
+      </div>
+      <div class="group-cat-actions">
+        <button class="roster-reset-btn" id="groupCatDeleteBtn" type="button">이 항목 삭제</button>
+      </div>
+      <p class="group-move-hint">이름을 <b>탭</b>하면 출석 체크, <b>꾹 눌러 끌어다</b> 다른 조 카드에 놓으면 그 조로 옮겨져요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="groupProgressFill"></div></div>
         <div class="progress-head">
@@ -2409,12 +2489,17 @@
         </div>
       </div>
       <div id="groupList"></div>
+      <button class="group-add-btn" id="groupAddBtn" type="button">+ 조 추가</button>
     </section>
 
     <section id="panel-name-list" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">학생 명렬표</h2>
-      <p class="group-move-hint">전체 학생 출석 확인용이에요. 이름을 탭하면 체크됩니다. (이 기기에만 저장)</p>
+      <p class="group-move-hint">학년별 출석 확인용이에요. 이름을 탭하면 체크됩니다. (이 기기에만 저장)</p>
+      <div class="roster-tabs" id="nameListTabs">
+        <button class="pill active" data-grade="1학년">1학년</button>
+        <button class="pill" data-grade="2학년">2학년</button>
+      </div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="nameListProgressFill"></div></div>
         <div class="progress-head">
@@ -3210,9 +3295,11 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     const wasDrag = st.dragging;
     const src = wasDrag ? getName(st.item) : null;
     const dst = st.target;
+    const zone = st.zone;
     cleanup();
     if(wasDrag){
       if(dropped && dst && dst !== src) onSwap(src, dst);
+      else if(dropped && !dst && zone && opts.onDropZone) opts.onDropZone(src, zone);
       // 드래그 직후 따라오는 click 1회 무시 (체크 오작동 방지)
       const kill = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
       listEl.addEventListener("click", kill, true);
@@ -3249,16 +3336,30 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     }
     e.preventDefault();
     moveGhost(e.clientX, e.clientY);
+    // 화면 위/아래 가장자리 근처면 목록을 자동으로 스크롤
+    const scroller = listEl.closest(".panel") || listEl.parentElement;
+    if(scroller){
+      const sr = scroller.getBoundingClientRect();
+      if(e.clientY < sr.top + 72) scroller.scrollTop -= 14;
+      else if(e.clientY > sr.bottom - 72) scroller.scrollTop += 14;
+    }
     st.ghost.style.visibility = "hidden";
     const under = document.elementFromPoint(e.clientX, e.clientY);
     st.ghost.style.visibility = "";
     const t = under && under.closest(itemSel);
+    const zone = opts.zoneSel && under && under.closest(opts.zoneSel);
     listEl.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
     if(t && t !== st.item && getName(t)){
       t.classList.add("drag-over");
       st.target = getName(t);
+      st.zone = null;
+    } else if(zone){
+      zone.classList.add("drag-over");
+      st.target = null;
+      st.zone = zone;
     } else {
       st.target = null;
+      st.zone = null;
     }
   });
 
@@ -4140,37 +4241,107 @@ document.getElementById("sosAllContactsBtn").addEventListener("click", () => {
   showPanel("contacts");
 });
 
-/* ---- 조 편성표 렌더 (한눈에 보기 + 출석 체크 + 드래그 교환) ---- */
+/* ===== 조 편성표 (항목별 · 한눈에 · 출석 체크 · 드래그 이동 · 시트 동기화) ===== */
 const groupList = document.getElementById("groupList");
+const GROUP_CFG_KEY = "suhak_group_config";
 const GROUP_ATTEND_KEY = "teacher_group_attendance";
-let groupAttend = loadAttendState(GROUP_ATTEND_KEY);
+const GROUP_CFG_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=조편성";
 
-// 특정 학생이 지금 몇 조인지 (배정 변경 반영된 기준)
-function groupNoOf(name){
-  const g = applyGroupOverrides(GROUPS).find(g => g.members.includes(name));
-  return g ? String(g.no) : null;
+const DEFAULT_CATEGORIES = ["공항", "편의점투어(1일차)", "편의점투어(2일차)", "쇼핑몰투어(3일차)", "유니버셜 스튜디오", "산넨자카·닌넨자카", "도톤보리", "간사이 공항"];
+
+// 기본 편성 = 학년별 2조
+function gradeGroups(){
+  const g1 = ROSTER.filter(s => s.id.charAt(0) === "1").map(s => s.name);
+  const g2 = ROSTER.filter(s => s.id.charAt(0) === "2").map(s => s.name);
+  return [g1, g2];
+}
+function defaultGroupConfig(){
+  const cfg = { categories: DEFAULT_CATEGORIES.slice(), data: {} };
+  cfg.categories.forEach(c => { cfg.data[c] = gradeGroups().map(a => a.slice()); });
+  return cfg;
+}
+function normalizeGroupConfig(cfg){
+  if(!cfg || !Array.isArray(cfg.categories) || !cfg.categories.length || !cfg.data) return defaultGroupConfig();
+  cfg.categories.forEach(c => {
+    if(!Array.isArray(cfg.data[c]) || !cfg.data[c].length) cfg.data[c] = gradeGroups().map(a => a.slice());
+  });
+  return cfg;
+}
+
+let groupConfig = (function(){
+  try { return normalizeGroupConfig(JSON.parse(localStorage.getItem(GROUP_CFG_KEY) || "null")); }
+  catch(e){ return defaultGroupConfig(); }
+})();
+let groupAttend = loadAttendState(GROUP_ATTEND_KEY);   // { 항목: {이름:true} }
+let currentGroupCat = groupConfig.categories[0];
+
+function saveGroupConfigLocal(){
+  try { localStorage.setItem(GROUP_CFG_KEY, JSON.stringify(groupConfig)); } catch(e){}
+}
+function pushGroupConfig(){
+  saveGroupConfigLocal();
+  if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0){
+    fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify({ action:"saveGroupConfig", data: groupConfig }) }).catch(() => {});
+  }
+}
+function fetchGroupConfig(){
+  return fetch(GROUP_CFG_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text);
+      // A2 셀(2행 1열)에 JSON 한 덩어리
+      const cell = rows[1] && rows[1][0];
+      if(!cell) return;
+      const parsed = JSON.parse(cell);
+      groupConfig = normalizeGroupConfig(parsed);
+      saveGroupConfigLocal();
+      if(!groupConfig.categories.includes(currentGroupCat)) currentGroupCat = groupConfig.categories[0];
+    })
+    .catch(() => {});
+}
+
+function curGroups(){ return groupConfig.data[currentGroupCat] || []; }
+function curAttend(){ return groupAttend[currentGroupCat] || (groupAttend[currentGroupCat] = {}); }
+
+// 현재 항목에서 학생을 targetIdx 조로 이동 (원래 조에서 빼고 넣기)
+function moveStudentToGroup(name, targetIdx){
+  const groups = curGroups();
+  if(!groups[targetIdx]) return;
+  groups.forEach(g => { const i = g.indexOf(name); if(i !== -1) g.splice(i, 1); });
+  if(!groups[targetIdx].includes(name)) groups[targetIdx].push(name);
+  pushGroupConfig();
+  renderGroups();
+}
+
+function renderGroupCatTabs(){
+  const el = document.getElementById("groupCatTabs");
+  el.innerHTML = groupConfig.categories.map(c =>
+    `<button type="button" class="pill${c === currentGroupCat ? " active" : ""}" data-cat="${c.replace(/"/g,"&quot;")}">${c}</button>`
+  ).join("");
 }
 
 function renderGroups(){
-  const groups = applyGroupOverrides(GROUPS);
-  groupList.innerHTML = groups.map(g => `
-    <div class="group-card open" data-group-no="${g.no}">
+  renderGroupCatTabs();
+  const groups = curGroups();
+  const att = curAttend();
+  groupList.innerHTML = groups.map((members, idx) => `
+    <div class="group-card open" data-group-idx="${idx}">
       <div class="group-head">
-        <span class="group-no">${g.no}조</span>
+        <span class="group-no">${idx + 1}조</span>
         <span class="g-info">
-          <p class="g-leader">조장 · ${g.leader}</p>
-          <p class="g-meta">총 ${g.members.length}명</p>
+          <p class="g-leader">${idx + 1}조</p>
+          <p class="g-meta">총 ${members.length}명</p>
         </span>
-        <span class="chevron">${chevronDown}</span>
+        <button class="group-del-btn" type="button" data-del-group="${idx}" title="이 조 삭제">${trashIcon}</button>
       </div>
       <div class="group-body">
-        <div class="roster-grid">
-          ${g.members.map(m => `
-            <div class="room-member${groupAttend[m] ? " checked" : ""}" data-name="${m}">
+        ${members.length ? `<div class="roster-grid">
+          ${members.map(m => `
+            <div class="room-member${att[m] ? " checked" : ""}" data-name="${m}">
               <span class="rm-box">${checkIcon}</span>
               <span class="rm-name">${m}</span>
             </div>`).join("")}
-        </div>
+        </div>` : `<p class="group-empty-hint">빈 조예요. 학생을 끌어다 놓으세요.</p>`}
       </div>
     </div>
   `).join("");
@@ -4187,63 +4358,123 @@ function updateGroupProgress(){
 
 renderGroups();
 
-// 두 학생의 조를 맞바꾸기
-function swapStudentGroups(a, b){
-  const ga = groupNoOf(a), gb = groupNoOf(b);
-  if(ga == null || gb == null || ga === gb) return;
-  assignOverrides.groups[a] = gb;
-  assignOverrides.groups[b] = ga;
-  pushAssignOverrides();
+// 항목 탭 전환
+document.getElementById("groupCatTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentGroupCat = btn.dataset.cat;
   renderGroups();
-}
+});
 
-// 이름을 탭하면 출석 체크
+// 항목 추가
+document.getElementById("groupCatAddBtn").addEventListener("click", () => {
+  const name = (prompt("새 항목 이름을 입력하세요 (예: 오사카성)") || "").trim();
+  if(!name) return;
+  if(groupConfig.categories.includes(name)){ alert("이미 있는 항목이에요."); return; }
+  groupConfig.categories.push(name);
+  groupConfig.data[name] = gradeGroups().map(a => a.slice());   // 기본: 학년별 2조
+  currentGroupCat = name;
+  pushGroupConfig();
+  renderGroups();
+});
+
+// 항목 삭제
+document.getElementById("groupCatDeleteBtn").addEventListener("click", () => {
+  if(groupConfig.categories.length <= 1){ alert("항목은 최소 1개는 있어야 해요."); return; }
+  if(!confirm(`'${currentGroupCat}' 항목을 삭제할까요?`)) return;
+  const i = groupConfig.categories.indexOf(currentGroupCat);
+  groupConfig.categories.splice(i, 1);
+  delete groupConfig.data[currentGroupCat];
+  delete groupAttend[currentGroupCat];
+  saveAttendState(GROUP_ATTEND_KEY, groupAttend);
+  currentGroupCat = groupConfig.categories[Math.max(0, i - 1)];
+  pushGroupConfig();
+  renderGroups();
+});
+
+// 조 추가
+document.getElementById("groupAddBtn").addEventListener("click", () => {
+  curGroups().push([]);
+  pushGroupConfig();
+  renderGroups();
+});
+
+// 조 삭제 / 출석 체크
 groupList.addEventListener("click", (e) => {
+  const del = e.target.closest(".group-del-btn");
+  if(del){
+    const idx = Number(del.dataset.delGroup);
+    const groups = curGroups();
+    if(groups.length <= 1){ alert("조는 최소 1개는 있어야 해요."); return; }
+    if(groups[idx] && groups[idx].length && !confirm(`${idx + 1}조를 삭제할까요? (학생 ${groups[idx].length}명은 배정 없음이 됩니다)`)) return;
+    groups.splice(idx, 1);
+    pushGroupConfig();
+    renderGroups();
+    return;
+  }
   const item = e.target.closest(".room-member");
   if(!item) return;
   const name = item.dataset.name;
+  const att = curAttend();
   item.classList.toggle("checked");
-  if(item.classList.contains("checked")) groupAttend[name] = true;
-  else delete groupAttend[name];
+  if(item.classList.contains("checked")) att[name] = true;
+  else delete att[name];
   saveAttendState(GROUP_ATTEND_KEY, groupAttend);
   updateGroupProgress();
 });
 
 document.getElementById("groupResetBtn").addEventListener("click", () => {
-  if(!confirm("조편성표 출석 체크를 모두 초기화할까요?")) return;
-  groupAttend = {};
+  if(!confirm(`'${currentGroupCat}' 항목의 출석 체크를 초기화할까요?`)) return;
+  groupAttend[currentGroupCat] = {};
   saveAttendState(GROUP_ATTEND_KEY, groupAttend);
   renderGroups();
 });
 
-// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 조가 맞바뀜
-enableDragSwap(groupList, ".room-member", el => el.dataset.name, swapStudentGroups);
+// 학생 이름을 꾹 눌러 드래그 → 다른 조 카드(또는 그 조 학생) 위에 놓으면 그 조로 이동
+enableDragSwap(
+  groupList, ".room-member",
+  el => el.dataset.name,
+  (dragName, dropName) => {   // 학생 위에 놓음 → 그 학생의 조로 이동
+    const groups = curGroups();
+    const idx = groups.findIndex(g => g.includes(dropName));
+    if(idx !== -1) moveStudentToGroup(dragName, idx);
+  },
+  {
+    zoneSel: ".group-card",
+    onDropZone: (dragName, cardEl) => moveStudentToGroup(dragName, Number(cardEl.dataset.groupIdx))
+  }
+);
 
-/* ---- 학생 명렬표 (전체 학생 출석 체크만) ---- */
+/* ---- 학생 명렬표 (학년별 탭 · 출석 체크만) ---- */
 const NAMELIST_ATTEND_KEY = "teacher_namelist_attendance";
 let nameListAttend = loadAttendState(NAMELIST_ATTEND_KEY);
 const nameListList = document.getElementById("nameListList");
+let currentNameListGrade = "1학년";
+
+function nameListByGrade(grade){
+  return ROSTER.filter(s => (s.id.charAt(0) === "1" ? "1학년" : "2학년") === grade)
+    .slice().sort((a, b) => a.id.localeCompare(b.id));
+}
 
 function renderNameList(){
-  const byGrade = { "1학년": [], "2학년": [] };
-  ROSTER.forEach(s => {
-    const grade = s.id.charAt(0) === "1" ? "1학년" : "2학년";
-    byGrade[grade].push(s);
-  });
-  nameListList.innerHTML = Object.keys(byGrade).map(grade => {
-    const rows = byGrade[grade]
-      .slice()
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map(s => `
-        <div class="room-member${nameListAttend[s.name] ? " checked" : ""}" data-name="${s.name}">
-          <span class="rm-box">${checkIcon}</span>
-          <span class="rm-num">${s.id}</span>
-          <span class="rm-name">${s.name}</span>
-        </div>`).join("");
-    return `<p class="nl-group-label">${grade} (${byGrade[grade].length}명)</p><div class="roster-grid">${rows}</div>`;
-  }).join("");
+  document.querySelectorAll("#nameListTabs .pill").forEach(p =>
+    p.classList.toggle("active", p.dataset.grade === currentNameListGrade));
+  const students = nameListByGrade(currentNameListGrade);
+  nameListList.innerHTML = `<div class="roster-grid">${students.map(s => `
+    <div class="room-member${nameListAttend[s.name] ? " checked" : ""}" data-name="${s.name}">
+      <span class="rm-box">${checkIcon}</span>
+      <span class="rm-num">${s.id}</span>
+      <span class="rm-name">${s.name}</span>
+    </div>`).join("")}</div>`;
   updateNameListProgress();
 }
+
+document.getElementById("nameListTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentNameListGrade = btn.dataset.grade;
+  renderNameList();
+});
 
 function updateNameListProgress(){
   const total = nameListList.querySelectorAll(".room-member").length;
@@ -4265,8 +4496,8 @@ nameListList.addEventListener("click", (e) => {
 });
 
 document.getElementById("nameListResetBtn").addEventListener("click", () => {
-  if(!confirm("학생 명렬표 출석 체크를 모두 초기화할까요?")) return;
-  nameListAttend = {};
+  if(!confirm(currentNameListGrade + " 출석 체크를 초기화할까요?")) return;
+  nameListByGrade(currentNameListGrade).forEach(s => { delete nameListAttend[s.name]; });
   saveAttendState(NAMELIST_ATTEND_KEY, nameListAttend);
   renderNameList();
 });
@@ -4493,7 +4724,7 @@ document.querySelectorAll('.more-item[data-target="room-roster"]').forEach(btn =
   btn.addEventListener("click", renderRoomTabs);
 });
 document.querySelectorAll('.more-item[data-target="groups"]').forEach(btn => {
-  btn.addEventListener("click", renderGroups);
+  btn.addEventListener("click", () => { fetchGroupConfig().then(renderGroups); });
 });
 document.querySelectorAll('.more-item[data-target="name-list"]').forEach(btn => {
   btn.addEventListener("click", renderNameList);
@@ -4502,12 +4733,12 @@ document.querySelectorAll('.more-item[data-target="name-list"]').forEach(btn => 
 renderBusTabs();
 renderRoomTabs();
 
-// 시트에 저장돼 있던 배정 변경을 불러와 조/버스/숙소를 다시 그립니다.
+// 시트에 저장돼 있던 배정 변경 / 조편성을 불러와 다시 그립니다.
 fetchAssignOverrides().then(() => {
-  renderGroups();
   renderBusTabs();
   renderRoomTabs();
 });
+fetchGroupConfig().then(renderGroups);
 
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
