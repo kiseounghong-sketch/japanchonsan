@@ -1088,10 +1088,32 @@
     background:var(--coral);
     color:#fff;
   }
-  .bus-seat.selected, .room-member.selected{
-    outline:2.5px solid var(--coral);
-    outline-offset:1px;
+  /* 꾹 눌러 드래그로 배정 바꾸기 */
+  .drag-ghost{
+    position:fixed;
+    z-index:9999;
+    pointer-events:none;
+    opacity:.6;
+    transform:scale(1.04);
+    box-shadow:0 10px 26px rgba(15,25,48,0.28);
+    background:#fff;
+    border:1.5px solid var(--coral);
+    border-radius:10px;
+    padding:6px 10px;
+    font-weight:700;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .drag-source{ opacity:.3 !important; }
+  .drag-over{
+    outline:2.5px dashed var(--coral);
+    outline-offset:2px;
     border-radius:8px;
+  }
+  body.dragging-active{
+    -webkit-user-select:none;
+    user-select:none;
+    touch-action:none;
   }
 
   /* ===== 학생현황 ===== */
@@ -2177,7 +2199,7 @@
     <section id="panel-bus-roster" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">버스</h2>
-      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 자리가 맞바뀌어요. 왼쪽 네모는 탑승 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
+      <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 자리가 맞바뀌어요. 왼쪽 네모는 탑승 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="roster-tabs" id="busRosterTabs"></div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
@@ -2192,7 +2214,7 @@
     <section id="panel-room-roster" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">숙소</h2>
-      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 방이 맞바뀌어요. 왼쪽 네모는 입실 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
+      <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 방이 맞바뀌어요. 왼쪽 네모는 입실 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="roster-tabs" id="roomRosterTabs">
         <button class="pill active" data-gender="남학생">남학생</button>
         <button class="pill" data-gender="여학생">여학생</button>
@@ -2210,7 +2232,7 @@
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">조편성표</h2>
-      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 조가 맞바뀌어요. (조 제목을 누르면 그 조로 이동) 바꾼 내용은 학생 화면에도 반영돼요.</p>
+      <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 조가 맞바뀌어요. 바꾼 내용은 학생 화면에도 반영돼요.</p>
       <div id="groupList"></div>
     </section>
 
@@ -2911,6 +2933,97 @@ function applyBusOverrides(baseBuses){
     eff[busName] = list.map(s => ({ seat: s.seat, name: bySeat[s.seat] || "" }));
   });
   return eff;
+}
+
+/* ===== 꾹 눌러 드래그로 두 학생 배정 맞바꾸기 =====
+   listEl 안의 itemSel 요소를 길게 누르면 반투명 복제본이 손을 따라오고,
+   다른 학생 위에서 놓으면 onSwap(끌던학생, 놓은학생) 을 호출합니다.
+   opts.ignore 선택자(체크박스 등)에서 시작한 터치는 드래그로 보지 않습니다. */
+function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
+  opts = opts || {};
+  const HOLD_MS = 300, MOVE_CANCEL = 12;
+  let st = null;
+
+  function cleanup(){
+    if(!st) return;
+    if(st.timer) clearTimeout(st.timer);
+    if(st.ghost) st.ghost.remove();
+    if(st.item) st.item.classList.remove("drag-source");
+    listEl.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
+    document.body.classList.remove("dragging-active");
+    st = null;
+  }
+  function makeGhost(item, x, y){
+    const g = document.createElement("div");
+    g.className = "drag-ghost";
+    g.textContent = getName(item);
+    document.body.appendChild(g);
+    const r = g.getBoundingClientRect();
+    g.style.left = (x - r.width / 2) + "px";
+    g.style.top = (y - r.height / 2) + "px";
+    return g;
+  }
+  function moveGhost(x, y){
+    const r = st.ghost.getBoundingClientRect();
+    st.ghost.style.left = (x - r.width / 2) + "px";
+    st.ghost.style.top = (y - r.height / 2) + "px";
+  }
+
+  listEl.addEventListener("pointerdown", (e) => {
+    if(opts.ignore && e.target.closest(opts.ignore)) return;
+    const item = e.target.closest(itemSel);
+    if(!item || !getName(item)) return;
+    cleanup();
+    st = { x0:e.clientX, y0:e.clientY, item, dragging:false, timer:null, target:null, pid:e.pointerId };
+    st.timer = setTimeout(() => {
+      if(!st) return;
+      st.dragging = true;
+      st.item.classList.add("drag-source");
+      st.ghost = makeGhost(st.item, st.x0, st.y0);
+      document.body.classList.add("dragging-active");
+      if(navigator.vibrate) navigator.vibrate(15);
+      try { listEl.setPointerCapture(st.pid); } catch(_){}
+    }, HOLD_MS);
+  });
+
+  listEl.addEventListener("pointermove", (e) => {
+    if(!st) return;
+    if(!st.dragging){
+      if(Math.abs(e.clientX - st.x0) > MOVE_CANCEL || Math.abs(e.clientY - st.y0) > MOVE_CANCEL){
+        clearTimeout(st.timer); st = null;   // 손이 먼저 움직이면 스크롤로 간주
+      }
+      return;
+    }
+    e.preventDefault();
+    moveGhost(e.clientX, e.clientY);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const t = under && under.closest(itemSel);
+    listEl.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
+    if(t && t !== st.item && getName(t)){
+      t.classList.add("drag-over");
+      st.target = getName(t);
+    } else {
+      st.target = null;
+    }
+  });
+
+  function finish(e){
+    if(!st) return;
+    const wasDrag = st.dragging;
+    const src = wasDrag ? getName(st.item) : null;
+    const dst = st.target;
+    cleanup();
+    if(wasDrag){
+      if(e) e.preventDefault();
+      if(dst && dst !== src) onSwap(src, dst);
+      // 드래그 직후 따라오는 click 이벤트를 한 번 무시 (체크박스 오작동 방지)
+      const kill = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+      listEl.addEventListener("click", kill, true);
+      setTimeout(() => listEl.removeEventListener("click", kill, true), 350);
+    }
+  }
+  listEl.addEventListener("pointerup", finish);
+  listEl.addEventListener("pointercancel", cleanup);
 }
 
 function loadNotices(){
@@ -3679,8 +3792,6 @@ contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
 /* ---- 조 편성표 렌더 ---- */
 const groupList = document.getElementById("groupList");
 
-let selectedStudentForMove = null;
-
 // 특정 학생이 지금 몇 조인지 (배정 변경 반영된 기준)
 function groupNoOf(name){
   const g = applyGroupOverrides(GROUPS).find(g => g.members.includes(name));
@@ -3688,9 +3799,12 @@ function groupNoOf(name){
 }
 
 function renderGroups(){
+  const openNos = new Set(
+    [...document.querySelectorAll("#groupList .group-card.open")].map(c => c.dataset.groupNo)
+  );
   const groups = applyGroupOverrides(GROUPS);
   groupList.innerHTML = groups.map(g => `
-    <div class="group-card" data-group-no="${g.no}">
+    <div class="group-card${openNos.has(String(g.no)) ? " open" : ""}" data-group-no="${g.no}">
       <div class="group-head">
         <span class="group-no">${g.no}조</span>
         <span class="g-info">
@@ -3701,63 +3815,35 @@ function renderGroups(){
       </div>
       <div class="group-body">
         <div class="member-chips">
-          ${g.members.map(m => `<span class="member-chip${m === selectedStudentForMove ? " selected" : ""}">${m}</span>`).join("")}
+          ${g.members.map(m => `<span class="member-chip" data-name="${m}">${m}</span>`).join("")}
         </div>
       </div>
     </div>
   `).join("");
-  document.querySelectorAll(".group-card").forEach(c => {
-    if(c.querySelector(".member-chip.selected")) c.classList.add("open");
-  });
 }
 
 renderGroups();
 
-// 선택된 학생을 targetNo 조로 이동 (빈자리로 보내기)
-function moveStudentToGroup(name, targetNo){
-  assignOverrides.groups[name] = String(targetNo);
-  pushAssignOverrides();
-  selectedStudentForMove = null;
-  renderGroups();
-  document.querySelectorAll(`.group-card[data-group-no="${targetNo}"]`).forEach(c => c.classList.add("open"));
-}
-
 // 두 학생의 조를 맞바꾸기
 function swapStudentGroups(a, b){
   const ga = groupNoOf(a), gb = groupNoOf(b);
-  if(ga == null || gb == null || ga === gb){ selectedStudentForMove = null; renderGroups(); return; }
+  if(ga == null || gb == null || ga === gb) return;
   assignOverrides.groups[a] = gb;
   assignOverrides.groups[b] = ga;
   pushAssignOverrides();
-  selectedStudentForMove = null;
   renderGroups();
+  [ga, gb].forEach(no => document.querySelectorAll(`.group-card[data-group-no="${no}"]`).forEach(c => c.classList.add("open")));
 }
 
+// 조 제목 누르면 펼치기/접기 (드래그 중이 아닐 때만)
 groupList.addEventListener("click", (e) => {
-  const chip = e.target.closest(".member-chip");
-  if(chip){
-    e.stopPropagation();
-    const name = chip.textContent;
-    if(selectedStudentForMove === name){
-      selectedStudentForMove = null;         // 같은 학생 다시 누르면 선택 해제
-      renderGroups();
-    } else if(selectedStudentForMove){
-      swapStudentGroups(selectedStudentForMove, name);   // 다른 학생 누르면 맞바꾸기
-    } else {
-      selectedStudentForMove = name;
-      renderGroups();
-    }
-    return;
-  }
   const head = e.target.closest(".group-head");
   if(!head) return;
-  const card = head.closest(".group-card");
-  if(selectedStudentForMove){
-    moveStudentToGroup(selectedStudentForMove, parseInt(card.dataset.groupNo, 10));
-    return;
-  }
-  card.classList.toggle("open");
+  head.closest(".group-card").classList.toggle("open");
 });
+
+// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 조가 맞바뀜
+enableDragSwap(groupList, ".member-chip", el => el.dataset.name, swapStudentGroups);
 
 /* ---- 버스 편성표 / 숙소 편성표 (선생님 전용 출석 체크, 이 기기에만 저장) ---- */
 const BUS_ATTEND_KEY = "teacher_bus_attendance";
@@ -3810,7 +3896,6 @@ function chunkBusRows(members){
   return rows;
 }
 
-let selectedBusStudent = null;
 function seatNoOf(name){
   const b = applyBusOverrides(getBusRoster())[currentBus] || [];
   const hit = b.find(s => s.name === name);
@@ -3818,11 +3903,10 @@ function seatNoOf(name){
 }
 function swapBusSeats(a, b){
   const sa = seatNoOf(a), sb = seatNoOf(b);
-  if(!sa || !sb || sa === sb){ selectedBusStudent = null; renderBusList(); return; }
+  if(!sa || !sb || sa === sb) return;
   assignOverrides.bus[a] = sb;
   assignOverrides.bus[b] = sa;
   pushAssignOverrides();
-  selectedBusStudent = null;
   renderBusList();
 }
 
@@ -3831,7 +3915,7 @@ function renderBusList(){
   const members = buses[currentBus] || [];
   const rows = chunkBusRows(members);
   const seatHtml = (m) => `
-    <div class="bus-seat${m.name === selectedBusStudent ? " selected" : ""}" data-name="${m.name}">
+    <div class="bus-seat" data-name="${m.name}">
       <span class="bs-box">${checkIcon}</span>
       <span class="bs-no">${m.seat}</span>
       <span class="bs-name">${m.name || "-"}</span>
@@ -3865,28 +3949,22 @@ busRosterTabs.addEventListener("click", (e) => {
   renderBusTabs();
 });
 
+// 왼쪽 네모(체크박스)를 탭하면 탑승 체크. 이름 쪽은 드래그로 자리 바꾸기용.
 busRosterList.addEventListener("click", (e) => {
+  if(!e.target.closest(".bs-box")) return;
   const item = e.target.closest(".bus-seat");
   if(!item) return;
   const name = item.dataset.name;
   if(!name) return;
-  // 체크박스(왼쪽 네모)를 누르면 탑승 체크, 이름 쪽을 누르면 자리 바꾸기
-  if(e.target.closest(".bs-box")){
-    item.classList.toggle("checked");
-    if(item.classList.contains("checked")) busAttend[name] = true;
-    else delete busAttend[name];
-    saveAttendState(BUS_ATTEND_KEY, busAttend);
-    updateBusProgress();
-    return;
-  }
-  if(selectedBusStudent === name){
-    selectedBusStudent = null; renderBusList();
-  } else if(selectedBusStudent){
-    swapBusSeats(selectedBusStudent, name);
-  } else {
-    selectedBusStudent = name; renderBusList();
-  }
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) busAttend[name] = true;
+  else delete busAttend[name];
+  saveAttendState(BUS_ATTEND_KEY, busAttend);
+  updateBusProgress();
 });
+
+// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 자리가 맞바뀜 (네모에서 시작한 터치는 제외)
+enableDragSwap(busRosterList, ".bus-seat", el => el.dataset.name, swapBusSeats, { ignore: ".bs-box" });
 
 document.getElementById("busResetBtn").addEventListener("click", () => {
   if(!confirm((currentBus || "이 버스") + " 탑승 체크를 초기화할까요?")) return;
@@ -3905,7 +3983,6 @@ function renderRoomTabs(){
   renderRoomList();
 }
 
-let selectedRoomStudent = null;
 function roomNoOf(name){
   const rooms = applyRoomOverrides(ROOMS)[currentRoomGender] || [];
   const hit = rooms.find(r => r.members.includes(name));
@@ -3913,11 +3990,10 @@ function roomNoOf(name){
 }
 function swapRooms(a, b){
   const ra = roomNoOf(a), rb = roomNoOf(b);
-  if(ra == null || rb == null || ra === rb){ selectedRoomStudent = null; renderRoomList(); return; }
+  if(ra == null || rb == null || ra === rb) return;
   assignOverrides.rooms[a] = rb;
   assignOverrides.rooms[b] = ra;
   pushAssignOverrides();
-  selectedRoomStudent = null;
   renderRoomList();
 }
 
@@ -3930,7 +4006,7 @@ function renderRoomList(){
         <span class="rc-count">${r.members.length}명</span>
       </div>
       ${r.members.map(name => `
-        <div class="room-member${name === selectedRoomStudent ? " selected" : ""}" data-name="${name}">
+        <div class="room-member" data-name="${name}">
           <span class="rm-box">${checkIcon}</span>
           <span class="rm-name">${name}</span>
         </div>
@@ -3958,27 +4034,21 @@ roomRosterTabs.addEventListener("click", (e) => {
   renderRoomTabs();
 });
 
+// 왼쪽 네모(체크박스)를 탭하면 입실 체크. 이름 쪽은 드래그로 방 바꾸기용.
 roomRosterList.addEventListener("click", (e) => {
+  if(!e.target.closest(".rm-box")) return;
   const item = e.target.closest(".room-member");
   if(!item) return;
   const name = item.dataset.name;
-  // 체크박스를 누르면 인원 체크, 이름 쪽을 누르면 방 바꾸기
-  if(e.target.closest(".rm-box")){
-    item.classList.toggle("checked");
-    if(item.classList.contains("checked")) roomAttend[name] = true;
-    else delete roomAttend[name];
-    saveAttendState(ROOM_ATTEND_KEY, roomAttend);
-    updateRoomProgress();
-    return;
-  }
-  if(selectedRoomStudent === name){
-    selectedRoomStudent = null; renderRoomList();
-  } else if(selectedRoomStudent){
-    swapRooms(selectedRoomStudent, name);
-  } else {
-    selectedRoomStudent = name; renderRoomList();
-  }
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) roomAttend[name] = true;
+  else delete roomAttend[name];
+  saveAttendState(ROOM_ATTEND_KEY, roomAttend);
+  updateRoomProgress();
 });
+
+// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 방이 맞바뀜 (네모에서 시작한 터치는 제외)
+enableDragSwap(roomRosterList, ".room-member", el => el.dataset.name, swapRooms, { ignore: ".rm-box" });
 
 document.getElementById("roomResetBtn").addEventListener("click", () => {
   if(!confirm(currentRoomGender + " 출석 체크를 초기화할까요?")) return;
