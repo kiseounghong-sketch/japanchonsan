@@ -65,19 +65,18 @@
     gap:10px;
     padding:12px 16px;
   }
-  .student-name-tag{
+  .ticket-top-right{
     flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:1px;
+  }
+  .student-name-tag{
     font-size:13.5px;
     font-weight:600;
     color:rgba(255,255,255,0.8);
     white-space:nowrap;
-  }
-  .ticket-top-left{
-    flex:1;
-    min-width:0;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
   }
   .trip-title{
     flex:1;
@@ -90,9 +89,10 @@
     letter-spacing:0;
   }
   .trip-dates{
-    font-size:11px;
+    font-size:10.5px;
     font-weight:600;
-    color:rgba(255,255,255,0.55);
+    color:rgba(255,255,255,0.5);
+    white-space:nowrap;
   }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
@@ -1614,11 +1614,11 @@
 
   <header class="ticket">
     <div class="ticket-top">
-      <span class="ticket-top-left">
-        <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
-        <span class="trip-dates">2026.10.27 ~ 2026.10.30</span>
+      <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+      <span class="ticket-top-right">
+        <span class="student-name-tag" id="studentNameTag"></span>
+        <span class="trip-dates">10.27 ~ 10.30</span>
       </span>
-      <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
 
@@ -1786,7 +1786,9 @@
       </div>
     </section>
 
-    <section id="panel-contacts" class="panel">
+    <section id="panel-contacts" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">비상 연락망</h2>
       <button type="button" id="kakaoSosBtn" class="kakao-sos-btn">
         <svg viewBox="0 0 24 24" fill="#191919"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.86 1.8 5.37 4.5 6.83l-1.16 4.3c-.14.5.42.87.82.52l4.98-3.32c.28.02.56.03.86.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
         선생님께 카카오톡으로 내 위치 보내기
@@ -1825,6 +1827,11 @@
         <button class="more-item" data-target="phrases">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
           <span class="more-text">서바이벌 일본어 회화</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="contacts">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <span class="more-text">비상 연락망</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -1899,10 +1906,6 @@
     <button class="tab" data-panel="checklist">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
       준비물
-    </button>
-    <button class="tab" data-panel="contacts">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
-      연락처
     </button>
     <button class="tab" data-panel="more">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -2188,14 +2191,14 @@ const MISSIONS = [
 const FAQS = [
   { q:"멀미약은 어디서 받을 수 있나요?", a:"버스 탑승 전 인솔 선생님께 말씀드리면 나눠드립니다. 미리 먹는 게 효과가 좋으니 출발 30분 전에 받아가세요." },
   { q:"핸드폰 배터리는 어디서 충전하나요?", a:"버스 안 좌석 USB 단자와 숙소 객실 콘센트를 이용할 수 있습니다. 보조배터리를 챙겨오면 더 편리해요." },
-  { q:"몸이 아프면 어떻게 해야 하나요?", a:"바로 담임 선생님 또는 인솔 선생님께 알려주세요. 연락처 탭에서 바로 전화 연결이 가능합니다." },
+  { q:"몸이 아프면 어떻게 해야 하나요?", a:"바로 담임 선생님 또는 인솔 선생님께 알려주세요. 더보기 → 비상 연락망에서 바로 전화 연결이 가능합니다." },
   { q:"자유시간에 개인적으로 이동해도 되나요?", a:"안전을 위해 반드시 배정된 조원과 함께, 사전에 안내된 구역 안에서만 이동해주세요." },
   { q:"용돈은 얼마 정도 챙기면 좋을까요?", a:"기념품과 간식 구입 등을 고려해 학교 안내문에 적힌 권장 금액을 참고해주세요." }
 ];
 
 // 공지 탭 상단 "비상상황 FAQ" 버튼에서 보여주는 목록입니다.
 const EMERGENCY_FAQS = [
-  { q:"🚨 일행과 떨어져 길을 잃었어요!", a:"절대 당황해서 이리저리 돌아다니지 마세요! 그 자리에 멈춰서 [연락처] 탭의 '선생님께 내 위치 보내기(또는 전화)'를 이용해 바로 연락하세요. 와이파이나 데이터가 안 터진다면 가까운 편의점 직원이나 '코반(KOBAN, 파출소)'에 가서 선생님 전화번호나 호텔 이름이 적힌 화면을 보여주세요." },
+  { q:"🚨 일행과 떨어져 길을 잃었어요!", a:"절대 당황해서 이리저리 돌아다니지 마세요! 그 자리에 멈춰서 더보기 → 비상 연락망의 '선생님께 내 위치 보내기(또는 전화)'를 이용해 바로 연락하세요. 와이파이나 데이터가 안 터진다면 가까운 편의점 직원이나 '코반(KOBAN, 파출소)'에 가서 선생님 전화번호나 호텔 이름이 적힌 화면을 보여주세요." },
   { q:"🚨 여권을 잃어버렸어요!", a:"여권이 없으면 한국으로 돌아가는 비행기를 탈 수 없습니다. 잃어버린 것을 안 즉시 혼자 찾으려 하지 말고 <strong>무조건 담임 선생님께 제일 먼저</strong> 알리세요. (미리 찍어둔 여권 사본 사진이 있다면 영사관에서 임시 여권을 발급받는 데 큰 도움이 됩니다.)" },
   { q:"🚨 지진이 났어요! 흔들려요!", a:"당황해서 밖으로 무작정 뛰어나가지 마세요. 1) 가방이나 겉옷으로 <strong>머리를 가장 먼저 보호</strong>하고 2) 튼튼한 탁자 아래나 유리창이 없는 안전한 벽 쪽으로 몸을 숨기세요. 3) 흔들림이 멈추면 선생님이나 현지 안내원(호텔, USJ 직원 등)의 지시에 따라 계단(엘리베이터 금지)으로 대피합니다." },
   { q:"🚨 몸이 너무 아프거나 다쳤어요.", a:"참지 말고 즉시 주변 친구나 선생님께 알리세요. 현지 약국(드럭스토어)에서 파는 약을 함부로 사 먹지 말고, 반드시 선생님과 상의해야 합니다. 수학여행 단체 보험이 들어있으니 병원비 걱정 말고 아프면 바로 이야기하세요!" },
@@ -3023,6 +3026,13 @@ function findMyRoom(){
 }
 function renderRoomGenderTabs(){
   const el = document.getElementById("roomGenderTabs");
+  // 로그인한 학생은 본인 성별 방만 보여요 → 남/여 전환 탭을 숨깁니다.
+  if(findMyRoom()){
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
+  el.hidden = false;
   el.innerHTML = Object.keys(ROOMS).map(g =>
     `<button class="pill${g === currentRoomGender ? " active" : ""}" data-gender="${g}">${g}</button>`
   ).join("");

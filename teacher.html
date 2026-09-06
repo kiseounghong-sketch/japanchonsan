@@ -61,24 +61,27 @@
   .ticket-top{
     display:flex;
     align-items:center;
-    justify-content:center;
+    justify-content:space-between;
+    gap:10px;
     padding:12px 16px;
   }
   .trip-title{
+    flex:1;
+    min-width:0;
     font-family:'Black Han Sans', sans-serif;
     font-weight:400;
     font-size:clamp(14px, 5vw, 19px);
     line-height:1.2;
     margin:0;
     letter-spacing:0;
-    text-align:center;
   }
   .trip-dates{
-    margin:3px 0 0;
-    font-size:11px;
+    flex-shrink:0;
+    margin:0;
+    font-size:10.5px;
     font-weight:600;
-    color:rgba(255,255,255,0.55);
-    text-align:center;
+    color:rgba(255,255,255,0.5);
+    white-space:nowrap;
   }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
@@ -821,7 +824,6 @@
     display:flex;
     align-items:center;
     gap:10px;
-    padding-right:22px;
   }
   .ac-countdown-col{
     flex:7;
@@ -888,21 +890,23 @@
   }
   .ac-delete-btn{
     position:absolute;
-    top:8px;
-    right:8px;
-    width:28px;
-    height:28px;
+    top:5px;
+    right:5px;
+    width:22px;
+    height:22px;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:rgba(255,255,255,0.14);
-    color:rgba(255,255,255,0.85);
-    border:1px solid rgba(255,255,255,0.35);
-    border-radius:8px;
+    background:transparent;
+    color:rgba(255,255,255,0.5);
+    border:none;
+    border-radius:6px;
     padding:0;
     cursor:pointer;
+    z-index:1;
   }
-  .ac-delete-btn svg{width:14px;height:14px;}
+  .ac-delete-btn:hover{ color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.12); }
+  .ac-delete-btn svg{width:13px;height:13px;}
   .assembly-card.urgent{
     background:var(--coral);
     animation:assemblyPulse 1s infinite;
@@ -1850,10 +1854,8 @@
 
   <header class="ticket">
     <div class="ticket-top">
-      <span class="ticket-top-left">
-        <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
-        <p class="trip-dates">2026.10.27 ~ 2026.10.30</p>
-      </span>
+      <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+      <span class="trip-dates">10.27 ~ 10.30</span>
     </div>
   </header>
 
@@ -2075,7 +2077,9 @@
       </div>
     </section>
 
-    <section id="panel-contacts" class="panel">
+    <section id="panel-contacts" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">비상 연락망</h2>
       <button type="button" id="kakaoSosBtn" class="kakao-sos-btn">
         <svg viewBox="0 0 24 24" fill="#191919"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.86 1.8 5.37 4.5 6.83l-1.16 4.3c-.14.5.42.87.82.52l4.98-3.32c.28.02.56.03.86.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
         선생님께 카카오톡으로 내 위치 보내기
@@ -2088,7 +2092,7 @@
       <div class="more-list">
         <button class="more-item" data-target="roster-select">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">인원체크 및 조편성표</span>
+          <span class="more-text">인원배정 및 인원체크</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="grade-select">
@@ -2121,6 +2125,11 @@
           <span class="more-text">서바이벌 일본어 회화</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="more-item" data-target="contacts">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <span class="more-text">비상 연락망</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
       <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
       <button class="danger-link" id="resetStudentsBtn">학생현황 데이터 초기화</button>
@@ -2140,29 +2149,29 @@
 
     <section id="panel-roster-select" class="panel sub-panel">
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">인원체크 및 조편성표</h2>
+      <h2 class="sub-title">인원배정 및 인원체크</h2>
       <div class="more-list">
         <button class="more-item" data-target="bus-roster">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
-          <span class="more-text">버스 인원 체크</span>
+          <span class="more-text">버스</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="room-roster">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
-          <span class="more-text">숙소 인원 체크</span>
+          <span class="more-text">숙소</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="groups">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">조별 명단 관리</span>
+          <span class="more-text">조편성표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
     </section>
 
     <section id="panel-bus-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
-      <h2 class="sub-title">버스 인원 체크</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
+      <h2 class="sub-title">버스</h2>
       <div class="roster-tabs" id="busRosterTabs"></div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
@@ -2175,8 +2184,8 @@
     </section>
 
     <section id="panel-room-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
-      <h2 class="sub-title">숙소 인원 체크</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
+      <h2 class="sub-title">숙소</h2>
       <div class="roster-tabs" id="roomRosterTabs">
         <button class="pill active" data-gender="남학생">남학생</button>
         <button class="pill" data-gender="여학생">여학생</button>
@@ -2192,8 +2201,8 @@
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원체크 및 조편성표</button>
-      <h2 class="sub-title">조별 명단 관리</h2>
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
+      <h2 class="sub-title">조편성표</h2>
       <p class="group-move-hint">학생 이름을 눌러 선택한 뒤, 옮길 조 제목을 누르면 이동해요.</p>
       <div id="groupList"></div>
     </section>
@@ -2275,10 +2284,6 @@
     <button class="tab" data-panel="checklist">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
       준비물
-    </button>
-    <button class="tab" data-panel="contacts">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
-      연락처
     </button>
     <button class="tab" data-panel="more">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
