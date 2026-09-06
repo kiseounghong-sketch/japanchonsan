@@ -705,6 +705,15 @@
   .mission-photo-status.uploading{color:var(--ink-soft);}
   .mission-photo-status.done{color:var(--coral-deep);font-weight:700;}
   .mission-photo-status.failed{color:#c0392b;}
+  .mission-photo-preview{
+    display:block;
+    width:180px;
+    max-width:72%;
+    margin-top:8px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    cursor:pointer;
+  }
 
   /* ===== 연락처 ===== */
   .contact-list{
@@ -2687,7 +2696,7 @@ function linkify(text){
 const photoLightbox = document.getElementById("photoLightbox");
 const photoLightboxImg = document.getElementById("photoLightboxImg");
 document.addEventListener("click", (e) => {
-  const img = e.target.closest(".notice-photo");
+  const img = e.target.closest(".notice-photo, .mission-photo-preview");
   if(img){
     photoLightboxImg.src = img.src;
     photoLightbox.classList.add("show");
@@ -3824,9 +3833,49 @@ function saveMissionState(){
   const checkedTitles = Array.from(missionList.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
   localStorage.setItem(MISSION_STATE_KEY, JSON.stringify(checkedTitles));
 }
+
+/* ---- 올린 미션 사진 미리보기 (브라우저에 저장되어 새로고침해도 유지) ---- */
+const MISSION_PHOTO_KEY = "suhak_mission_photos";
+function loadMissionPhotos(){
+  try { return JSON.parse(localStorage.getItem(MISSION_PHOTO_KEY) || "{}"); } catch(e){ return {}; }
+}
+function saveMissionPhotoData(title, dataUrl){
+  const store = loadMissionPhotos();
+  store[title] = dataUrl;
+  try { localStorage.setItem(MISSION_PHOTO_KEY, JSON.stringify(store)); } catch(e){ /* 저장 공간 초과 시 무시 */ }
+}
+function renderMissionPhoto(itemEl, dataUrl){
+  if(!itemEl || !dataUrl) return;
+  const box = itemEl.querySelector(".mission-text");
+  if(!box) return;
+  let img = box.querySelector(".mission-photo-preview");
+  if(!img){
+    img = document.createElement("img");
+    img.className = "mission-photo-preview";
+    img.alt = "올린 미션 사진 (눌러서 크게 보기)";
+    box.appendChild(img);
+  }
+  img.src = dataUrl;
+}
+async function showMissionPhotoPreview(itemEl, file, title){
+  try {
+    const base64 = await compressImageFile(file, 600, 0.6);
+    const dataUrl = "data:image/jpeg;base64," + base64;
+    renderMissionPhoto(itemEl, dataUrl);
+    saveMissionPhotoData(title, dataUrl);
+  } catch(e){
+    console.error("미션 사진 미리보기 실패:", e);
+  }
+}
+
 const savedMissions = loadMissionState();
 missionList.querySelectorAll(".check-item").forEach(item => {
   if(savedMissions.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
+});
+const savedMissionPhotos = loadMissionPhotos();
+missionList.querySelectorAll(".check-item").forEach(item => {
+  const title = item.querySelector(".text").textContent;
+  if(savedMissionPhotos[title]) renderMissionPhoto(item, savedMissionPhotos[title]);
 });
 
 function updateMissionProgress(){
@@ -3946,7 +3995,10 @@ missionList.querySelectorAll(".mission-photo-input").forEach(input => {
     if(!file) return;
     const item = input.closest(".check-item");
     const statusEl = item.querySelector(".mission-photo-status");
-    uploadMissionPhoto(input.dataset.mission, file, statusEl, item);
+    const missionTitle = input.dataset.mission;
+    // 올린 사진을 화면에 바로 보여주고(브라우저에 저장), 서버 업로드도 함께 진행합니다.
+    showMissionPhotoPreview(item, file, missionTitle);
+    uploadMissionPhoto(missionTitle, file, statusEl, item);
     input.value = "";
   });
 });
