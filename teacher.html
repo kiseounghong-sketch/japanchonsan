@@ -1134,7 +1134,7 @@
     border-radius:8px;
   }
   /* 꾹 눌러 드래그가 브라우저 스크롤/롱프레스 메뉴에 가로채이지 않도록 */
-  #groupList .member-chip,
+  #groupList .room-member,
   #busRosterList .bus-seat,
   #roomRosterList .room-member{
     touch-action:none;
@@ -1445,6 +1445,35 @@
   .room-member.checked .rm-box{background:var(--coral);border-color:var(--coral);}
   .room-member.checked .rm-box svg{opacity:1;transform:scale(1);stroke:#fff;}
   .room-member.checked .rm-name{color:var(--coral-deep);}
+
+  /* 조편성표 / 학생 명렬표: 이름+체크박스 2열 그리드 */
+  .roster-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .roster-grid .room-member{
+    padding:9px 10px;
+    background:var(--paper-dim);
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    touch-action:none;
+    -webkit-touch-callout:none;
+  }
+  .roster-grid .room-member.drag-source{opacity:.3;}
+  .roster-grid .room-member .rm-num{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    flex-shrink:0;
+  }
+  .nl-group-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--coral-deep);
+    margin:16px 2px 8px;
+  }
+  .nl-group-label:first-child{margin-top:0;}
 
   /* ===== 서바이벌 일본어 회화 ===== */
   .phrase-category{
@@ -2237,6 +2266,11 @@
           <span class="more-text">조편성표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="more-item" data-target="name-list">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></span>
+          <span class="more-text">학생 명렬표</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </section>
 
@@ -2276,8 +2310,29 @@
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">조편성표</h2>
-      <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 조가 맞바뀌어요. 바꾼 내용은 학생 화면에도 반영돼요.</p>
+      <p class="group-move-hint">이름을 <b>탭</b>하면 출석 체크, <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 조가 맞바뀌어요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="groupProgressFill"></div></div>
+        <div class="progress-head">
+          <p class="progress-text"><span id="groupCheckedCount">0</span>/<span id="groupTotalCount">0</span>명 확인</p>
+          <button class="roster-reset-btn" id="groupResetBtn">초기화</button>
+        </div>
+      </div>
       <div id="groupList"></div>
+    </section>
+
+    <section id="panel-name-list" class="panel sub-panel">
+      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
+      <h2 class="sub-title">학생 명렬표</h2>
+      <p class="group-move-hint">전체 학생 출석 확인용이에요. 이름을 탭하면 체크됩니다. (이 기기에만 저장)</p>
+      <div class="progress">
+        <div class="progress-bar"><div class="progress-fill" id="nameListProgressFill"></div></div>
+        <div class="progress-head">
+          <p class="progress-text"><span id="nameListCheckedCount">0</span>/<span id="nameListTotalCount">0</span>명 확인</p>
+          <button class="roster-reset-btn" id="nameListResetBtn">초기화</button>
+        </div>
+      </div>
+      <div id="nameListList"></div>
     </section>
 
     <section id="panel-missions" class="panel sub-panel">
@@ -3871,8 +3926,10 @@ document.getElementById("sosAllContactsBtn").addEventListener("click", () => {
   showPanel("contacts");
 });
 
-/* ---- 조 편성표 렌더 ---- */
+/* ---- 조 편성표 렌더 (한눈에 보기 + 출석 체크 + 드래그 교환) ---- */
 const groupList = document.getElementById("groupList");
+const GROUP_ATTEND_KEY = "teacher_group_attendance";
+let groupAttend = loadAttendState(GROUP_ATTEND_KEY);
 
 // 특정 학생이 지금 몇 조인지 (배정 변경 반영된 기준)
 function groupNoOf(name){
@@ -3881,12 +3938,9 @@ function groupNoOf(name){
 }
 
 function renderGroups(){
-  const openNos = new Set(
-    [...document.querySelectorAll("#groupList .group-card.open")].map(c => c.dataset.groupNo)
-  );
   const groups = applyGroupOverrides(GROUPS);
   groupList.innerHTML = groups.map(g => `
-    <div class="group-card${openNos.has(String(g.no)) ? " open" : ""}" data-group-no="${g.no}">
+    <div class="group-card open" data-group-no="${g.no}">
       <div class="group-head">
         <span class="group-no">${g.no}조</span>
         <span class="g-info">
@@ -3896,12 +3950,25 @@ function renderGroups(){
         <span class="chevron">${chevronDown}</span>
       </div>
       <div class="group-body">
-        <div class="member-chips">
-          ${g.members.map(m => `<span class="member-chip" data-name="${m}">${m}</span>`).join("")}
+        <div class="roster-grid">
+          ${g.members.map(m => `
+            <div class="room-member${groupAttend[m] ? " checked" : ""}" data-name="${m}">
+              <span class="rm-box">${checkIcon}</span>
+              <span class="rm-name">${m}</span>
+            </div>`).join("")}
         </div>
       </div>
     </div>
   `).join("");
+  updateGroupProgress();
+}
+
+function updateGroupProgress(){
+  const total = groupList.querySelectorAll(".room-member").length;
+  const checked = groupList.querySelectorAll(".room-member.checked").length;
+  document.getElementById("groupCheckedCount").textContent = checked;
+  document.getElementById("groupTotalCount").textContent = total;
+  document.getElementById("groupProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
 }
 
 renderGroups();
@@ -3914,18 +3981,83 @@ function swapStudentGroups(a, b){
   assignOverrides.groups[b] = ga;
   pushAssignOverrides();
   renderGroups();
-  [ga, gb].forEach(no => document.querySelectorAll(`.group-card[data-group-no="${no}"]`).forEach(c => c.classList.add("open")));
 }
 
-// 조 제목 누르면 펼치기/접기 (드래그 중이 아닐 때만)
+// 이름을 탭하면 출석 체크
 groupList.addEventListener("click", (e) => {
-  const head = e.target.closest(".group-head");
-  if(!head) return;
-  head.closest(".group-card").classList.toggle("open");
+  const item = e.target.closest(".room-member");
+  if(!item) return;
+  const name = item.dataset.name;
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) groupAttend[name] = true;
+  else delete groupAttend[name];
+  saveAttendState(GROUP_ATTEND_KEY, groupAttend);
+  updateGroupProgress();
+});
+
+document.getElementById("groupResetBtn").addEventListener("click", () => {
+  if(!confirm("조편성표 출석 체크를 모두 초기화할까요?")) return;
+  groupAttend = {};
+  saveAttendState(GROUP_ATTEND_KEY, groupAttend);
+  renderGroups();
 });
 
 // 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 조가 맞바뀜
-enableDragSwap(groupList, ".member-chip", el => el.dataset.name, swapStudentGroups);
+enableDragSwap(groupList, ".room-member", el => el.dataset.name, swapStudentGroups);
+
+/* ---- 학생 명렬표 (전체 학생 출석 체크만) ---- */
+const NAMELIST_ATTEND_KEY = "teacher_namelist_attendance";
+let nameListAttend = loadAttendState(NAMELIST_ATTEND_KEY);
+const nameListList = document.getElementById("nameListList");
+
+function renderNameList(){
+  const byGrade = { "1학년": [], "2학년": [] };
+  ROSTER.forEach(s => {
+    const grade = s.id.charAt(0) === "1" ? "1학년" : "2학년";
+    byGrade[grade].push(s);
+  });
+  nameListList.innerHTML = Object.keys(byGrade).map(grade => {
+    const rows = byGrade[grade]
+      .slice()
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(s => `
+        <div class="room-member${nameListAttend[s.name] ? " checked" : ""}" data-name="${s.name}">
+          <span class="rm-box">${checkIcon}</span>
+          <span class="rm-num">${s.id}</span>
+          <span class="rm-name">${s.name}</span>
+        </div>`).join("");
+    return `<p class="nl-group-label">${grade} (${byGrade[grade].length}명)</p><div class="roster-grid">${rows}</div>`;
+  }).join("");
+  updateNameListProgress();
+}
+
+function updateNameListProgress(){
+  const total = nameListList.querySelectorAll(".room-member").length;
+  const checked = nameListList.querySelectorAll(".room-member.checked").length;
+  document.getElementById("nameListCheckedCount").textContent = checked;
+  document.getElementById("nameListTotalCount").textContent = total;
+  document.getElementById("nameListProgressFill").style.width = (total ? (checked / total * 100) : 0) + "%";
+}
+
+nameListList.addEventListener("click", (e) => {
+  const item = e.target.closest(".room-member");
+  if(!item) return;
+  const name = item.dataset.name;
+  item.classList.toggle("checked");
+  if(item.classList.contains("checked")) nameListAttend[name] = true;
+  else delete nameListAttend[name];
+  saveAttendState(NAMELIST_ATTEND_KEY, nameListAttend);
+  updateNameListProgress();
+});
+
+document.getElementById("nameListResetBtn").addEventListener("click", () => {
+  if(!confirm("학생 명렬표 출석 체크를 모두 초기화할까요?")) return;
+  nameListAttend = {};
+  saveAttendState(NAMELIST_ATTEND_KEY, nameListAttend);
+  renderNameList();
+});
+
+renderNameList();
 
 /* ---- 버스 편성표 / 숙소 편성표 (선생님 전용 출석 체크, 이 기기에만 저장) ---- */
 const BUS_ATTEND_KEY = "teacher_bus_attendance";
@@ -4145,6 +4277,12 @@ document.querySelectorAll('.more-item[data-target="bus-roster"]').forEach(btn =>
 });
 document.querySelectorAll('.more-item[data-target="room-roster"]').forEach(btn => {
   btn.addEventListener("click", renderRoomTabs);
+});
+document.querySelectorAll('.more-item[data-target="groups"]').forEach(btn => {
+  btn.addEventListener("click", renderGroups);
+});
+document.querySelectorAll('.more-item[data-target="name-list"]').forEach(btn => {
+  btn.addEventListener("click", renderNameList);
 });
 
 renderBusTabs();
