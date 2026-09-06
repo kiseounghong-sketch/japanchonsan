@@ -281,10 +281,24 @@
   .time{
     width:52px;
     flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
     font-size:13px;
     font-weight:700;
     color:var(--ink-soft);
     padding-top:1px;
+  }
+  .tl-tag{
+    font-size:9.5px;
+    font-weight:800;
+    color:#fff;
+    background:var(--coral);
+    padding:1px 6px;
+    border-radius:999px;
+    line-height:1.5;
+    white-space:nowrap;
   }
   .dot{
     position:absolute;
@@ -342,7 +356,7 @@
     padding:10px 12px;
   }
   .timeline li.open .tl-note{display:block;}
-  /* 타임라인 진행 표시 */
+  /* 타임라인 진행 표시 — 세로선을 현재 지점까지 코랄색으로 채우고, 그 줄에 태그 */
   .tl-progress{
     position:absolute;
     left:52px;
@@ -353,34 +367,8 @@
     transition:height .4s ease;
     pointer-events:none;
   }
-  .tl-now{
-    position:absolute;
-    left:0;
-    right:0;
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    padding-right:14px;
-    pointer-events:none;
-    transform:translateY(-50%);
-  }
-  .tl-now::before{
-    content:"";
-    position:absolute;
-    left:47px;
-    width:12px;height:12px;
-    border-radius:50%;
-    background:var(--coral);
-    box-shadow:0 0 0 4px rgba(255,90,54,0.25);
-  }
-  .tl-now .tl-now-label{
-    font-size:11px;
-    font-weight:800;
-    color:#fff;
-    background:var(--coral);
-    padding:2px 8px;
-    border-radius:999px;
-    white-space:nowrap;
+  .timeline li.tl-current > .dot{
+    box-shadow:0 0 0 4px rgba(255,90,54,0.22);
   }
   .fw-note{
     display:none;
@@ -2894,12 +2882,11 @@ function renderDay(dayKey){
   const tl = document.getElementById("timeline");
   tl.innerHTML =
     `<div class="tl-progress" id="tlProgress"></div>` +
-    `<div class="tl-now" id="tlNow" hidden><span class="tl-now-label"></span></div>` +
     SCHEDULE[dayKey].items.map(([time, name, place]) => {
       const note = SCHEDULE_NOTES[dayKey + "-" + time];
       return `
     <li>
-      <span class="time">${time}</span>
+      <span class="time">${time}<span class="tl-tag" hidden></span></span>
       <span class="dot"></span>
       <span class="event">
         <p class="name"><span class="title-text">${name}</span><span class="tl-more">자세히 <span class="tl-more-arrow">▾</span></span></p>
@@ -2918,12 +2905,11 @@ function dayDate(dayKey){
   return d;
 }
 
-// 현재 시각을 30분 단위로 끊어 오늘 일정의 진행 위치를 타임라인에 표시
+// 오늘 일정의 현재 지점을 찾아 그 줄에 태그를 붙이고, 세로선을 거기까지 채웁니다.
 function updateTimelineProgress(){
   const tl = document.getElementById("timeline");
-  const tlNow = document.getElementById("tlNow");
   const prog = document.getElementById("tlProgress");
-  if(!tl || !tlNow || !prog) return;
+  if(!tl || !prog) return;
   const lis = [...tl.querySelectorAll("li")];
   if(!lis.length) return;
 
@@ -2936,38 +2922,29 @@ function updateTimelineProgress(){
   const now = new Date();
   const dd = dayDate(currentDayKey);
   const sameDay = now.getFullYear() === dd.getFullYear() && now.getMonth() === dd.getMonth() && now.getDate() === dd.getDate();
-  const firstY = dotY(0), lastY = dotY(lis.length - 1);
-  let y, label;
 
-  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00)에 고정
-    y = firstY;
-    label = "시작 전";
-  } else if(!sameDay && now > dd){      // 이미 지난 날
-    y = lastY;
-    label = "일정 종료";
-  } else {                              // 오늘
-    const nowMin = Math.floor((now.getHours() * 60 + now.getMinutes()) / 30) * 30;
-    const first = toMin(items[0][0]), last = toMin(items[items.length - 1][0]);
-    if(nowMin <= first){ y = firstY; }
-    else if(nowMin >= last){ y = lastY; }
-    else {
-      for(let i = 0; i < items.length - 1; i++){
-        const a = toMin(items[i][0]), b = toMin(items[i + 1][0]);
-        if(nowMin >= a && nowMin <= b){
-          const t = (b - a) ? (nowMin - a) / (b - a) : 0;
-          y = dotY(i) + t * (dotY(i + 1) - dotY(i));
-          break;
-        }
-      }
-    }
-    const hh = String(Math.floor(nowMin / 60)).padStart(2, "0");
-    const mm = String(nowMin % 60).padStart(2, "0");
-    label = "지금 " + hh + ":" + mm;
+  let curIdx, label;
+  if(now < dd){                         // 아직 시작 전 → 첫 일정에 '시작 전'
+    curIdx = 0; label = "시작 전";
+  } else if(!sameDay && now > dd){      // 이미 지난 날 → 마지막에 '종료'
+    curIdx = lis.length - 1; label = "종료";
+  } else {                              // 오늘 → 현재 시각이 지난 마지막 일정
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    curIdx = 0;
+    for(let i = 0; i < items.length; i++){ if(nowMin >= toMin(items[i][0])) curIdx = i; }
+    label = "지금";
   }
-  tlNow.hidden = false;
-  tlNow.style.top = y + "px";
-  tlNow.querySelector(".tl-now-label").textContent = label;
-  prog.style.height = Math.max(0, y - 6) + "px";
+
+  lis.forEach(li => {
+    li.classList.remove("tl-current");
+    const t = li.querySelector(".tl-tag");
+    if(t){ t.hidden = true; t.textContent = ""; }
+  });
+  const cur = lis[curIdx];
+  cur.classList.add("tl-current");
+  const tag = cur.querySelector(".tl-tag");
+  if(tag){ tag.textContent = label; tag.hidden = false; }
+  prog.style.height = Math.max(0, dotY(curIdx) - 6) + "px";
 }
 setInterval(updateTimelineProgress, 60 * 1000);
 window.addEventListener("resize", updateTimelineProgress);
