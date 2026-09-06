@@ -1110,6 +1110,15 @@
     outline-offset:2px;
     border-radius:8px;
   }
+  /* 꾹 눌러 드래그가 브라우저 스크롤/롱프레스 메뉴에 가로채이지 않도록 */
+  #groupList .member-chip,
+  #busRosterList .bus-seat,
+  #roomRosterList .room-member{
+    touch-action:none;
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+  }
   body.dragging-active{
     -webkit-user-select:none;
     user-select:none;
@@ -2941,7 +2950,7 @@ function applyBusOverrides(baseBuses){
    opts.ignore 선택자(체크박스 등)에서 시작한 터치는 드래그로 보지 않습니다. */
 function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
   opts = opts || {};
-  const HOLD_MS = 300, MOVE_CANCEL = 12;
+  const HOLD_MS = 260, MOVE_CANCEL = 14;
   let st = null;
 
   function cleanup(){
@@ -2951,6 +2960,7 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     if(st.item) st.item.classList.remove("drag-source");
     listEl.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
     document.body.classList.remove("dragging-active");
+    try { listEl.releasePointerCapture(st.pid); } catch(_){}
     st = null;
   }
   function makeGhost(item, x, y){
@@ -2968,13 +2978,31 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     st.ghost.style.left = (x - r.width / 2) + "px";
     st.ghost.style.top = (y - r.height / 2) + "px";
   }
+  // 드래그를 끝냅니다. dropped=true 면 대상 위에서 놓은 것.
+  function endDrag(dropped){
+    if(!st) return;
+    const wasDrag = st.dragging;
+    const src = wasDrag ? getName(st.item) : null;
+    const dst = st.target;
+    cleanup();
+    if(wasDrag){
+      if(dropped && dst && dst !== src) onSwap(src, dst);
+      // 드래그 직후 따라오는 click 1회 무시 (체크 오작동 방지)
+      const kill = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+      listEl.addEventListener("click", kill, true);
+      setTimeout(() => listEl.removeEventListener("click", kill, true), 400);
+    }
+  }
 
   listEl.addEventListener("pointerdown", (e) => {
+    if(e.button != null && e.button !== 0) return;
     if(opts.ignore && e.target.closest(opts.ignore)) return;
     const item = e.target.closest(itemSel);
     if(!item || !getName(item)) return;
     cleanup();
     st = { x0:e.clientX, y0:e.clientY, item, dragging:false, timer:null, target:null, pid:e.pointerId };
+    // 처음부터 포인터를 붙잡아 스크롤/취소로 이벤트가 새지 않게 합니다.
+    try { listEl.setPointerCapture(e.pointerId); } catch(_){}
     st.timer = setTimeout(() => {
       if(!st) return;
       st.dragging = true;
@@ -2982,21 +3010,22 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
       st.ghost = makeGhost(st.item, st.x0, st.y0);
       document.body.classList.add("dragging-active");
       if(navigator.vibrate) navigator.vibrate(15);
-      try { listEl.setPointerCapture(st.pid); } catch(_){}
     }, HOLD_MS);
   });
 
   listEl.addEventListener("pointermove", (e) => {
-    if(!st) return;
+    if(!st || e.pointerId !== st.pid) return;
     if(!st.dragging){
       if(Math.abs(e.clientX - st.x0) > MOVE_CANCEL || Math.abs(e.clientY - st.y0) > MOVE_CANCEL){
-        clearTimeout(st.timer); st = null;   // 손이 먼저 움직이면 스크롤로 간주
+        cleanup();   // 홀드 전에 손이 움직이면 스크롤로 간주하고 포기
       }
       return;
     }
     e.preventDefault();
     moveGhost(e.clientX, e.clientY);
+    st.ghost.style.visibility = "hidden";
     const under = document.elementFromPoint(e.clientX, e.clientY);
+    st.ghost.style.visibility = "";
     const t = under && under.closest(itemSel);
     listEl.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
     if(t && t !== st.item && getName(t)){
@@ -3007,23 +3036,20 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     }
   });
 
-  function finish(e){
-    if(!st) return;
-    const wasDrag = st.dragging;
-    const src = wasDrag ? getName(st.item) : null;
-    const dst = st.target;
-    cleanup();
-    if(wasDrag){
-      if(e) e.preventDefault();
-      if(dst && dst !== src) onSwap(src, dst);
-      // 드래그 직후 따라오는 click 이벤트를 한 번 무시 (체크박스 오작동 방지)
-      const kill = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
-      listEl.addEventListener("click", kill, true);
-      setTimeout(() => listEl.removeEventListener("click", kill, true), 350);
-    }
-  }
-  listEl.addEventListener("pointerup", finish);
-  listEl.addEventListener("pointercancel", cleanup);
+  listEl.addEventListener("pointerup", (e) => {
+    if(!st || e.pointerId !== st.pid) return;
+    if(st.dragging) e.preventDefault();
+    endDrag(true);
+  });
+  // 브라우저가 도중에 포인터를 취소해도, 이미 대상이 잡혀 있으면 그 위치로 교환 처리
+  listEl.addEventListener("pointercancel", (e) => {
+    if(!st || e.pointerId !== st.pid) return;
+    endDrag(true);
+  });
+  listEl.addEventListener("lostpointercapture", () => {
+    if(st && st.dragging) endDrag(true);
+    else cleanup();
+  });
 }
 
 function loadNotices(){
@@ -3949,9 +3975,8 @@ busRosterTabs.addEventListener("click", (e) => {
   renderBusTabs();
 });
 
-// 왼쪽 네모(체크박스)를 탭하면 탑승 체크. 이름 쪽은 드래그로 자리 바꾸기용.
+// 좌석을 살짝 탭하면 탑승 체크 (아무 곳이나). 꾹 누르면 아래 드래그로 자리 바꾸기.
 busRosterList.addEventListener("click", (e) => {
-  if(!e.target.closest(".bs-box")) return;
   const item = e.target.closest(".bus-seat");
   if(!item) return;
   const name = item.dataset.name;
@@ -3963,8 +3988,8 @@ busRosterList.addEventListener("click", (e) => {
   updateBusProgress();
 });
 
-// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 자리가 맞바뀜 (네모에서 시작한 터치는 제외)
-enableDragSwap(busRosterList, ".bus-seat", el => el.dataset.name, swapBusSeats, { ignore: ".bs-box" });
+// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 자리가 맞바뀜
+enableDragSwap(busRosterList, ".bus-seat", el => el.dataset.name, swapBusSeats);
 
 document.getElementById("busResetBtn").addEventListener("click", () => {
   if(!confirm((currentBus || "이 버스") + " 탑승 체크를 초기화할까요?")) return;
@@ -4034,9 +4059,8 @@ roomRosterTabs.addEventListener("click", (e) => {
   renderRoomTabs();
 });
 
-// 왼쪽 네모(체크박스)를 탭하면 입실 체크. 이름 쪽은 드래그로 방 바꾸기용.
+// 학생을 살짝 탭하면 입실 체크 (아무 곳이나). 꾹 누르면 아래 드래그로 방 바꾸기.
 roomRosterList.addEventListener("click", (e) => {
-  if(!e.target.closest(".rm-box")) return;
   const item = e.target.closest(".room-member");
   if(!item) return;
   const name = item.dataset.name;
@@ -4047,8 +4071,8 @@ roomRosterList.addEventListener("click", (e) => {
   updateRoomProgress();
 });
 
-// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 방이 맞바뀜 (네모에서 시작한 터치는 제외)
-enableDragSwap(roomRosterList, ".room-member", el => el.dataset.name, swapRooms, { ignore: ".rm-box" });
+// 학생 이름을 꾹 눌러 드래그 → 다른 학생 위에 놓으면 방이 맞바뀜
+enableDragSwap(roomRosterList, ".room-member", el => el.dataset.name, swapRooms);
 
 document.getElementById("roomResetBtn").addEventListener("click", () => {
   if(!confirm(currentRoomGender + " 출석 체크를 초기화할까요?")) return;
