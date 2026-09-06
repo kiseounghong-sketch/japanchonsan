@@ -359,6 +359,83 @@
     color:var(--ink-soft);
     margin:0;
   }
+  .event .name .tl-more{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--coral-deep);
+    white-space:nowrap;
+  }
+  .timeline li.open .tl-more .tl-more-arrow{display:inline-block;transform:rotate(180deg);}
+  .tl-note{
+    display:none;
+    margin:8px 0 0;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--ink);
+    background:var(--paper-dim);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .timeline li.open .tl-note{display:block;}
+  .timeline li.has-note .event{cursor:pointer;}
+  .tl-progress{
+    position:absolute;
+    left:52px;
+    top:6px;
+    width:2px;
+    background:var(--coral);
+    height:0;
+    transition:height .4s ease;
+    pointer-events:none;
+  }
+  .tl-now{
+    position:absolute;
+    left:0;
+    right:0;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    pointer-events:none;
+    transform:translateY(-50%);
+  }
+  .tl-now::before{
+    content:"";
+    position:absolute;
+    left:47px;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--coral);
+    box-shadow:0 0 0 4px rgba(255,90,54,0.25);
+  }
+  .tl-now .tl-now-label{
+    margin-left:70px;
+    font-size:11px;
+    font-weight:800;
+    color:#fff;
+    background:var(--coral);
+    padding:2px 8px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .fw-note{
+    display:none;
+    flex-basis:100%;
+    margin:4px 0 0;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--ink);
+    background:var(--paper-dim);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .findway-item{flex-wrap:wrap;}
+  .findway-item.note-open .fw-note{display:block;}
+  .findway-item .fw-name .tl-more{
+    font-size:11px;
+    font-weight:700;
+    color:var(--coral-deep);
+    margin-left:4px;
+  }
 
   /* ===== 길찾기 ===== */
   .next-stop-card{
@@ -2506,6 +2583,42 @@ const SCHEDULE = {
   }
 };
 
+// 일정 상세 설명 — 키는 "일차-시각". 설명이 있는 항목만 타임라인·길찾기에서 탭하면 펼쳐집니다.
+const SCHEDULE_NOTES = {
+  "1-07:00": "여권과 모바일 항공권을 챙겼는지 다시 확인하세요. 집결 시간에 늦으면 전체 일정이 밀립니다. 큰 캐리어는 버스 짐칸, 귀중품은 몸에 지니세요.",
+  "1-08:00": "여권과 탑승권을 손에 들고 보안검색 → 출국심사 순으로 진행해요. 물·음료 등 액체류는 100ml 이하만 기내에 가져갈 수 있어요.",
+  "1-09:55": "TW327편, 약 1시간 45분 비행. 이착륙 때 안전벨트를 매고 전자기기는 비행기모드로 바꿔주세요.",
+  "1-11:40": "일본 입국심사에서 지문과 얼굴 사진을 찍어요. 당황하지 말고 선생님 안내에 따라 조별로 이동합니다.",
+  "1-12:30": "현지식 돈까스로 점심. 못 먹는 음식이나 알레르기가 있으면 식사 전에 선생님께 꼭 말하세요.",
+  "1-13:30": "'사람과 미래 방재센터'는 1995년 한신·아와지 대지진을 기억하는 곳이에요. 지진 체험 코너가 있으니 진지하게 참여하고, 촬영 금지 구역 안내를 지켜주세요.",
+  "1-15:00": "지진메모리얼파크에는 무너진 방파제를 그대로 보존해 뒀어요. 항구를 따라 걷는 자유 산책 구간이니, 집합 시간·장소를 꼭 기억하고 조원과 함께 다니세요.",
+  "1-17:30": "버스로 약 1시간 30분 이동. 멀미가 잘 나는 학생은 출발 전 선생님께 멀미약을 받아 미리 드세요.",
+  "1-19:30": "야끼니꾸(고기구이) 무제한 석식. 방 번호와 룸메이트를 확인하고, 귀중품은 객실 금고나 프런트에 맡기세요.",
+
+  "2-08:00": "오늘은 USJ에서 하루 종일 자유이용이에요. 반드시 조 단위로 움직이고 절대 혼자 다니지 마세요.",
+  "2-09:00": "입장하면 USJ 공식 앱으로 놀이기구 대기시간을 보며 다니면 효율적이에요. 미아 방지를 위해 조끼리 붙어 다니고, 정해진 집합 시간·장소를 꼭 지키세요. 잃어버린 물건은 파크 인포메이션 센터로.",
+  "2-12:30": "파크 안에서 자유롭게 사 먹어요. 예산 2,000엔 정도로 계획하고 현금·카드를 함께 챙기면 편해요. 점심시간엔 매장이 붐비니 조금 일찍 움직이세요.",
+  "2-18:00": "저녁도 파크 안에서 자유식. 폐장 직전에는 사람이 몰리니 여유 있게 드세요.",
+  "2-19:30": "버스 타기 전 조별 인원 확인. 오늘 산 기념품은 캐리어에 잘 정리해 두세요.",
+
+  "3-08:00": "오늘은 교토 답사예요. 사찰에서는 조용히, 실내에서 신발을 벗는 곳이 많으니 신고 벗기 편한 신발이 좋아요.",
+  "3-09:30": "윤동주·정지용 시인이 유학한 대학이에요. 두 시비(詩碑) 앞에서 잠시 묵념하고, 캠퍼스에서는 재학생에게 방해되지 않게 조용히 이동합니다.",
+  "3-11:00": "'기요미즈데라(청수사)'. 절벽 위 나무 무대에서 교토 시내가 한눈에 보여요. 난간에 기대거나 위험한 자세로 사진 찍지 마세요. 운세(오미쿠지)·부적을 파는 곳도 있어요.",
+  "3-12:00": "청수사 오르는 길(산넨자카)에 식당과 간식이 많아요. 일본에서는 걸어 다니며 먹는 걸 실례로 여기니, 가게 앞이나 벤치에 서서 드세요.",
+  "3-13:00": "돌계단 옛길이라 바닥이 미끄러워요. '넘어지면 3년 안에 불운이 온다'는 속설이 있을 만큼 조심해야 하는 길입니다. 기념품 쇼핑 명소예요.",
+  "3-14:30": "버스로 약 1시간 이동. 도착하기 전에 화장실을 미리 다녀오세요.",
+  "3-15:30": "버스에서 내리지 않고 창밖으로 천수각(오사카성)을 봅니다. 어느 쪽 창인지 안내에 따라 미리 준비하세요.",
+  "3-16:30": "글리코 간판으로 유명한 번화가에서 자유시간 겸 자유 저녁이에요. 사람이 아주 많으니 조원과 절대 떨어지지 말고, 소매치기를 조심하고, 집합 장소·시간을 저장해 두세요.",
+  "3-19:30": "인원 확인 후 휴식. 다음 날 귀국이니 짐을 미리 싸 두면 아침이 편해요.",
+
+  "4-07:00": "체크아웃 전 객실에 두고 온 물건이 없는지 확인하고, 충전기·보조배터리를 꼭 챙기세요.",
+  "4-08:30": "여권은 캐리어 깊숙이 넣지 말고 손가방에 넣어 두세요.",
+  "4-09:00": "면세점 쇼핑은 탑승 시간을 넉넉히 남기고 하세요. 액체·젤류 100ml 규정을 다시 확인합니다.",
+  "4-12:40": "TW328편, 약 1시간 50분 비행. 도착하면 조별로 모여 해산 준비를 해요.",
+  "4-14:30": "입국심사와 수하물 찾기 후 전체 인원을 확인합니다.",
+  "4-16:00": "학교에서 최종 점호 후 해산. 분실물은 인솔 선생님께 문의하세요."
+};
+
 // 준비물 체크리스트 (그룹명: [항목, 항목, ...])
 // 준비물 체크리스트 (그룹명: [{ text, essential, guide }])
 // essential:true인 항목은 학생 화면에 "필수" 표시가 뜨고,
@@ -3491,17 +3604,91 @@ let currentDayKey = dayKeys[0];
 function renderDay(dayKey){
   document.getElementById("dayLabel").textContent = SCHEDULE[dayKey].label;
   const tl = document.getElementById("timeline");
-  tl.innerHTML = SCHEDULE[dayKey].items.map(([time, name, place]) => `
-    <li>
+  tl.innerHTML =
+    `<div class="tl-progress" id="tlProgress"></div>` +
+    `<div class="tl-now" id="tlNow" hidden><span class="tl-now-label"></span></div>` +
+    SCHEDULE[dayKey].items.map(([time, name, place]) => {
+      const note = SCHEDULE_NOTES[dayKey + "-" + time];
+      return `
+    <li class="${note ? "has-note" : ""}">
       <span class="time">${time}</span>
       <span class="dot"></span>
       <span class="event">
-        <p class="name">${name}</p>
+        <p class="name">${name}${note ? ` <span class="tl-more">자세히 <span class="tl-more-arrow">▾</span></span>` : ""}</p>
         <p class="place">${place}</p>
+        ${note ? `<p class="tl-note">${note}</p>` : ""}
       </span>
-    </li>
-  `).join("");
+    </li>`;
+    }).join("");
+  updateTimelineProgress();
 }
+
+function dayDate(dayKey){
+  const d = new Date(DEPART_DATE + "T00:00:00");
+  d.setDate(d.getDate() + (Number(dayKey) - 1));
+  return d;
+}
+
+function updateTimelineProgress(){
+  const tl = document.getElementById("timeline");
+  const tlNow = document.getElementById("tlNow");
+  const prog = document.getElementById("tlProgress");
+  if(!tl || !tlNow || !prog) return;
+  const lis = [...tl.querySelectorAll("li")];
+  if(!lis.length) return;
+
+  const items = SCHEDULE[currentDayKey].items;
+  const toMin = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const dotY = i => {
+    const dot = lis[i].querySelector(".dot");
+    return lis[i].offsetTop + dot.offsetTop + dot.offsetHeight / 2;
+  };
+  const now = new Date();
+  const dd = dayDate(currentDayKey);
+  const sameDay = now.getFullYear() === dd.getFullYear() && now.getMonth() === dd.getMonth() && now.getDate() === dd.getDate();
+  const firstY = dotY(0), lastY = dotY(lis.length - 1);
+  let y, label;
+
+  if(now < dd){
+    tlNow.hidden = true;
+    prog.style.height = "0px";
+    return;
+  }
+  if(!sameDay && now > dd){
+    y = lastY;
+    label = "일정 종료";
+  } else {
+    const nowMin = Math.floor((now.getHours() * 60 + now.getMinutes()) / 30) * 30;
+    const first = toMin(items[0][0]), last = toMin(items[items.length - 1][0]);
+    if(nowMin <= first){ y = firstY; }
+    else if(nowMin >= last){ y = lastY; }
+    else {
+      for(let i = 0; i < items.length - 1; i++){
+        const a = toMin(items[i][0]), b = toMin(items[i + 1][0]);
+        if(nowMin >= a && nowMin <= b){
+          const t = (b - a) ? (nowMin - a) / (b - a) : 0;
+          y = dotY(i) + t * (dotY(i + 1) - dotY(i));
+          break;
+        }
+      }
+    }
+    const hh = String(Math.floor(nowMin / 60)).padStart(2, "0");
+    const mm = String(nowMin % 60).padStart(2, "0");
+    label = "지금 " + hh + ":" + mm;
+  }
+  tlNow.hidden = false;
+  tlNow.style.top = y + "px";
+  tlNow.querySelector(".tl-now-label").textContent = label;
+  prog.style.height = Math.max(0, y - 6) + "px";
+}
+setInterval(updateTimelineProgress, 60 * 1000);
+window.addEventListener("resize", updateTimelineProgress);
+
+document.getElementById("timeline").addEventListener("click", (e) => {
+  const li = e.target.closest("li.has-note");
+  if(!li) return;
+  li.classList.toggle("open");
+});
 
 dayPills.innerHTML = dayKeys.map((k,i) =>
   `<button class="pill${i===0 ? " active":""}" data-day="${k}">Day ${k}</button>`
@@ -3602,18 +3789,21 @@ function renderFindway(dayKey){
   document.getElementById("nextStopName").textContent = next[1];
   document.getElementById("nextStopGoBtn").href = mapsUrl(next[2], next[3], next[4]);
 
-  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng], i) => `
-    <div class="findway-item" data-lat="${lat != null ? lat : ""}" data-lng="${lng != null ? lng : ""}">
+  document.getElementById("findwayList").innerHTML = items.map(([time, name, place, lat, lng], i) => {
+    const note = SCHEDULE_NOTES[dayKey + "-" + time];
+    return `
+    <div class="findway-item${note ? " has-note" : ""}" data-lat="${lat != null ? lat : ""}" data-lng="${lng != null ? lng : ""}">
       <span class="fw-left">
         ${labels[i] ? `<span class="fw-marker">${labels[i]}</span>` : ""}
         <span class="fw-info">
           <span class="fw-time">${time}</span>
-          <span class="fw-name">${name}</span>
+          <span class="fw-name">${name}${note ? ` <span class="tl-more">자세히 ▾</span>` : ""}</span>
         </span>
       </span>
       <a class="fw-btn" href="${mapsUrl(place, lat, lng)}" target="_blank" rel="noopener">${pinIcon}길찾기</a>
-    </div>
-  `).join("");
+      ${note ? `<p class="fw-note">${note}</p>` : ""}
+    </div>`;
+  }).join("");
 }
 
 renderFindway(currentDayKey);
@@ -3622,6 +3812,9 @@ document.getElementById("findwayList").addEventListener("click", (e) => {
   if(e.target.closest(".fw-btn")) return;
   const item = e.target.closest(".findway-item");
   if(!item) return;
+  if(item.classList.contains("has-note")){
+    item.classList.toggle("note-open");
+  }
   const lat = item.dataset.lat, lng = item.dataset.lng;
   if(!lat || !lng) return;
   document.getElementById("findwayList").querySelectorAll(".findway-item").forEach(el => el.classList.remove("active"));
