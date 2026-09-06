@@ -72,6 +72,13 @@
     color:rgba(255,255,255,0.8);
     white-space:nowrap;
   }
+  .ticket-top-left{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
   .trip-title{
     flex:1;
     min-width:0;
@@ -81,6 +88,11 @@
     line-height:1.2;
     margin:0;
     letter-spacing:0;
+  }
+  .trip-dates{
+    font-size:11px;
+    font-weight:600;
+    color:rgba(255,255,255,0.55);
   }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
@@ -833,10 +845,13 @@
   }
   .ac-place .place-map-link svg{width:12px;height:12px;flex-shrink:0;}
   .ac-map-hint{
-    margin:6px 0 0;
-    font-size:9px;
+    margin:8px 0 0;
+    font-size:9.5px;
     color:rgba(255,255,255,0.5);
     text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .ac-delete-btn{
     margin-top:12px;
@@ -1115,6 +1130,137 @@
     padding:5px 11px;
     border-radius:999px;
   }
+
+  /* ===== 숙소 방 배정 / 버스 좌석표 ===== */
+  .roster-tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .roster-tabs .pill{flex:1;}
+  .empty-state{
+    background:#fff;
+    border:1.5px dashed var(--line);
+    border-radius:var(--radius);
+    padding:20px 16px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  .room-card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .room-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:9px 8px;
+    min-width:0;
+  }
+  .room-card.mine{
+    border-color:var(--coral);
+    background:var(--paper-dim);
+  }
+  .room-card .rc-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px;
+    margin:0 0 6px;
+  }
+  .room-card .rc-no{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .room-member{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 0;
+  }
+  .room-member .rm-name{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+  }
+  .room-member .rm-name.me{
+    color:var(--coral-deep);
+    font-weight:800;
+  }
+  .bus-seat-map{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .bus-seat-row{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+  }
+  .bus-seat-pair{
+    flex:1;
+    display:flex;
+    gap:6px;
+    min-width:0;
+  }
+  .bus-aisle{
+    width:16px;
+    flex-shrink:0;
+    position:relative;
+  }
+  .bus-aisle::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:4px;
+    bottom:4px;
+    width:1px;
+    background:var(--line);
+    transform:translateX(-50%);
+  }
+  .bus-seat{
+    flex:0 0 calc(50% - 3px);
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px 4px;
+  }
+  .bus-seat.mine{
+    border-color:var(--coral);
+    background:var(--paper-dim);
+  }
+  .bus-seat .bs-no{
+    font-size:10px;
+    font-weight:700;
+    color:#fff;
+    background:var(--navy);
+    padding:1px 7px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .bus-seat .bs-name{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    max-width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bus-seat.mine .bs-name{color:var(--coral-deep);font-weight:800;}
 
   /* ===== 서바이벌 일본어 회화 ===== */
   .phrase-category{
@@ -1468,7 +1614,10 @@
 
   <header class="ticket">
     <div class="ticket-top">
-      <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+      <span class="ticket-top-left">
+        <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+        <span class="trip-dates">2026.10.27 ~ 2026.10.30</span>
+      </span>
       <span class="student-name-tag" id="studentNameTag"></span>
     </div>
   </header>
@@ -1560,7 +1709,6 @@
           <div class="ac-countdown-col">
             <p class="ac-label">집합까지 남은 시간</p>
             <p class="ac-countdown" id="assemblyCountdown">--</p>
-            <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
           </div>
           <div class="ac-info-col">
             <div class="ac-info-item">
@@ -1573,6 +1721,7 @@
             </div>
           </div>
         </div>
+        <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
       </div>
       <div class="scroll-area">
         <div id="noticeList"></div>
@@ -1653,6 +1802,16 @@
           <span class="more-text">조 편성표</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button class="more-item" data-target="rooms">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></span>
+          <span class="more-text">숙소 방 배정</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="bus">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 12h18"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="16.5" cy="20" r="1.5"/></svg></span>
+          <span class="more-text">버스 좌석표</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <button class="more-item" data-target="missions">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
           <span class="more-text">사진 미션</span>
@@ -1676,6 +1835,20 @@
       <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">조 편성표</h2>
       <div id="groupList"></div>
+    </section>
+
+    <section id="panel-rooms" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">숙소 방 배정</h2>
+      <div class="roster-tabs" id="roomGenderTabs"></div>
+      <div class="room-card-grid" id="roomsList"></div>
+    </section>
+
+    <section id="panel-bus" class="panel sub-panel">
+      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">버스 좌석표</h2>
+      <div class="roster-tabs" id="busTabs"></div>
+      <div id="busList"></div>
     </section>
 
     <section id="panel-missions" class="panel sub-panel">
@@ -1834,11 +2007,11 @@ const CHECKLIST = {
     { text:"여권", essential:true },
     { text:"모바일 항공권", essential:true, guide:"mobile-ticket" },
     { text:"운동화 (슬리퍼 X)", essential:true },
-    { text:"개념", essential:true }
+    { text:"개인 용돈", essential:true }
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
-    { text:"110V 어댑터(돼지코)", essential:false }
+    { text:"110V 어댑터(돼지코)", essential:false, guide:"japan-plug" }
   ]
 };
 
@@ -1852,6 +2025,15 @@ const ITEM_GUIDES = {
       "예약 상세 화면에서 '모바일 탑승권(모바일 체크인)'을 눌러 발급받아요.",
       "발급된 모바일 탑승권 화면을 캡처하거나 저장해두면 공항에서 바로 보여줄 수 있어요.",
       "출발 전날까지 발급이 안 되면 선생님께 꼭 알려주세요."
+    ]
+  },
+  "japan-plug": {
+    title: "일본 콘센트·전압 안내",
+    steps: [
+      "일본의 전압은 100V로, 한국(220V)보다 낮아요.",
+      "콘센트 모양은 얇은 일자 모양 두 개(A타입)라서, 한국 돼지코(변환 어댑터)만 있으면 대부분의 충전기는 그대로 꽂아 쓸 수 있어요.",
+      "휴대폰·노트북 충전기는 보통 100~240V를 모두 지원해서 어댑터만 있으면 문제없이 충전돼요. (헤어드라이기 등 전압에 민감한 기기는 미리 확인해주세요.)",
+      "숙소 객실 콘센트 개수가 넉넉하지 않을 수 있으니 멀티탭이나 여분의 어댑터를 챙기면 편해요."
     ]
   }
 };
@@ -2803,6 +2985,104 @@ groupList.addEventListener("click", (e) => {
   head.closest(".group-card").classList.toggle("open");
 });
 
+/* ---- 숙소 방 배정 (2인 1실, 여학생 마지막 방만 3인) ---- */
+const ROOMS = {
+  "남학생": [
+    { no:1, members:["고용석","김민호"] }, { no:2, members:["김태원","박민웅"] },
+    { no:3, members:["유지상","이승준"] }, { no:4, members:["이진욱","최건우"] },
+    { no:5, members:["신민수","현영관"] }, { no:6, members:["이금강","하유민"] },
+    { no:7, members:["박서용","임지율"] }, { no:8, members:["유승균","박정호"] }
+  ],
+  "여학생": [
+    { no:9, members:["이수아","신소율"] }, { no:10, members:["김은주","박규빈"] },
+    { no:11, members:["박서연","박성희"] }, { no:12, members:["박수영","김하영"] },
+    { no:13, members:["구은정","최해나"] }, { no:14, members:["김민지","한다해"] },
+    { no:15, members:["김세영","서하원"] }, { no:16, members:["이은서","장은영"] },
+    { no:17, members:["조하경","박아람"] }, { no:18, members:["전서현","김서연","김도연"] }
+  ]
+};
+// 버스는 1학년 전원 1호차, 2학년 전원 2호차. 학번 순서대로 좌석 번호를 매겨요.
+function getBusRoster(){
+  const buses = { "1호차":[], "2호차":[] };
+  ROSTER.forEach(s => {
+    const busNo = s.id.charAt(0) === "1" ? "1호차" : "2호차";
+    buses[busNo].push({ name:s.name, seat:(buses[busNo].length + 1) + "번" });
+  });
+  return buses;
+}
+
+let currentRoomGender = "남학생";
+function findMyRoom(){
+  if(!studentName) return null;
+  for(const gender of Object.keys(ROOMS)){
+    for(const room of ROOMS[gender]){
+      if(room.members.includes(studentName)) return { gender, no:room.no };
+    }
+  }
+  return null;
+}
+function renderRoomGenderTabs(){
+  const el = document.getElementById("roomGenderTabs");
+  el.innerHTML = Object.keys(ROOMS).map(g =>
+    `<button class="pill${g === currentRoomGender ? " active" : ""}" data-gender="${g}">${g}</button>`
+  ).join("");
+}
+function renderRoomsList(){
+  const rooms = ROOMS[currentRoomGender] || [];
+  document.getElementById("roomsList").innerHTML = rooms.map(room => {
+    const mine = studentName && room.members.includes(studentName);
+    return `<div class="room-card${mine ? " mine" : ""}">
+      <div class="rc-head"><span class="rc-no">${room.no}호</span></div>
+      ${room.members.map(m => `<div class="room-member"><span class="rm-name${m === studentName ? " me" : ""}">${m}</span></div>`).join("")}
+    </div>`;
+  }).join("");
+}
+document.getElementById("roomGenderTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentRoomGender = btn.dataset.gender;
+  renderRoomGenderTabs();
+  renderRoomsList();
+});
+
+let currentBusName = "1호차";
+function renderBusTabs(){
+  const buses = getBusRoster();
+  const names = Object.keys(buses);
+  document.getElementById("busTabs").innerHTML = names.map(n =>
+    `<button class="pill${n === currentBusName ? " active" : ""}" data-bus="${n}">${n}</button>`
+  ).join("");
+}
+function renderBusList(){
+  const buses = getBusRoster();
+  const members = buses[currentBusName] || [];
+  const rows = [];
+  for(let i = 0; i < members.length; i += 4) rows.push(members.slice(i, i + 4));
+  const seatHtml = m => `<div class="bus-seat${m.name === studentName ? " mine" : ""}"><span class="bs-no">${m.seat}</span><span class="bs-name">${m.name}</span></div>`;
+  document.getElementById("busList").innerHTML = rows.length
+    ? `<div class="bus-seat-map">${rows.map(row =>
+        `<div class="bus-seat-row"><div class="bus-seat-pair">${row.slice(0, 2).map(seatHtml).join("")}</div><div class="bus-aisle"></div><div class="bus-seat-pair">${row.slice(2, 4).map(seatHtml).join("")}</div></div>`
+      ).join("")}</div>`
+    : `<div class="empty-state">배정된 학생이 없어요.</div>`;
+}
+document.getElementById("busTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pill");
+  if(!btn) return;
+  currentBusName = btn.dataset.bus;
+  renderBusTabs();
+  renderBusList();
+});
+
+// 로그인한 학생 기준으로 내 방/내 호차를 기본 선택
+const myRoom = findMyRoom();
+if(myRoom) currentRoomGender = myRoom.gender;
+if(studentGrade === "1학년") currentBusName = "1호차";
+else if(studentGrade === "2학년") currentBusName = "2호차";
+renderRoomGenderTabs();
+renderRoomsList();
+renderBusTabs();
+renderBusList();
+
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
 document.getElementById("missionTotalCount").textContent = MISSIONS.length;
@@ -3059,6 +3339,18 @@ const PHRASES = [
     { jp: "駅はどこですか", pronounce: "에키와 도코데스카", kr: "역은 어디인가요?" },
     { jp: "助けてください", pronounce: "타스케테 쿠다사이", kr: "도와주세요" },
     { jp: "日本語がわかりません", pronounce: "니혼고가 와카리마센", kr: "일본어를 몰라요" }
+  ]},
+  { category: "편의점", items: [
+    { jp: "温めてください", pronounce: "아타타메테 쿠다사이", kr: "데워주세요 (전자레인지)" },
+    { jp: "袋は要りません", pronounce: "후쿠로와 이리마센", kr: "봉투는 필요 없어요" },
+    { jp: "お箸をください", pronounce: "오하시오 쿠다사이", kr: "젓가락 주세요" },
+    { jp: "ここで食べられますか", pronounce: "코코데 타베라레마스카", kr: "여기서 먹을 수 있나요?" }
+  ]},
+  { category: "응급상황", items: [
+    { jp: "具合が悪いです", pronounce: "구아이가 와루이데스", kr: "몸이 안 좋아요" },
+    { jp: "病院に連れて行ってください", pronounce: "뵤-인니 츠레테잇테 쿠다사이", kr: "병원에 데려가 주세요" },
+    { jp: "警察を呼んでください", pronounce: "케-사츠오 욘데 쿠다사이", kr: "경찰을 불러주세요" },
+    { jp: "パスポートをなくしました", pronounce: "파스포-토오 나쿠시마시타", kr: "여권을 잃어버렸어요" }
   ]}
 ];
 
@@ -3123,6 +3415,19 @@ phraseListEl.addEventListener("click", (e) => {
 function showPanel(id){
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById("panel-" + id).classList.add("active");
+  // 방 배정 / 버스 좌석표는 열 때마다 로그인한 학생 기준으로 다시 그려요.
+  if(id === "rooms"){
+    const mine = findMyRoom();
+    if(mine) currentRoomGender = mine.gender;
+    renderRoomGenderTabs();
+    renderRoomsList();
+  }
+  if(id === "bus"){
+    if(studentGrade === "1학년") currentBusName = "1호차";
+    else if(studentGrade === "2학년") currentBusName = "2호차";
+    renderBusTabs();
+    renderBusList();
+  }
 }
 
 document.querySelectorAll(".tab").forEach(tab => {

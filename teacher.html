@@ -73,6 +73,13 @@
     letter-spacing:0;
     text-align:center;
   }
+  .trip-dates{
+    margin:3px 0 0;
+    font-size:11px;
+    font-weight:600;
+    color:rgba(255,255,255,0.55);
+    text-align:center;
+  }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
   .weather-card{
@@ -808,11 +815,13 @@
     margin-bottom:10px;
     text-align:left;
     transition:background .3s ease;
+    position:relative;
   }
   .ac-main-row{
     display:flex;
     align-items:center;
     gap:10px;
+    padding-right:22px;
   }
   .ac-countdown-col{
     flex:7;
@@ -869,23 +878,31 @@
   }
   .ac-place .place-map-link svg{width:12px;height:12px;flex-shrink:0;}
   .ac-map-hint{
-    margin:6px 0 0;
-    font-size:9px;
+    margin:8px 0 0;
+    font-size:9.5px;
     color:rgba(255,255,255,0.5);
     text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .ac-delete-btn{
-    margin-top:12px;
-    background:rgba(255,255,255,0.15);
-    color:#fff;
-    border:1px solid rgba(255,255,255,0.4);
-    border-radius:999px;
-    padding:7px 16px;
-    font-family:inherit;
-    font-size:11.5px;
-    font-weight:700;
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:28px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.14);
+    color:rgba(255,255,255,0.85);
+    border:1px solid rgba(255,255,255,0.35);
+    border-radius:8px;
+    padding:0;
     cursor:pointer;
   }
+  .ac-delete-btn svg{width:14px;height:14px;}
   .assembly-card.urgent{
     background:var(--coral);
     animation:assemblyPulse 1s infinite;
@@ -1833,7 +1850,10 @@
 
   <header class="ticket">
     <div class="ticket-top">
-      <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+      <span class="ticket-top-left">
+        <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
+        <p class="trip-dates">2026.10.27 ~ 2026.10.30</p>
+      </span>
     </div>
   </header>
 
@@ -1915,11 +1935,13 @@
         <button type="button" class="quick-faq-btn" id="openMannerFaqBtn">🙏 매너·에티켓 FAQ</button>
       </div>
       <div class="assembly-card" id="assemblyCard" style="display:none;">
+        <button class="ac-delete-btn" id="deleteAssemblyBtn" type="button" title="집합 시간 삭제" aria-label="집합 시간 삭제">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
         <div class="ac-main-row">
           <div class="ac-countdown-col">
             <p class="ac-label">집합까지 남은 시간</p>
             <p class="ac-countdown" id="assemblyCountdown">--</p>
-            <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
           </div>
           <div class="ac-info-col">
             <div class="ac-info-item">
@@ -1932,7 +1954,7 @@
             </div>
           </div>
         </div>
-        <button class="ac-delete-btn" id="deleteAssemblyBtn">집합 시간 삭제</button>
+        <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
       </div>
       <div class="scroll-area">
         <div id="noticeList"></div>
@@ -2361,11 +2383,11 @@ const CHECKLIST = {
     { text:"여권", essential:true },
     { text:"모바일 항공권", essential:true, guide:"mobile-ticket" },
     { text:"운동화 (슬리퍼 X)", essential:true },
-    { text:"개념", essential:true }
+    { text:"개인 용돈", essential:true }
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
-    { text:"110V 어댑터(돼지코)", essential:false }
+    { text:"110V 어댑터(돼지코)", essential:false, guide:"japan-plug" }
   ]
 };
 
@@ -2379,6 +2401,15 @@ const ITEM_GUIDES = {
       "예약 상세 화면에서 '모바일 탑승권(모바일 체크인)'을 눌러 발급받아요.",
       "발급된 모바일 탑승권 화면을 캡처하거나 저장해두면 공항에서 바로 보여줄 수 있어요.",
       "출발 전날까지 발급이 안 되면 선생님께 꼭 알려주세요."
+    ]
+  },
+  "japan-plug": {
+    title: "일본 콘센트·전압 안내",
+    steps: [
+      "일본의 전압은 100V로, 한국(220V)보다 낮아요.",
+      "콘센트 모양은 얇은 일자 모양 두 개(A타입)라서, 한국 돼지코(변환 어댑터)만 있으면 대부분의 충전기는 그대로 꽂아 쓸 수 있어요.",
+      "휴대폰·노트북 충전기는 보통 100~240V를 모두 지원해서 어댑터만 있으면 문제없이 충전돼요. (헤어드라이기 등 전압에 민감한 기기는 미리 확인해주세요.)",
+      "숙소 객실 콘센트 개수가 넉넉하지 않을 수 있으니 멀티탭이나 여분의 어댑터를 챙기면 편해요."
     ]
   }
 };
@@ -4059,6 +4090,18 @@ const PHRASES = [
     { jp: "駅はどこですか", pronounce: "에키와 도코데스카", kr: "역은 어디인가요?" },
     { jp: "助けてください", pronounce: "타스케테 쿠다사이", kr: "도와주세요" },
     { jp: "日本語がわかりません", pronounce: "니혼고가 와카리마센", kr: "일본어를 몰라요" }
+  ]},
+  { category: "편의점", items: [
+    { jp: "温めてください", pronounce: "아타타메테 쿠다사이", kr: "데워주세요 (전자레인지)" },
+    { jp: "袋は要りません", pronounce: "후쿠로와 이리마센", kr: "봉투는 필요 없어요" },
+    { jp: "お箸をください", pronounce: "오하시오 쿠다사이", kr: "젓가락 주세요" },
+    { jp: "ここで食べられますか", pronounce: "코코데 타베라레마스카", kr: "여기서 먹을 수 있나요?" }
+  ]},
+  { category: "응급상황", items: [
+    { jp: "具合が悪いです", pronounce: "구아이가 와루이데스", kr: "몸이 안 좋아요" },
+    { jp: "病院に連れて行ってください", pronounce: "뵤-인니 츠레테잇테 쿠다사이", kr: "병원에 데려가 주세요" },
+    { jp: "警察を呼んでください", pronounce: "케-사츠오 욘데 쿠다사이", kr: "경찰을 불러주세요" },
+    { jp: "パスポートをなくしました", pronounce: "파스포-토오 나쿠시마시타", kr: "여권을 잃어버렸어요" }
   ]}
 ];
 
