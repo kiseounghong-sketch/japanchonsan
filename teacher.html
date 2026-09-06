@@ -1088,6 +1088,11 @@
     background:var(--coral);
     color:#fff;
   }
+  .bus-seat.selected, .room-member.selected{
+    outline:2.5px solid var(--coral);
+    outline-offset:1px;
+    border-radius:8px;
+  }
 
   /* ===== 학생현황 ===== */
   .students-header{
@@ -2172,6 +2177,7 @@
     <section id="panel-bus-roster" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">버스</h2>
+      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 자리가 맞바뀌어요. 왼쪽 네모는 탑승 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="roster-tabs" id="busRosterTabs"></div>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
@@ -2186,6 +2192,7 @@
     <section id="panel-room-roster" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">숙소</h2>
+      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 방이 맞바뀌어요. 왼쪽 네모는 입실 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="roster-tabs" id="roomRosterTabs">
         <button class="pill active" data-gender="남학생">남학생</button>
         <button class="pill" data-gender="여학생">여학생</button>
@@ -2203,7 +2210,7 @@
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원배정 및 인원체크</button>
       <h2 class="sub-title">조편성표</h2>
-      <p class="group-move-hint">학생 이름을 눌러 선택한 뒤, 옮길 조 제목을 누르면 이동해요.</p>
+      <p class="group-move-hint">학생 이름을 누르고 다른 학생을 누르면 조가 맞바뀌어요. (조 제목을 누르면 그 조로 이동) 바꾼 내용은 학생 화면에도 반영돼요.</p>
       <div id="groupList"></div>
     </section>
 
@@ -2812,6 +2819,98 @@ function parseCSV(text){
   }
   if(field !== "" || row.length){ row.push(field); rows.push(row); }
   return rows;
+}
+
+/* ===== 배정 변경(조/버스/숙소) — 저장하면 시트를 통해 학생 화면에도 반영 ===== */
+const ASSIGN_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=배정변경";
+const ASSIGN_LS_KEY = "suhak_assign_overrides";
+function emptyAssign(){ return { groups:{}, bus:{}, rooms:{} }; }
+let assignOverrides = (function(){
+  try {
+    const o = JSON.parse(localStorage.getItem(ASSIGN_LS_KEY) || "null");
+    if(o && o.groups && o.bus && o.rooms) return o;
+  } catch(e){}
+  return emptyAssign();
+})();
+function saveAssignLocal(){
+  try { localStorage.setItem(ASSIGN_LS_KEY, JSON.stringify(assignOverrides)); } catch(e){}
+}
+function applyAssignRows(rows){
+  const next = emptyAssign();
+  rows.forEach(r => {
+    const kind = (r[0] || "").trim();
+    const name = (r[1] || "").trim();
+    const slot = (r[2] || "").trim();
+    if(next[kind] && name) next[kind][name] = slot;
+  });
+  assignOverrides = next;
+  saveAssignLocal();
+}
+function fetchAssignOverrides(){
+  return fetch(ASSIGN_SHEET_CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = parseCSV(text).filter(r => r.length >= 3 && r[0] && r[0] !== "종류");
+      applyAssignRows(rows);
+    })
+    .catch(() => {});
+}
+// 저장: 로컬에 저장하고, SCRIPT_URL이 설정돼 있으면 시트로도 보냅니다.
+function pushAssignOverrides(){
+  saveAssignLocal();
+  if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0){
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "saveAssignments", data: assignOverrides })
+    }).catch(() => {});
+  }
+}
+
+function applyGroupOverrides(baseGroups){
+  const ov = assignOverrides.groups;
+  const eff = baseGroups.map(g => ({ ...g, members: [...g.members] }));
+  const movers = Object.keys(ov);
+  if(!movers.length) return eff;
+  const moverSet = new Set(movers);
+  eff.forEach(g => { g.members = g.members.filter(m => !moverSet.has(m)); });
+  movers.forEach(name => {
+    const t = eff.find(g => String(g.no) === String(ov[name]));
+    if(t && !t.members.includes(name)) t.members.push(name);
+  });
+  return eff;
+}
+function applyRoomOverrides(baseRooms){
+  const ov = assignOverrides.rooms;
+  const eff = {};
+  Object.keys(baseRooms).forEach(gender => {
+    eff[gender] = baseRooms[gender].map(r => ({ no: r.no, members: [...r.members] }));
+  });
+  const movers = Object.keys(ov);
+  if(!movers.length) return eff;
+  const moverSet = new Set(movers);
+  Object.keys(eff).forEach(gender => {
+    eff[gender].forEach(r => { r.members = r.members.filter(m => !moverSet.has(m)); });
+  });
+  movers.forEach(name => {
+    Object.keys(eff).forEach(gender => {
+      const t = eff[gender].find(r => String(r.no) === String(ov[name]));
+      if(t && !t.members.includes(name)) t.members.push(name);
+    });
+  });
+  return eff;
+}
+function applyBusOverrides(baseBuses){
+  const ov = assignOverrides.bus;
+  if(!Object.keys(ov).length) return baseBuses;
+  const eff = {};
+  Object.keys(baseBuses).forEach(busName => {
+    const list = baseBuses[busName];
+    const bySeat = {};
+    list.forEach(s => { if(!ov[s.name]) bySeat[s.seat] = s.name; });
+    list.forEach(s => { if(ov[s.name]) bySeat[ov[s.name]] = s.name; });
+    eff[busName] = list.map(s => ({ seat: s.seat, name: bySeat[s.seat] || "" }));
+  });
+  return eff;
 }
 
 function loadNotices(){
@@ -3580,28 +3679,16 @@ contactList.innerHTML = CONTACTS.map(([role, name, tel]) => `
 /* ---- 조 편성표 렌더 ---- */
 const groupList = document.getElementById("groupList");
 
-const GROUP_OVERRIDES_KEY = "teacher_group_overrides";
-function loadGroupOverrides(){
-  try { return JSON.parse(localStorage.getItem(GROUP_OVERRIDES_KEY) || "{}"); } catch(e){ return {}; }
-}
-function saveGroupOverrides(){
-  localStorage.setItem(GROUP_OVERRIDES_KEY, JSON.stringify(groupOverrides));
-}
-let groupOverrides = loadGroupOverrides();
 let selectedStudentForMove = null;
 
-function getEffectiveGroups(){
-  const effective = GROUPS.map(g => ({ ...g, members: [...g.members] }));
-  Object.entries(groupOverrides).forEach(([name, targetNo]) => {
-    effective.forEach(g => { g.members = g.members.filter(m => m !== name); });
-    const target = effective.find(g => g.no === targetNo);
-    if(target && !target.members.includes(name)) target.members.push(name);
-  });
-  return effective;
+// 특정 학생이 지금 몇 조인지 (배정 변경 반영된 기준)
+function groupNoOf(name){
+  const g = applyGroupOverrides(GROUPS).find(g => g.members.includes(name));
+  return g ? String(g.no) : null;
 }
 
 function renderGroups(){
-  const groups = getEffectiveGroups();
+  const groups = applyGroupOverrides(GROUPS);
   groupList.innerHTML = groups.map(g => `
     <div class="group-card" data-group-no="${g.no}">
       <div class="group-head">
@@ -3614,35 +3701,52 @@ function renderGroups(){
       </div>
       <div class="group-body">
         <div class="member-chips">
-          ${g.members.map(m => `<span class="member-chip">${m}</span>`).join("")}
+          ${g.members.map(m => `<span class="member-chip${m === selectedStudentForMove ? " selected" : ""}">${m}</span>`).join("")}
         </div>
       </div>
     </div>
   `).join("");
+  document.querySelectorAll(".group-card").forEach(c => {
+    if(c.querySelector(".member-chip.selected")) c.classList.add("open");
+  });
 }
 
 renderGroups();
 
+// 선택된 학생을 targetNo 조로 이동 (빈자리로 보내기)
 function moveStudentToGroup(name, targetNo){
-  groupOverrides[name] = targetNo;
-  saveGroupOverrides();
+  assignOverrides.groups[name] = String(targetNo);
+  pushAssignOverrides();
   selectedStudentForMove = null;
   renderGroups();
   document.querySelectorAll(`.group-card[data-group-no="${targetNo}"]`).forEach(c => c.classList.add("open"));
+}
+
+// 두 학생의 조를 맞바꾸기
+function swapStudentGroups(a, b){
+  const ga = groupNoOf(a), gb = groupNoOf(b);
+  if(ga == null || gb == null || ga === gb){ selectedStudentForMove = null; renderGroups(); return; }
+  assignOverrides.groups[a] = gb;
+  assignOverrides.groups[b] = ga;
+  pushAssignOverrides();
+  selectedStudentForMove = null;
+  renderGroups();
 }
 
 groupList.addEventListener("click", (e) => {
   const chip = e.target.closest(".member-chip");
   if(chip){
     e.stopPropagation();
-    if(selectedStudentForMove === chip.textContent){
-      selectedStudentForMove = null;
-      chip.classList.remove("selected");
-      return;
+    const name = chip.textContent;
+    if(selectedStudentForMove === name){
+      selectedStudentForMove = null;         // 같은 학생 다시 누르면 선택 해제
+      renderGroups();
+    } else if(selectedStudentForMove){
+      swapStudentGroups(selectedStudentForMove, name);   // 다른 학생 누르면 맞바꾸기
+    } else {
+      selectedStudentForMove = name;
+      renderGroups();
     }
-    groupList.querySelectorAll(".member-chip.selected").forEach(c => c.classList.remove("selected"));
-    selectedStudentForMove = chip.textContent;
-    chip.classList.add("selected");
     return;
   }
   const head = e.target.closest(".group-head");
@@ -3706,15 +3810,31 @@ function chunkBusRows(members){
   return rows;
 }
 
+let selectedBusStudent = null;
+function seatNoOf(name){
+  const b = applyBusOverrides(getBusRoster())[currentBus] || [];
+  const hit = b.find(s => s.name === name);
+  return hit ? hit.seat : null;
+}
+function swapBusSeats(a, b){
+  const sa = seatNoOf(a), sb = seatNoOf(b);
+  if(!sa || !sb || sa === sb){ selectedBusStudent = null; renderBusList(); return; }
+  assignOverrides.bus[a] = sb;
+  assignOverrides.bus[b] = sa;
+  pushAssignOverrides();
+  selectedBusStudent = null;
+  renderBusList();
+}
+
 function renderBusList(){
-  const buses = getBusRoster();
+  const buses = applyBusOverrides(getBusRoster());
   const members = buses[currentBus] || [];
   const rows = chunkBusRows(members);
   const seatHtml = (m) => `
-    <div class="bus-seat" data-name="${m.name}">
+    <div class="bus-seat${m.name === selectedBusStudent ? " selected" : ""}" data-name="${m.name}">
       <span class="bs-box">${checkIcon}</span>
       <span class="bs-no">${m.seat}</span>
-      <span class="bs-name">${m.name}</span>
+      <span class="bs-name">${m.name || "-"}</span>
     </div>
   `;
   busRosterList.innerHTML = rows.length ? `<div class="bus-seat-map">${rows.map(row => `
@@ -3748,11 +3868,24 @@ busRosterTabs.addEventListener("click", (e) => {
 busRosterList.addEventListener("click", (e) => {
   const item = e.target.closest(".bus-seat");
   if(!item) return;
-  item.classList.toggle("checked");
-  if(item.classList.contains("checked")) busAttend[item.dataset.name] = true;
-  else delete busAttend[item.dataset.name];
-  saveAttendState(BUS_ATTEND_KEY, busAttend);
-  updateBusProgress();
+  const name = item.dataset.name;
+  if(!name) return;
+  // 체크박스(왼쪽 네모)를 누르면 탑승 체크, 이름 쪽을 누르면 자리 바꾸기
+  if(e.target.closest(".bs-box")){
+    item.classList.toggle("checked");
+    if(item.classList.contains("checked")) busAttend[name] = true;
+    else delete busAttend[name];
+    saveAttendState(BUS_ATTEND_KEY, busAttend);
+    updateBusProgress();
+    return;
+  }
+  if(selectedBusStudent === name){
+    selectedBusStudent = null; renderBusList();
+  } else if(selectedBusStudent){
+    swapBusSeats(selectedBusStudent, name);
+  } else {
+    selectedBusStudent = name; renderBusList();
+  }
 });
 
 document.getElementById("busResetBtn").addEventListener("click", () => {
@@ -3772,8 +3905,24 @@ function renderRoomTabs(){
   renderRoomList();
 }
 
+let selectedRoomStudent = null;
+function roomNoOf(name){
+  const rooms = applyRoomOverrides(ROOMS)[currentRoomGender] || [];
+  const hit = rooms.find(r => r.members.includes(name));
+  return hit ? String(hit.no) : null;
+}
+function swapRooms(a, b){
+  const ra = roomNoOf(a), rb = roomNoOf(b);
+  if(ra == null || rb == null || ra === rb){ selectedRoomStudent = null; renderRoomList(); return; }
+  assignOverrides.rooms[a] = rb;
+  assignOverrides.rooms[b] = ra;
+  pushAssignOverrides();
+  selectedRoomStudent = null;
+  renderRoomList();
+}
+
 function renderRoomList(){
-  const rooms = getRoomRoster()[currentRoomGender] || [];
+  const rooms = applyRoomOverrides(ROOMS)[currentRoomGender] || [];
   roomRosterList.innerHTML = rooms.length ? `<div class="room-card-grid">${rooms.map(r => `
     <div class="room-card">
       <div class="rc-head">
@@ -3781,7 +3930,7 @@ function renderRoomList(){
         <span class="rc-count">${r.members.length}명</span>
       </div>
       ${r.members.map(name => `
-        <div class="room-member" data-name="${name}">
+        <div class="room-member${name === selectedRoomStudent ? " selected" : ""}" data-name="${name}">
           <span class="rm-box">${checkIcon}</span>
           <span class="rm-name">${name}</span>
         </div>
@@ -3812,11 +3961,23 @@ roomRosterTabs.addEventListener("click", (e) => {
 roomRosterList.addEventListener("click", (e) => {
   const item = e.target.closest(".room-member");
   if(!item) return;
-  item.classList.toggle("checked");
-  if(item.classList.contains("checked")) roomAttend[item.dataset.name] = true;
-  else delete roomAttend[item.dataset.name];
-  saveAttendState(ROOM_ATTEND_KEY, roomAttend);
-  updateRoomProgress();
+  const name = item.dataset.name;
+  // 체크박스를 누르면 인원 체크, 이름 쪽을 누르면 방 바꾸기
+  if(e.target.closest(".rm-box")){
+    item.classList.toggle("checked");
+    if(item.classList.contains("checked")) roomAttend[name] = true;
+    else delete roomAttend[name];
+    saveAttendState(ROOM_ATTEND_KEY, roomAttend);
+    updateRoomProgress();
+    return;
+  }
+  if(selectedRoomStudent === name){
+    selectedRoomStudent = null; renderRoomList();
+  } else if(selectedRoomStudent){
+    swapRooms(selectedRoomStudent, name);
+  } else {
+    selectedRoomStudent = name; renderRoomList();
+  }
 });
 
 document.getElementById("roomResetBtn").addEventListener("click", () => {
@@ -3838,6 +3999,13 @@ document.querySelectorAll('.more-item[data-target="room-roster"]').forEach(btn =
 
 renderBusTabs();
 renderRoomTabs();
+
+// 시트에 저장돼 있던 배정 변경을 불러와 조/버스/숙소를 다시 그립니다.
+fetchAssignOverrides().then(() => {
+  renderGroups();
+  renderBusTabs();
+  renderRoomTabs();
+});
 
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
