@@ -298,19 +298,33 @@
   }
   .event{
     flex:1;
+    min-width:0;
     padding-left:14px;
+    cursor:pointer;
   }
   .event .name{
     font-size:15.5px;
     font-weight:700;
-    margin:0 0 3px;
+    margin:0;
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+  }
+  .event .name .title-text{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
   }
   .event .place{
+    display:none;
     font-size:13px;
     color:var(--ink-soft);
-    margin:0;
+    margin:6px 0 0;
   }
+  .timeline li.open .event .place{display:block;}
   .event .name .tl-more{
+    flex-shrink:0;
     font-size:11.5px;
     font-weight:700;
     color:var(--coral-deep);
@@ -328,7 +342,6 @@
     padding:10px 12px;
   }
   .timeline li.open .tl-note{display:block;}
-  .timeline li.has-note .event{cursor:pointer;}
   /* 타임라인 진행 표시 */
   .tl-progress{
     position:absolute;
@@ -2159,7 +2172,7 @@ const CHECKLIST = {
     { text:"여권", essential:true },
     { text:"모바일 항공권", essential:true, guide:"mobile-ticket" },
     { text:"운동화 (슬리퍼 X)", essential:true },
-    { text:"개인 용돈", essential:true }
+    { text:"개념", essential:true, guide:"gaenyeom" }
   ],
   "전자기기": [
     { text:"휴대폰 충전기", essential:false },
@@ -2186,6 +2199,16 @@ const ITEM_GUIDES = {
       "콘센트 모양은 얇은 일자 모양 두 개(A타입)라서, 한국 돼지코(변환 어댑터)만 있으면 대부분의 충전기는 그대로 꽂아 쓸 수 있어요.",
       "휴대폰·노트북 충전기는 보통 100~240V를 모두 지원해서 어댑터만 있으면 문제없이 충전돼요. (헤어드라이기 등 전압에 민감한 기기는 미리 확인해주세요.)",
       "숙소 객실 콘센트 개수가 넉넉하지 않을 수 있으니 멀티탭이나 여분의 어댑터를 챙기면 편해요."
+    ]
+  },
+  "gaenyeom": {
+    title: "짐보다 먼저 챙길 '개념' 5가지",
+    steps: [
+      "시간 개념 — 집합 시간 5분 전 도착. 나 한 명이 늦으면 380명이 버스에서 기다립니다.",
+      "안전 개념 — 자유시간에도 조원과 절대 떨어지지 않기. 일본은 차가 왼쪽으로 다니니 길 건널 때 오른쪽부터 확인.",
+      "예의 개념 — 전철·버스·숙소에서 큰 소리 금지, 사진 찍기 전 상대에게 허락, 새치기 금지.",
+      "질서 개념 — 선생님 안내 동선을 벗어나지 않기. 정해진 구역 밖으로 나가지 않기.",
+      "책임 개념 — 여권·지갑·휴대폰은 내가 챙긴다. 쓰레기는 되가져와서 숙소나 편의점에서 버리기."
     ]
   }
 };
@@ -2787,11 +2810,11 @@ function renderDay(dayKey){
     SCHEDULE[dayKey].items.map(([time, name, place]) => {
       const note = SCHEDULE_NOTES[dayKey + "-" + time];
       return `
-    <li class="${note ? "has-note" : ""}">
+    <li>
       <span class="time">${time}</span>
       <span class="dot"></span>
       <span class="event">
-        <p class="name">${name}${note ? ` <span class="tl-more">자세히 <span class="tl-more-arrow">▾</span></span>` : ""}</p>
+        <p class="name"><span class="title-text">${name}</span><span class="tl-more">자세히 <span class="tl-more-arrow">▾</span></span></p>
         <p class="place">${place}</p>
         ${note ? `<p class="tl-note">${note}</p>` : ""}
       </span>
@@ -2828,12 +2851,10 @@ function updateTimelineProgress(){
   const firstY = dotY(0), lastY = dotY(lis.length - 1);
   let y, label;
 
-  if(now < dd){                         // 아직 시작 전인 날
-    tlNow.hidden = true;
-    prog.style.height = "0px";
-    return;
-  }
-  if(!sameDay && now > dd){             // 이미 지난 날
+  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00) 바로 위에 고정
+    y = firstY - 16;
+    label = "시작 전";
+  } else if(!sameDay && now > dd){      // 이미 지난 날
     y = lastY;
     label = "일정 종료";
   } else {                              // 오늘
@@ -2863,9 +2884,9 @@ function updateTimelineProgress(){
 setInterval(updateTimelineProgress, 60 * 1000);
 window.addEventListener("resize", updateTimelineProgress);
 
-// 타임라인 항목 탭 → 상세 설명 펼치기/접기
+// 타임라인 항목 탭 → 장소·상세 설명 펼치기/접기
 document.getElementById("timeline").addEventListener("click", (e) => {
-  const li = e.target.closest("li.has-note");
+  const li = e.target.closest(".timeline li");
   if(!li) return;
   li.classList.toggle("open");
 });
@@ -2977,7 +2998,7 @@ function renderFindway(dayKey){
         ${labels[i] ? `<span class="fw-marker">${labels[i]}</span>` : ""}
         <span class="fw-info">
           <span class="fw-time">${time}</span>
-          <span class="fw-name">${name}${note ? ` <span class="tl-more">자세히 ▾</span>` : ""}</span>
+          <span class="fw-name">${name}</span>
         </span>
       </span>
       <a class="fw-btn" href="${mapsUrl(place, lat, lng)}" target="_blank" rel="noopener">${pinIcon}길찾기</a>
