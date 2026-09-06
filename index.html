@@ -2739,20 +2739,51 @@ function applyBusOverrides(baseBuses){
 const GROUP_CFG_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=조편성";
 const GROUP_CFG_LS_KEY = "suhak_group_config";
 const DEFAULT_CATEGORIES = ["공항", "편의점투어(1일차)", "편의점투어(2일차)", "쇼핑몰투어(3일차)", "유니버셜 스튜디오", "산넨자카·닌넨자카", "도톤보리", "간사이 공항"];
-function gradeGroups(){
-  const g1 = ROSTER.filter(s => s.id.charAt(0) === "1").map(s => s.name);
-  const g2 = ROSTER.filter(s => s.id.charAt(0) === "2").map(s => s.name);
-  return [g1, g2];
+
+/* ---- 숙소 방 배정 (2인 1실, 여학생 마지막 방만 3인) ---- */
+const ROOMS = {
+  "남학생": [
+    { no:1, members:["고용석","김민호"] }, { no:2, members:["김태원","박민웅"] },
+    { no:3, members:["유지상","이승준"] }, { no:4, members:["이진욱","최건우"] },
+    { no:5, members:["신민수","현영관"] }, { no:6, members:["이금강","하유민"] },
+    { no:7, members:["박서용","임지율"] }, { no:8, members:["유승균","박정호"] }
+  ],
+  "여학생": [
+    { no:9, members:["이수아","신소율"] }, { no:10, members:["김은주","박규빈"] },
+    { no:11, members:["박서연","박성희"] }, { no:12, members:["박수영","김하영"] },
+    { no:13, members:["구은정","최해나"] }, { no:14, members:["김민지","한다해"] },
+    { no:15, members:["김세영","서하원"] }, { no:16, members:["이은서","장은영"] },
+    { no:17, members:["조하경","박아람"] }, { no:18, members:["전서현","김서연","김도연"] }
+  ]
+};
+
+// 기본 편성 = 숙소 방 배정을 참고해 룸메이트끼리 묶어 5~6명 조로
+function roomBasedGroups(){
+  const chunks = [];
+  ["남학생", "여학생"].forEach(gender => {
+    let cur = [];
+    (ROOMS[gender] || []).forEach(room => {
+      cur = cur.concat(room.members);
+      if(cur.length >= 5){ chunks.push(cur); cur = []; }
+    });
+    if(cur.length) chunks.push(cur);
+  });
+  return chunks.map((members, i) => ({ name: (i + 1) + "조", members: members.slice() }));
+}
+function normGroupArr(arr){
+  return (arr || []).map((g, i) => Array.isArray(g)
+    ? { name: (i + 1) + "조", members: g.slice() }
+    : { name: (g && g.name) || ((i + 1) + "조"), members: Array.isArray(g && g.members) ? g.members.slice() : [] });
 }
 function defaultGroupConfig(){
   const cfg = { categories: DEFAULT_CATEGORIES.slice(), data: {} };
-  cfg.categories.forEach(c => { cfg.data[c] = gradeGroups().map(a => a.slice()); });
+  cfg.categories.forEach(c => { cfg.data[c] = roomBasedGroups(); });
   return cfg;
 }
 function normalizeGroupConfig(cfg){
   if(!cfg || !Array.isArray(cfg.categories) || !cfg.categories.length || !cfg.data) return defaultGroupConfig();
   cfg.categories.forEach(c => {
-    if(!Array.isArray(cfg.data[c]) || !cfg.data[c].length) cfg.data[c] = gradeGroups().map(a => a.slice());
+    cfg.data[c] = (Array.isArray(cfg.data[c]) && cfg.data[c].length) ? normGroupArr(cfg.data[c]) : roomBasedGroups();
   });
   return cfg;
 }
@@ -3401,21 +3432,21 @@ function renderGroupCatTabs(){
 function renderGroupList(){
   renderGroupCatTabs();
   const groups = groupConfig.data[currentGroupCat] || [];
-  const myIdx = groups.findIndex(g => g.includes(studentName));
-  groupList.innerHTML = groups.map((members, idx) => {
+  const myIdx = groups.findIndex(g => g.members.includes(studentName));
+  groupList.innerHTML = groups.map((g, idx) => {
     const mine = idx === myIdx;
     return `
     <div class="group-card open${mine ? " mine" : ""}">
       <div class="group-head">
-        <span class="group-no">${idx + 1}조</span>
+        <span class="group-no">${idx + 1}</span>
         <span class="g-info">
-          <p class="g-leader">${idx + 1}조${mine ? ` <span class="my-group-badge">내 조</span>` : ""}</p>
-          <p class="g-meta">총 ${members.length}명</p>
+          <p class="g-leader">${g.name}${mine ? ` <span class="my-group-badge">내 조</span>` : ""}</p>
+          <p class="g-meta">총 ${g.members.length}명</p>
         </span>
       </div>
       <div class="group-body">
         <div class="member-chips">
-          ${members.map(m => `<span class="member-chip${m === studentName ? " me" : ""}">${m}</span>`).join("")}
+          ${g.members.map(m => `<span class="member-chip${m === studentName ? " me" : ""}">${m}</span>`).join("")}
         </div>
       </div>
     </div>`;
@@ -3433,22 +3464,6 @@ groupCatTabs.addEventListener("click", (e) => {
   renderGroupList();
 });
 
-/* ---- 숙소 방 배정 (2인 1실, 여학생 마지막 방만 3인) ---- */
-const ROOMS = {
-  "남학생": [
-    { no:1, members:["고용석","김민호"] }, { no:2, members:["김태원","박민웅"] },
-    { no:3, members:["유지상","이승준"] }, { no:4, members:["이진욱","최건우"] },
-    { no:5, members:["신민수","현영관"] }, { no:6, members:["이금강","하유민"] },
-    { no:7, members:["박서용","임지율"] }, { no:8, members:["유승균","박정호"] }
-  ],
-  "여학생": [
-    { no:9, members:["이수아","신소율"] }, { no:10, members:["김은주","박규빈"] },
-    { no:11, members:["박서연","박성희"] }, { no:12, members:["박수영","김하영"] },
-    { no:13, members:["구은정","최해나"] }, { no:14, members:["김민지","한다해"] },
-    { no:15, members:["김세영","서하원"] }, { no:16, members:["이은서","장은영"] },
-    { no:17, members:["조하경","박아람"] }, { no:18, members:["전서현","김서연","김도연"] }
-  ]
-};
 // 버스는 1학년 전원 1호차, 2학년 전원 2호차. 학번 순서대로 좌석 번호를 매겨요.
 function getBusRoster(){
   const buses = { "1호차":[], "2호차":[] };
