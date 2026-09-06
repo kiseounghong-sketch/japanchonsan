@@ -359,7 +359,8 @@
     right:0;
     display:flex;
     align-items:center;
-    gap:6px;
+    justify-content:flex-end;
+    padding-right:14px;
     pointer-events:none;
     transform:translateY(-50%);
   }
@@ -373,7 +374,6 @@
     box-shadow:0 0 0 4px rgba(255,90,54,0.25);
   }
   .tl-now .tl-now-label{
-    margin-left:70px;
     font-size:11px;
     font-weight:800;
     color:#fff;
@@ -2939,8 +2939,8 @@ function updateTimelineProgress(){
   const firstY = dotY(0), lastY = dotY(lis.length - 1);
   let y, label;
 
-  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00) 바로 위에 고정
-    y = firstY - 16;
+  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00)에 고정
+    y = firstY;
     label = "시작 전";
   } else if(!sameDay && now > dd){      // 이미 지난 날
     y = lastY;

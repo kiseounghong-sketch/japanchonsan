@@ -426,7 +426,8 @@
     right:0;
     display:flex;
     align-items:center;
-    gap:6px;
+    justify-content:flex-end;
+    padding-right:14px;
     pointer-events:none;
     transform:translateY(-50%);
   }
@@ -440,7 +441,6 @@
     box-shadow:0 0 0 4px rgba(255,90,54,0.25);
   }
   .tl-now .tl-now-label{
-    margin-left:70px;
     font-size:11px;
     font-weight:800;
     color:#fff;
@@ -2352,6 +2352,10 @@
         <span>학생 준비 현황 보기</span>
         <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
+      <button type="button" class="exchange-btn-standalone" id="openExchangeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6v.01M18 6v.01M6 18v.01M18 18v.01"/></svg>
+        엔화 계산기
+      </button>
       <div class="progress">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <p class="progress-text"><span id="checkedCount">0</span>/<span id="totalCount">0</span>개 챙겼어요</p>
@@ -2368,10 +2372,6 @@
             <span class="amenity-tag">냉장고(매우 작음)</span>
           </div>
         </div>
-        <button type="button" class="exchange-btn-standalone" id="openExchangeBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6v.01M18 6v.01M6 18v.01M18 18v.01"/></svg>
-          엔화 계산기
-        </button>
         <div id="checklistGroups"></div>
       </div>
     </section>
@@ -2404,16 +2404,6 @@
           <span class="more-text">자주 묻는 질문</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <button class="more-item" data-target="bus-checklist">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
-          <span class="more-text">버스 체크리스트</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <button class="more-item" data-target="hotel-checklist">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
-          <span class="more-text">숙소 체크리스트</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
         <button class="more-item" data-target="phrases">
           <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
           <span class="more-text">서바이벌 일본어 회화</span>
@@ -2427,18 +2417,6 @@
       </div>
       <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
       <button class="danger-link" id="resetStudentsBtn">학생 준비 현황 데이터 초기화</button>
-    </section>
-
-    <section id="panel-hotel-checklist" class="panel sub-panel">
-      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">숙소 체크리스트</h2>
-      <div id="hotelChecklist"></div>
-    </section>
-
-    <section id="panel-bus-checklist" class="panel sub-panel">
-      <button class="back-btn" data-back><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
-      <h2 class="sub-title">버스 체크리스트</h2>
-      <div id="busChecklist"></div>
     </section>
 
     <section id="panel-roster-select" class="panel sub-panel">
@@ -3805,8 +3783,8 @@ function updateTimelineProgress(){
   const firstY = dotY(0), lastY = dotY(lis.length - 1);
   let y, label;
 
-  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00) 바로 위에 고정
-    y = firstY - 16;
+  if(now < dd){                         // 아직 시작 전인 날 → 첫 일정(예: 27일 07:00)에 고정
+    y = firstY;
     label = "시작 전";
   } else if(!sameDay && now > dd){
     y = lastY;
@@ -5217,46 +5195,6 @@ document.getElementById("resetStudentsBtn").addEventListener("click", () => {
     alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");
   });
 });
-
-/* ---- 숙소·버스 체크리스트 (선생님 전용, 이 기기에만 저장) ---- */
-const HOTEL_CHECKLIST = [
-  "방 열쇠(카드키) 전달 확인",
-  "귀중품 보관 안내 완료",
-  "취침 점호 시간 안내",
-  "조식 시간 및 장소 안내",
-  "체크아웃 시 개인 물품 분실 여부 확인",
-  "객실 파손·분실물 확인"
-];
-const BUS_CHECKLIST = [
-  "탑승 전 인원수 확인",
-  "안전벨트 착용 확인",
-  "하차 시 소지품·좌석 분실물 확인",
-  "다음 이동 시간 및 장소 공지"
-];
-
-function renderSimpleChecklist(containerId, storageKey, items){
-  const container = document.getElementById(containerId);
-  const saved = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch(e){ return []; } })();
-  container.innerHTML = items.map(text => `
-    <div class="check-item">
-      <span class="box">${checkIcon}</span>
-      <span class="text">${text}</span>
-    </div>
-  `).join("");
-  container.querySelectorAll(".check-item").forEach(item => {
-    if(saved.includes(item.querySelector(".text").textContent)) item.classList.add("checked");
-  });
-  container.addEventListener("click", (e) => {
-    const item = e.target.closest(".check-item");
-    if(!item) return;
-    item.classList.toggle("checked");
-    const checkedTexts = Array.from(container.querySelectorAll(".check-item.checked .text")).map(el => el.textContent);
-    localStorage.setItem(storageKey, JSON.stringify(checkedTexts));
-  });
-}
-
-renderSimpleChecklist("hotelChecklist", "teacher_hotel_checklist", HOTEL_CHECKLIST);
-renderSimpleChecklist("busChecklist", "teacher_bus_checklist", BUS_CHECKLIST);
 
 /* ---- SOS: 카카오톡으로 내 위치 보내기 ---- */
 // 카카오 개발자센터(developers.kakao.com)에서 발급받은 JavaScript 키를 입력하세요.
