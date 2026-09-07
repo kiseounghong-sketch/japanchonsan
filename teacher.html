@@ -1636,11 +1636,6 @@
     font-weight:700;
     cursor:pointer;
   }
-  .group-cat-actions{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:8px;
-  }
   .group-card .group-head{position:relative;}
   .group-del-btn{
     flex-shrink:0;
@@ -2493,17 +2488,14 @@
       <div class="group-cat-bar">
         <div class="group-cat-tabs" id="groupCatTabs"></div>
         <button class="group-cat-add" id="groupCatAddBtn" type="button">+ 항목</button>
+        <button class="roster-reset-btn" id="groupCatDeleteBtn" type="button">항목 삭제</button>
       </div>
-      <div class="group-cat-actions">
-        <button class="roster-reset-btn" id="groupCatDeleteBtn" type="button">이 항목 삭제</button>
-      </div>
-      <p class="group-move-hint">이름을 <b>탭</b>하면 출석 체크, <b>꾹 눌러 끌어다</b> 다른 조 카드에 놓으면 그 조로 옮겨져요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
-      <div class="progress">
-        <div class="progress-bar"><div class="progress-fill" id="groupProgressFill"></div></div>
+      <div class="progress progress-slim">
         <div class="progress-head">
           <p class="progress-text"><span id="groupCheckedCount">0</span>/<span id="groupTotalCount">0</span>명 확인</p>
           <button class="roster-reset-btn" id="groupResetBtn">초기화</button>
         </div>
+        <div class="progress-bar"><div class="progress-fill" id="groupProgressFill"></div></div>
       </div>
       <div id="groupList"></div>
       <button class="group-add-btn" id="groupAddBtn" type="button">+ 조 추가</button>
