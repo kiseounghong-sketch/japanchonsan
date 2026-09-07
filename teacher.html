@@ -1230,11 +1230,11 @@
     outline-offset:2px;
     border-radius:8px;
   }
-  /* 꾹 눌러 드래그가 브라우저 스크롤/롱프레스 메뉴에 가로채이지 않도록 */
+  /* 세로 스크롤은 브라우저에 맡기고(pan-y), 꾹 누르기·롱프레스 메뉴만 차단 */
   #groupList .room-member,
   #busRosterList .bus-seat,
   #roomRosterList .room-member{
-    touch-action:none;
+    touch-action:pan-y;
     -webkit-user-select:none;
     user-select:none;
     -webkit-touch-callout:none;
@@ -1415,7 +1415,7 @@
   .bus-seat-map{
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:5px;
   }
   .bus-seat-row{
     display:flex;
@@ -1425,11 +1425,11 @@
   .bus-seat-pair{
     flex:1;
     display:flex;
-    gap:6px;
+    gap:5px;
     min-width:0;
   }
   .bus-aisle{
-    width:16px;
+    width:14px;
     flex-shrink:0;
     position:relative;
   }
@@ -1452,38 +1452,43 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:2px;
     background:#fff;
     border:1.5px solid var(--line);
-    border-radius:12px;
-    padding:10px 4px;
+    border-radius:10px;
+    padding:5px 4px;
     cursor:pointer;
     user-select:none;
   }
+  .bus-seat .bs-top{
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
   .bus-seat .bs-box{
-    width:18px;height:18px;
+    width:15px;height:15px;
     flex-shrink:0;
-    border-radius:6px;
+    border-radius:5px;
     border:2px solid var(--line);
     display:flex;align-items:center;justify-content:center;
   }
   .bus-seat .bs-box svg{
-    width:11px;height:11px;
+    width:10px;height:10px;
     opacity:0;
     transform:scale(.6);
     transition:opacity .15s ease, transform .15s ease;
   }
   .bus-seat .bs-no{
-    font-size:10px;
+    font-size:9px;
     font-weight:700;
     color:#fff;
     background:var(--navy);
-    padding:1px 7px;
+    padding:1px 6px;
     border-radius:999px;
     white-space:nowrap;
   }
   .bus-seat .bs-name{
-    font-size:13.75px;
+    font-size:12.5px;
     font-weight:600;
     color:var(--ink);
     max-width:100%;
@@ -1574,7 +1579,7 @@
     background:var(--paper-dim);
     border:1.5px solid var(--line);
     border-radius:10px;
-    touch-action:none;
+    touch-action:pan-y;
     -webkit-touch-callout:none;
   }
   .roster-grid .room-member.drag-source{opacity:.3;}
@@ -2452,14 +2457,14 @@
     <section id="panel-bus-roster" class="panel sub-panel">
       <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원 관리</button>
       <h2 class="sub-title">버스</h2>
-      <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 자리가 맞바뀌어요. 왼쪽 네모는 탑승 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
+      <p class="group-move-hint"><b>꾹 눌러</b> 다른 자리에 놓으면 자리 교환 · 네모는 탑승 확인</p>
       <div class="roster-tabs" id="busRosterTabs"></div>
-      <div class="progress">
-        <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
+      <div class="progress progress-slim">
         <div class="progress-head">
           <p class="progress-text"><span id="busCheckedCount">0</span>/<span id="busTotalCount">0</span>명 탑승 확인</p>
           <button class="roster-reset-btn" id="busResetBtn">초기화</button>
         </div>
+        <div class="progress-bar"><div class="progress-fill" id="busProgressFill"></div></div>
       </div>
       <div id="busRosterList"></div>
     </section>
@@ -3324,11 +3329,12 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     if(!item || !getName(item)) return;
     cleanup();
     st = { x0:e.clientX, y0:e.clientY, item, dragging:false, timer:null, target:null, pid:e.pointerId };
-    // 처음부터 포인터를 붙잡아 스크롤/취소로 이벤트가 새지 않게 합니다.
-    try { listEl.setPointerCapture(e.pointerId); } catch(_){}
+    // 아직 포인터를 붙잡지 않는다 → 이 손짓이 스크롤이면 브라우저가 그대로 스크롤하게 둠
     st.timer = setTimeout(() => {
       if(!st) return;
       st.dragging = true;
+      // 홀드가 완성돼 드래그로 확정된 뒤에야 포인터를 붙잡는다
+      try { listEl.setPointerCapture(st.pid); } catch(_){}
       st.item.classList.add("drag-source");
       st.ghost = makeGhost(st.item, st.x0, st.y0);
       document.body.classList.add("dragging-active");
@@ -4596,8 +4602,7 @@ function renderBusList(){
   const rows = chunkBusRows(members);
   const seatHtml = (m) => `
     <div class="bus-seat" data-name="${m.name}">
-      <span class="bs-box">${checkIcon}</span>
-      <span class="bs-no">${m.seat}</span>
+      <div class="bs-top"><span class="bs-box">${checkIcon}</span><span class="bs-no">${m.seat}</span></div>
       <span class="bs-name">${m.name || "-"}</span>
     </div>
   `;
