@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "REPLACE_WITH_PACKAGE_NAME",
+      "package_name": "io.github.kiseounghongsketch.japanchonsan",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_SHA256_FINGERPRINT"
+        "41:5D:EA:13:B2:0D:81:72:34:6C:3B:5B:4A:17:EC:1B:C1:15:3A:C1:38:F7:37:CF:75:B5:A2:CC:1E:57:42:6D"
       ]
     }
   }
