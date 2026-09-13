@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root{
     --paper:#F5F7F5;
@@ -93,6 +94,46 @@
     font-weight:600;
     color:rgba(255,255,255,0.5);
     white-space:nowrap;
+  }
+
+  /* ===== 공지 알림(푸시) 받기 배너 ===== */
+  .push-enable-banner{
+    display:none;
+    align-items:center;
+    gap:10px;
+    background:var(--navy);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:11px 12px;
+    margin-bottom:8px;
+  }
+  .push-enable-banner .pe-text{
+    flex:1;
+    font-size:12.5px;
+    font-weight:600;
+    line-height:1.4;
+  }
+  .push-enable-banner button{
+    font-family:inherit;
+    border:none;
+    border-radius:999px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .push-enable-banner .pe-enable-btn{
+    background:var(--coral);
+    color:#fff;
+    font-weight:700;
+    font-size:12px;
+    padding:7px 12px;
+    white-space:nowrap;
+  }
+  .push-enable-banner .pe-dismiss-btn{
+    background:transparent;
+    color:rgba(255,255,255,0.7);
+    font-size:16px;
+    line-height:1;
+    padding:4px 6px;
   }
 
   /* ===== 오사카 날씨 (공지 탭 상단) ===== */
@@ -1842,6 +1883,11 @@
   <main class="content">
 
     <section id="panel-notice" class="panel active">
+      <div class="push-enable-banner" id="pushEnableBanner">
+        <span class="pe-text">🔔 중요 공지를 놓치지 않으려면<br>알림을 켜주세요</span>
+        <button type="button" class="pe-enable-btn" id="pushEnableBtn">알림 켜기</button>
+        <button type="button" class="pe-dismiss-btn" id="pushDismissBtn" aria-label="닫기">✕</button>
+      </div>
       <div class="weather-card" id="weatherCard">
         <p class="weather-title">오사카 날씨</p>
         <div class="weather-days">
@@ -4021,6 +4067,43 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
+
+/* ===== 공지 푸시 알림 (OneSignal) =====
+   교사가 새 공지를 등록하면(Apps Script) 학생 구독자 전체에게 알림이 갑니다.
+   여기서는 학생이 알림을 켜도록 안내하고 구독시키는 부분만 처리합니다. */
+const PUSH_DISMISS_KEY = "suhak_push_banner_dismissed";
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal){
+  try {
+    await OneSignal.init({
+      appId: "d9762656-303e-49f2-991a-864c97fd64ba",
+      serviceWorkerPath: "sw.js",
+      serviceWorkerParam: { scope: "./" }
+    });
+
+    const banner = document.getElementById("pushEnableBanner");
+    const enableBtn = document.getElementById("pushEnableBtn");
+    const dismissBtn = document.getElementById("pushDismissBtn");
+    if(!banner) return;
+
+    function refreshBanner(){
+      const dismissed = localStorage.getItem(PUSH_DISMISS_KEY) === "1";
+      const granted = OneSignal.Notifications.permission;
+      banner.style.display = (!granted && !dismissed) ? "flex" : "none";
+    }
+    refreshBanner();
+    OneSignal.Notifications.addEventListener("permissionChange", refreshBanner);
+
+    enableBtn.addEventListener("click", async () => {
+      await OneSignal.Notifications.requestPermission();
+      refreshBanner();
+    });
+    dismissBtn.addEventListener("click", () => {
+      localStorage.setItem(PUSH_DISMISS_KEY, "1");
+      refreshBanner();
+    });
+  } catch(_){ /* 알림 기능은 부가 기능이라 실패해도 앱은 그대로 동작하게 둠 */ }
+});
 </script>
 </body>
 </html>

@@ -1,4 +1,7 @@
-const CACHE_NAME = "suhak-app-shell-v2";
+// 공지 푸시 알림(OneSignal) 처리를 기존 서비스워커에 병합
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE_NAME = "suhak-app-shell-v3";
 const ASSETS = [
   "./index.html",
   "./teacher.html",
