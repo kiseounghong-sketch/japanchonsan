@@ -5,7 +5,7 @@
   "lang": "ko",
   "dir": "ltr",
   "start_url": "./teacher.html",
-  "scope": "./",
+  "scope": "./teacher",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FF5A36",
