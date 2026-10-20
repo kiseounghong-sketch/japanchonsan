@@ -3511,6 +3511,15 @@ function enableDragSwap(listEl, itemSel, getName, onSwap, opts){
     }
   });
 
+  // 터치 화면: 꾹 눌러 드래그가 시작된 뒤 손가락을 위아래로 움직이면 브라우저가
+  // 화면 스크롤로 가로채면서 드래그를 취소(pointercancel)해 버립니다.
+  // 드래그 중에는 스크롤을 막아서 끝까지 끌어다 놓을 수 있게 합니다.
+  listEl.addEventListener("touchmove", (e) => {
+    if(st && st.dragging && e.cancelable) e.preventDefault();
+  }, { passive: false });
+  // 꾹 누를 때 뜨는 길게 누르기 메뉴(복사·선택 등)도 막습니다.
+  listEl.addEventListener("contextmenu", (e) => { if(st) e.preventDefault(); });
+
   listEl.addEventListener("pointerup", (e) => {
     if(!st || e.pointerId !== st.pid) return;
     if(st.dragging) e.preventDefault();
