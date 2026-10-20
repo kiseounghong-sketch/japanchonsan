@@ -2637,7 +2637,15 @@ const NOTICES_REFRESH_SECONDS = 30; // 페이지를 열어둔 동안 몇 초마�
 // Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)의 firebaseConfig 값을 아래 { } 자리에 붙여넣으세요.
 // null로 두면 예전처럼 위 구글시트를 NOTICES_REFRESH_SECONDS마다 확인하는 방식으로 동작합니다.
 // (선생님용 페이지와 동일한 값)
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCXNr_vRO-PaZMEuiFYdLzqNqTKRef3Yf4",
+  authDomain: "chongsangojapan.firebaseapp.com",
+  databaseURL: "https://chongsangojapan-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chongsangojapan",
+  storageBucket: "chongsangojapan.firebasestorage.app",
+  messagingSenderId: "318409475372",
+  appId: "1:318409475372:web:f784ed0bd9cc44f5c89889"
+};
 const FIREBASE_SDK_URL = "https://www.gstatic.com/firebasejs/10.12.2/";
 
 function loadScriptOnce(src){
