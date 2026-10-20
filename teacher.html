@@ -2169,6 +2169,16 @@
   .export-list .home-btn{margin-top:0;background:#fff;border:1.5px solid var(--line);}
 
 
+  /* ===== 운영 설정 (관리자) ===== */
+  .admin-note{font-size:12px;color:var(--ink-soft);margin:6px 2px 0;}
+  .admin-danger-btn{
+    display:block;width:100%;margin-bottom:8px;
+    background:#fff;color:var(--coral-deep);
+    border:1.5px solid var(--coral);border-radius:12px;padding:12px;
+    font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
+  }
+  #panel-admin .home-btn{background:#fff;border:1.5px solid var(--line);}
+
   /* ===== 하단 탭바 ===== */
   .tabbar{
     position:fixed;
@@ -2890,14 +2900,33 @@
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
-      <p class="more-group-title">운영 설정 (관리자)</p>
+      <p class="more-group-title">운영 설정</p>
+      <div class="more-list">
+        <button class="more-item" id="openAdminBtn" type="button">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+          <span class="more-text">운영 설정 (관리자)</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section id="panel-admin" class="panel sub-panel">
+      <button class="back-btn" data-back="more"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
+      <h2 class="sub-title">운영 설정 (관리자)</h2>
+      <p class="admin-note">선생님 계정으로 로그인한 기기에서만 열려요.</p>
+      <p class="more-group-title">자료 내보내기</p>
       <div class="export-list">
         <button type="button" class="home-btn" id="exportStatusBtn">📄 학생 준비 현황 내보내기 (엑셀)</button>
         <button type="button" class="home-btn" id="exportRollcallBtn">📄 이번 집합 확인 기록 내보내기 (엑셀)</button>
         <button type="button" class="home-btn" id="exportChatBtn">📄 톡방 내용 내보내기 (엑셀)</button>
       </div>
-      <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
-      <button class="danger-link" id="resetStudentsBtn">학생 준비 현황 데이터 초기화</button>
+      <p class="more-group-title">데이터 초기화</p>
+      <button type="button" class="admin-danger-btn" id="resetNoticesBtn">공지 · 집합 시간 모두 지우기</button>
+      <button type="button" class="admin-danger-btn" id="resetStudentsBtn">학생 준비 현황 모두 지우기</button>
+      <p class="admin-note">지운 데이터는 되돌릴 수 없어요.</p>
+      <p class="more-group-title">이 기기</p>
+      <button type="button" class="home-btn" id="teacherLogoutBtn">선생님 계정 로그아웃 (이 기기에서)</button>
+      <p class="admin-note">여러 선생님이 함께 쓰는 기기라면 사용 후 로그아웃하세요. 다음에 공지·체크할 때 비밀번호를 다시 물어봐요.</p>
     </section>
 
     <section id="panel-roster-select" class="panel sub-panel">
@@ -7002,6 +7031,20 @@ if(FIREBASE_CONFIG){
 window.__v3Ready = true;
 renderNoticesV3(lastNotices);
 fillScheduleExtras(currentDayKey);
+
+/* ===== 운영 설정 (관리자): 선생님 계정 확인 후 열기 ===== */
+document.getElementById("openAdminBtn").addEventListener("click", () => {
+  if(!FIREBASE_CONFIG){ showPanel("admin"); return; }
+  teacherDb().then(() => showPanel("admin"))
+    .catch(err => alert("운영 설정은 선생님 계정으로만 열 수 있어요. (" + describeLoginError(err) + ")"));
+});
+document.getElementById("teacherLogoutBtn").addEventListener("click", () => {
+  if(!confirm("이 기기에서 선생님 계정을 로그아웃할까요?")) return;
+  initFirebase(true).then(() => firebase.auth().signOut()).then(() => {
+    alert("로그아웃했어요.");
+    showPanel("more");
+  }).catch(() => alert("로그아웃하지 못했어요."));
+});
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){
