@@ -4744,7 +4744,7 @@ renderNameList();
 const BUS_ATTEND_KEY = "teacher_bus_attendance";
 const ROOM_ATTEND_KEY = "teacher_room_attendance";
 
-// 지금 보이는 명단에서 가장 최근에 체크한 시각을 "마지막 확인 14:32"처럼 보여줍니다.
+// 지금 보이는 명단에서 가장 최근에 체크한 시각을 "마지막 확인 14:32:05"처럼 보여줍니다.
 // (체크 기록에는 체크한 시각이 저장돼요. 오늘이 아니면 날짜도 함께 표시)
 function showLastCheck(elId, listEl, state){
   let latest = 0;
@@ -4755,8 +4755,8 @@ function showLastCheck(elId, listEl, state){
   const el = document.getElementById(elId);
   if(!latest){ el.textContent = ""; return; }
   const d = new Date(latest);
-  const hm = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-  el.textContent = "· 마지막 확인 " + (isSameDate(d, new Date()) ? hm : (d.getMonth() + 1) + "." + d.getDate() + " " + hm);
+  const hms = [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, "0")).join(":");
+  el.textContent = "· 마지막 확인 " + (isSameDate(d, new Date()) ? hms : (d.getMonth() + 1) + "." + d.getDate() + " " + hms);
 }
 function loadAttendState(key){
   try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch(e){ return {}; }
