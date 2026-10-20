@@ -12,7 +12,7 @@
     "assembly": {
       ".read": true,
       ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
-      ".validate": "newData.hasChildren(['targetTime', 'place']) && newData.child('place').isString() && newData.child('place').val().length <= 200"
+      ".validate": "newData.hasChildren(['targetTime', 'place']) && newData.child('place').isString() && newData.child('place').val().length <= 200 && (!newData.child('id').exists() || (newData.child('id').isString() && newData.child('id').val().length <= 40))"
     },
     "assign": {
       ".read": true,
@@ -98,6 +98,37 @@
         },
         "$other": {
           ".validate": false
+        }
+      }
+    },
+    "rollcall": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$aid": {
+        "$name": {
+          ".validate": "newData.hasChildren(['s', 'ts']) && (newData.child('s').val() === 'ok' || newData.child('s').val() === 'special')",
+          "s": {
+            ".validate": "newData.isString()"
+          },
+          "r": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "arrivals": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$aid": {
+        "$name": {
+          ".write": "$aid === root.child('assembly').child('id').val()",
+          ".validate": "newData.isNumber() && newData.val() === now && $name.length <= 200"
         }
       }
     }

@@ -74,7 +74,7 @@
     font-size:clamp(14px, 5vw, 19px);
     line-height:1.2;
     margin:0;
-    letter-spacing:0;
+    letter-spacing:0;  word-break:keep-all;   /* 줄바꿈은 단어 단위로 (수학/여행처럼 끊기지 않게) */
   }
   .trip-dates{
     flex-shrink:0;
@@ -1954,6 +1954,174 @@
   }
   .chat-form input:disabled, .chat-form button:disabled{opacity:.5;}
 
+  /* ===== 상단 SOS 버튼 · 연결 상태 ===== */
+  .hdr-sos{
+    flex-shrink:0;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:6px 11px;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:900;
+    letter-spacing:.5px;
+    cursor:pointer;
+  }
+  .conn-banner{
+    background:#3a3a3a;
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    text-align:center;
+    padding:6px 12px;
+  }
+  .conn-banner[hidden]{display:none;}
+
+  /* ===== 하단 탭 6개 ===== */
+  .tabbar .tab{font-size:11.5px;}
+  .tabbar .tab svg{width:22px;height:22px;}
+  .fab{display:none !important;}   /* 떠 있는 버튼 대신 화면 안 버튼을 씀 */
+
+  /* ===== 홈 ===== */
+  .home-card{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .home-card[hidden]{display:none;}
+  .home-card-title{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .home-card-title .home-link{
+    background:none;border:none;padding:0;
+    font-family:inherit;font-size:12px;font-weight:700;
+    color:var(--coral-deep);cursor:pointer;
+  }
+  .home-urgent{
+    background:#FFF1EC;
+    border:1.5px solid var(--coral);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .home-urgent[hidden]{display:none;}
+  .home-urgent .hu-chip{
+    display:inline-block;background:var(--coral);color:#fff;
+    font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;margin-bottom:4px;
+  }
+  .home-urgent .hu-title{font-size:15px;font-weight:800;margin:0;color:var(--ink);}
+  .home-urgent .hu-body{font-size:13px;color:var(--ink-soft);margin:4px 0 0;}
+  .home-big{font-size:22px;font-weight:900;margin:0;color:var(--ink);}
+  .home-big small{font-size:13px;font-weight:700;color:var(--ink-soft);margin-left:6px;}
+  .home-sub{font-size:13px;color:var(--ink-soft);margin:6px 0 0;}
+  .home-now-row{display:flex;align-items:flex-start;gap:10px;}
+  .home-now-row .hn-time{font-size:13px;font-weight:800;color:var(--coral-deep);min-width:44px;padding-top:2px;}
+  .home-now-row .hn-name{font-size:16px;font-weight:800;margin:0;color:var(--ink);}
+  .home-now-row .hn-place{font-size:12.5px;color:var(--ink-soft);margin:2px 0 0;}
+  .home-next{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .home-weather{font-size:12px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .home-btn{
+    display:block;width:100%;margin-top:10px;
+    background:var(--paper-dim);color:var(--ink);
+    border:none;border-radius:10px;padding:10px;
+    font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;
+  }
+  .home-btn.primary{background:var(--coral);color:#fff;}
+  .home-todo-item{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    width:100%;background:none;border:none;border-top:1px solid var(--line);
+    padding:11px 0;font-family:inherit;text-align:left;cursor:pointer;
+  }
+  .home-todo-item:first-of-type{border-top:none;padding-top:2px;}
+  .home-todo-item .ht-text{font-size:14px;font-weight:700;color:var(--ink);}
+  .home-todo-item .ht-count{font-size:14px;font-weight:900;color:var(--coral-deep);white-space:nowrap;}
+  .home-todo-item .ht-count.ok{color:#2E8B57;}
+  .home-up-item{display:flex;gap:10px;font-size:13.5px;padding:6px 0;}
+  .home-up-item b{color:var(--coral-deep);min-width:44px;}
+  .home-empty{font-size:13px;color:var(--ink-soft);margin:0;}
+
+  /* 집합 카드 안 버튼 (교사: 인원 확인·수정 / 학생: 도착했어요) */
+  .ac-actions{display:flex;gap:8px;margin-top:10px;}
+  .ac-actions button{
+    flex:1;border:none;border-radius:10px;padding:9px 6px;
+    font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+    background:rgba(255,255,255,0.14);color:#fff;
+  }
+  .ac-actions button.primary{background:var(--coral);}
+  .ac-arrive-status{font-size:12.5px;font-weight:700;margin:8px 0 0;color:rgba(255,255,255,0.9);}
+  .ac-arrive-status:empty{display:none;}
+
+  /* ===== 인원 (집합 확인) ===== */
+  .people-nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;}
+  .people-nav .pill{flex:0 0 auto;padding:6px 13px;white-space:nowrap;}
+  .rc-head{margin-bottom:10px;}
+  .rc-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+  .rc-sum{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;}
+  .rc-sum b{display:block;font-size:18px;font-weight:900;color:var(--ink);}
+  .rc-sum span{font-size:11px;font-weight:700;color:var(--ink-soft);}
+  .rc-sum.warn b{color:var(--coral-deep);}
+  .rc-sum.ok b{color:#2E8B57;}
+  .rc-filter{display:flex;gap:6px;margin-bottom:10px;}
+  .rc-filter .pill{padding:5px 0;}
+  .rc-section-title{font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:14px 0 6px;}
+  .rc-row{
+    display:flex;align-items:center;gap:10px;
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:10px 12px;margin-bottom:6px;cursor:pointer;
+  }
+  .rc-row .rc-name{flex:1;font-size:15px;font-weight:800;color:var(--ink);}
+  .rc-row .rc-id{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-left:6px;}
+  .rc-badge{font-size:11px;font-weight:800;border-radius:999px;padding:3px 8px;white-space:nowrap;}
+  .rc-badge.none{background:var(--paper-dim);color:var(--ink-soft);}
+  .rc-badge.reported{background:#FFF4D6;color:#9A6B00;}
+  .rc-badge.ok{background:#E3F4EA;color:#1F7A47;}
+  .rc-badge.special{background:#EDE7FF;color:#5B3DB8;}
+  .rc-row.ok{opacity:.75;}
+  .rc-special-btn{
+    background:none;border:1.5px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink-soft);
+    padding:4px 8px;cursor:pointer;
+  }
+  .rc-reason{font-size:11.5px;color:#5B3DB8;font-weight:600;display:block;margin-top:2px;}
+  details.rc-done summary{cursor:pointer;font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:14px 0 6px;}
+
+  /* ===== 우리 조 (학생) ===== */
+  .myteam-card{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
+  .myteam-card h4{margin:0 0 6px;font-size:12px;color:var(--ink-soft);font-weight:700;}
+  .myteam-card .mt-big{font-size:18px;font-weight:900;margin:0;color:var(--ink);}
+  .myteam-card .mt-sub{font-size:13px;color:var(--ink-soft);margin:4px 0 0;}
+  .mt-group-row{display:flex;gap:8px;font-size:13.5px;padding:7px 0;border-top:1px solid var(--line);}
+  .mt-group-row:first-of-type{border-top:none;}
+  .mt-group-row b{min-width:96px;color:var(--ink);}
+  .mt-group-row span{color:var(--ink-soft);}
+
+  /* ===== 더보기 묶음 ===== */
+  .more-group-title{font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:18px 2px 8px;}
+  .more-group-title:first-child{margin-top:0;}
+  .sos-faq-btn{
+    display:block;width:100%;margin:0 0 12px;
+    background:var(--paper-dim);border:none;border-radius:12px;padding:12px;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;
+  }
+  .notice-top-actions{flex-shrink:0;margin-bottom:10px;}
+  .notice-write-btn{
+    width:100%;background:var(--coral);color:#fff;border:none;border-radius:12px;
+    padding:11px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
+  }
+
+  #panel-checklist > .back-btn{flex-shrink:0;align-self:flex-start;}
+
   /* ===== 하단 탭바 ===== */
   .tabbar{
     position:fixed;
@@ -2287,8 +2455,10 @@
     <div class="ticket-top">
       <h1 class="trip-title">안전하고 즐거운 오사카 수학여행</h1>
       <span class="trip-dates">10.27 ~ 10.30</span>
+      <button type="button" class="hdr-sos" id="openSosBtn" aria-label="긴급 SOS">SOS</button>
     </div>
   </header>
+  <div class="conn-banner" id="connBanner" hidden></div>
 
   <div class="notice-form-overlay" id="sosOverlay">
     <div class="notice-form-card">
@@ -2297,6 +2467,7 @@
         <svg viewBox="0 0 24 24" fill="#191919"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.86 1.8 5.37 4.5 6.83l-1.16 4.3c-.14.5.42.87.82.52l4.98-3.32c.28.02.56.03.86.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
         선생님께 카카오톡으로 내 위치 보내기
       </button>
+      <button type="button" class="sos-faq-btn" id="openEmergencyFaqBtn">🚨 비상상황 대처법 (길 잃음 · 여권 분실 · 지진 등)</button>
       <ul class="contact-list" id="sosContactList"></ul>
       <button type="button" class="sos-all-link" id="sosAllContactsBtn">전체 연락처 보기</button>
       <div class="nf-actions">
@@ -2357,32 +2528,64 @@
     </div>
   </div>
 
+      <div class="notice-form-overlay" id="assemblyFormOverlay">
+    <div class="notice-form-card">
+      <h3>집합 시간 등록</h3>
+      <p class="nf-label">집합 시각</p>
+      <input type="datetime-local" id="assemblyTimeInput" class="nf-input">
+      <p class="nf-label">집합 장소</p>
+      <input type="text" id="assemblyPlaceInput" class="nf-input" placeholder="예: 호텔 로비">
+      <button type="button" id="captureAssemblyLocationBtn" class="location-capture-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        지금 서 있는 위치를 구글지도 링크로 등록
+      </button>
+      <p class="location-capture-status" id="assemblyLocationStatus"></p>
+      <div id="assemblyLocationMap" class="assembly-location-map" style="display:none;"></div>
+      <p class="location-capture-hint" id="assemblyLocationHint" style="display:none;">지도를 누르거나 마커를 드래그해서 위치를 조정할 수 있어요.</p>
+      <div class="nf-actions">
+        <button type="button" id="cancelAssemblyBtn">취소</button>
+        <button type="button" id="assemblySubmitBtn">등록</button>
+      </div>
+      <p id="assemblyStatusMsg"></p>
+    </div>
+  </div>
+  <div class="notice-form-overlay" id="noticeFormOverlay">
+    <div class="notice-form-card">
+      <h3>새 공지 작성</h3>
+      <p class="nf-label">긴급 여부</p>
+      <div class="urgency-toggle" id="urgencyToggle">
+        <button type="button" class="active" data-val="false">일반</button>
+        <button type="button" data-val="true">긴급</button>
+      </div>
+      <p class="nf-label">제목</p>
+      <input type="text" class="nf-input" id="noticeTitleInput" placeholder="예: 출발 10분 지연 안내">
+      <p class="nf-label">내용</p>
+      <textarea class="nf-textarea" id="noticeBodyInput" placeholder="학생들에게 전달할 내용을 적어주세요."></textarea>
+      <p class="nf-label">사진 (선택)</p>
+      <div class="notice-photo-attach">
+        <label class="notice-photo-attach-btn">
+          <input type="file" accept="image/*" id="noticePhotoInput" hidden>
+          📷 사진 선택
+        </label>
+        <span class="notice-photo-attach-status" id="noticePhotoStatus"></span>
+      </div>
+      <div class="notice-photo-preview-wrap" id="noticePhotoPreviewWrap" style="display:none;">
+        <img id="noticePhotoPreview" alt="첨부한 사진 미리보기">
+        <button type="button" id="noticePhotoRemoveBtn">✕ 사진 제거</button>
+      </div>
+      <div class="nf-actions">
+        <button type="button" id="cancelNoticeBtn">취소</button>
+        <button type="button" id="submitNoticeBtn">등록</button>
+      </div>
+      <p id="noticeStatusMsg"></p>
+    </div>
+  </div>
   <main class="content">
 
-    <section id="panel-notice" class="panel active">
-      <div class="weather-card" id="weatherCard">
-        <p class="weather-title">오사카 날씨</p>
-        <div class="weather-days">
-          <div class="weather-day">
-            <p class="weather-day-label">오늘</p>
-            <span class="weather-icon" id="weatherIconToday"></span>
-            <p class="weather-temp" id="weatherTempToday">-</p>
-            <p class="weather-desc" id="weatherDescToday">-</p>
-          </div>
-          <div class="weather-divider"></div>
-          <div class="weather-day">
-            <p class="weather-day-label">내일</p>
-            <span class="weather-icon" id="weatherIconTomorrow"></span>
-            <p class="weather-temp" id="weatherTempTomorrow">-</p>
-            <p class="weather-desc" id="weatherDescTomorrow">-</p>
-          </div>
-        </div>
-      </div>
-      <div class="quick-faq-row">
-        <button type="button" class="quick-faq-btn sos-btn" id="openSosBtn">🆘 SOS</button>
-        <button type="button" class="quick-faq-btn" id="openEmergencyFaqBtn">🚨 비상상황 FAQ</button>
-        <button type="button" class="quick-faq-btn" id="openMannerFaqBtn">🙏 매너·에티켓 FAQ</button>
-      </div>
+    <section id="panel-home" class="panel active">
+      <div class="home-urgent" id="homeUrgent" hidden></div>
+      <div class="home-card" id="homePhase" hidden></div>
+      <div class="home-card" id="homeNow" hidden></div>
       <div class="assembly-card" id="assemblyCard" style="display:none;">
         <button class="ac-delete-btn" id="deleteAssemblyBtn" type="button" title="집합 시간 삭제" aria-label="집합 시간 삭제">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -2404,7 +2607,33 @@
           </div>
         </div>
         <p class="ac-map-hint">📍 집합 장소를 누르면 구글 지도 도보 길찾기가 열려요</p>
+        <div class="ac-actions"><button type="button" class="primary" data-act="people">인원 확인 <span id="acPeopleCount"></span></button><button type="button" data-act="edit-assembly">집합 수정</button></div>
       </div>
+      <div class="home-card" id="homeAsmEmpty" hidden><p class="home-card-title">다음 집합</p><p class="home-empty">진행 중인 집합이 없어요.</p><button type="button" class="home-btn primary" data-act="new-assembly">＋ 집합 등록</button></div>
+      <div class="home-card" id="homeTodo"></div>
+      <div class="home-card" id="homeUpcoming" hidden></div>
+      <div class="weather-card" id="weatherCard">
+        <p class="weather-title">오사카 날씨</p>
+        <div class="weather-days">
+          <div class="weather-day">
+            <p class="weather-day-label">오늘</p>
+            <span class="weather-icon" id="weatherIconToday"></span>
+            <p class="weather-temp" id="weatherTempToday">-</p>
+            <p class="weather-desc" id="weatherDescToday">-</p>
+          </div>
+          <div class="weather-divider"></div>
+          <div class="weather-day">
+            <p class="weather-day-label">내일</p>
+            <span class="weather-icon" id="weatherIconTomorrow"></span>
+            <p class="weather-temp" id="weatherTempTomorrow">-</p>
+            <p class="weather-desc" id="weatherDescTomorrow">-</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-notice" class="panel">
+      <div class="notice-top-actions"><button type="button" class="notice-write-btn" id="noticeWriteBtn">＋ 공지 작성</button></div>
       <div class="scroll-area">
         <div id="noticeList"></div>
       </div>
@@ -2412,58 +2641,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
       </button>
       <button class="fab" id="newNoticeFab">+</button>
-      <div class="notice-form-overlay" id="assemblyFormOverlay">
-        <div class="notice-form-card">
-          <h3>집합 시간 등록</h3>
-          <p class="nf-label">집합 시각</p>
-          <input type="datetime-local" id="assemblyTimeInput" class="nf-input">
-          <p class="nf-label">집합 장소</p>
-          <input type="text" id="assemblyPlaceInput" class="nf-input" placeholder="예: 호텔 로비">
-          <button type="button" id="captureAssemblyLocationBtn" class="location-capture-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            지금 서 있는 위치를 구글지도 링크로 등록
-          </button>
-          <p class="location-capture-status" id="assemblyLocationStatus"></p>
-          <div id="assemblyLocationMap" class="assembly-location-map" style="display:none;"></div>
-          <p class="location-capture-hint" id="assemblyLocationHint" style="display:none;">지도를 누르거나 마커를 드래그해서 위치를 조정할 수 있어요.</p>
-          <div class="nf-actions">
-            <button type="button" id="cancelAssemblyBtn">취소</button>
-            <button type="button" id="assemblySubmitBtn">등록</button>
-          </div>
-          <p id="assemblyStatusMsg"></p>
-        </div>
-      </div>
-      <div class="notice-form-overlay" id="noticeFormOverlay">
-        <div class="notice-form-card">
-          <h3>새 공지 작성</h3>
-          <p class="nf-label">긴급 여부</p>
-          <div class="urgency-toggle" id="urgencyToggle">
-            <button type="button" class="active" data-val="false">일반</button>
-            <button type="button" data-val="true">긴급</button>
-          </div>
-          <p class="nf-label">제목</p>
-          <input type="text" class="nf-input" id="noticeTitleInput" placeholder="예: 출발 10분 지연 안내">
-          <p class="nf-label">내용</p>
-          <textarea class="nf-textarea" id="noticeBodyInput" placeholder="학생들에게 전달할 내용을 적어주세요."></textarea>
-          <p class="nf-label">사진 (선택)</p>
-          <div class="notice-photo-attach">
-            <label class="notice-photo-attach-btn">
-              <input type="file" accept="image/*" id="noticePhotoInput" hidden>
-              📷 사진 선택
-            </label>
-            <span class="notice-photo-attach-status" id="noticePhotoStatus"></span>
-          </div>
-          <div class="notice-photo-preview-wrap" id="noticePhotoPreviewWrap" style="display:none;">
-            <img id="noticePhotoPreview" alt="첨부한 사진 미리보기">
-            <button type="button" id="noticePhotoRemoveBtn">✕ 사진 제거</button>
-          </div>
-          <div class="nf-actions">
-            <button type="button" id="cancelNoticeBtn">취소</button>
-            <button type="button" id="submitNoticeBtn">등록</button>
-          </div>
-          <p id="noticeStatusMsg"></p>
-        </div>
-      </div>
     </section>
 
     <section id="panel-schedule" class="panel">
@@ -2500,6 +2677,7 @@
     </section>
 
     <section id="panel-checklist" class="panel">
+      <button class="back-btn" data-back="more"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <button type="button" class="students-nav-btn" id="openStudentsBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>학생 준비 현황 보기</span>
@@ -2555,16 +2733,48 @@
       </form>
     </section>
 
+    <section id="panel-people" class="panel">
+      <div class="people-nav">
+        <button type="button" class="pill active">집합 확인</button>
+        <button type="button" class="pill" data-target="name-list">학생</button>
+        <button type="button" class="pill" data-target="groups">조</button>
+        <button type="button" class="pill" data-target="bus-roster">버스</button>
+        <button type="button" class="pill" data-target="room-roster">숙소</button>
+      </div>
+      <div class="rc-head" id="rcHead"></div>
+      <div class="rc-summary" id="rcSummary"></div>
+      <div class="rc-filter" id="rcFilter" hidden>
+        <button type="button" class="pill active" data-grade="all">전체</button>
+        <button type="button" class="pill" data-grade="1">1학년</button>
+        <button type="button" class="pill" data-grade="2">2학년</button>
+      </div>
+      <div id="rcList"></div>
+    </section>
+
     <section id="panel-more" class="panel">
+      <p class="more-group-title">출발 준비</p>
       <div class="more-list">
-        <button class="more-item" data-target="roster-select">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <span class="more-text">인원 관리</span>
+        <button class="more-item" data-target="checklist">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
+          <span class="more-text">준비물</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <button class="more-item" data-target="missions">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
-          <span class="more-text">사진 미션</span>
+        <button class="more-item" data-target="grade-select">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+          <span class="more-text">학생 준비 현황</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <p class="more-group-title">여행 도구 · 기록</p>
+      <div class="more-list">
+        <button class="more-item" id="moreExchangeBtn">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span class="more-text">엔화 계산기</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="phrases">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+          <span class="more-text">서바이벌 일본어 회화</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="faq">
@@ -2572,9 +2782,14 @@
           <span class="more-text">자주 묻는 질문</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <button class="more-item" data-target="phrases">
-          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
-          <span class="more-text">서바이벌 일본어 회화</span>
+        <button class="more-item" data-target="etiquette-faq">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+          <span class="more-text">매너 · 에티켓</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="more-item" data-target="missions">
+          <span class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          <span class="more-text">사진 미션</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <button class="more-item" data-target="contacts">
@@ -2583,6 +2798,7 @@
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
+      <p class="more-group-title">운영 설정 (관리자)</p>
       <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
       <button class="danger-link" id="resetStudentsBtn">학생 준비 현황 데이터 초기화</button>
     </section>
@@ -2615,7 +2831,7 @@
     </section>
 
     <section id="panel-bus-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원 관리</button>
+      <button class="back-btn" data-back="people"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원</button>
       <h2 class="sub-title">버스</h2>
       <p class="group-move-hint"><b>꾹 눌러</b> 다른 자리에 놓으면 자리 교환 · 네모는 탑승 확인</p>
       <div class="roster-tabs" id="busRosterTabs"></div>
@@ -2630,7 +2846,7 @@
     </section>
 
     <section id="panel-room-roster" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원 관리</button>
+      <button class="back-btn" data-back="people"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원</button>
       <h2 class="sub-title">숙소</h2>
       <p class="group-move-hint">학생 이름을 <b>꾹 눌러 끌어다</b> 다른 학생 위에 놓으면 방이 맞바뀌어요. 왼쪽 네모는 입실 확인용이에요. (바꾼 내용은 학생 화면에도 반영돼요)</p>
       <div class="roster-tabs" id="roomRosterTabs">
@@ -2648,7 +2864,7 @@
     </section>
 
     <section id="panel-groups" class="panel sub-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원 관리</button>
+      <button class="back-btn" data-back="people"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원</button>
       <div class="sub-title-row">
         <h2 class="sub-title">조편성표</h2>
         <div class="sub-title-actions">
@@ -2671,7 +2887,7 @@
     </section>
 
     <section id="panel-name-list" class="panel sub-panel namelist-panel">
-      <button class="back-btn" data-back="roster-select"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원 관리</button>
+      <button class="back-btn" data-back="people"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>인원</button>
       <h2 class="sub-title">학생 명렬표</h2>
       <div class="roster-tabs" id="nameListTabs">
         <button class="pill active" data-grade="1학년">1학년</button>
@@ -2708,13 +2924,13 @@
     </section>
 
     <section id="panel-emergency-faq" class="panel sub-panel">
-      <button class="back-btn" data-back="notice"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>공지</button>
+      <button class="back-btn" data-back="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>홈</button>
       <h2 class="sub-title">🚨 비상상황 FAQ</h2>
       <div id="emergencyFaqList"></div>
     </section>
 
     <section id="panel-etiquette-faq" class="panel sub-panel">
-      <button class="back-btn" data-back="notice"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>공지</button>
+      <button class="back-btn" data-back="more"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">🙏 매너·에티켓 FAQ</h2>
       <div id="mannerFaqList"></div>
     </section>
@@ -2726,7 +2942,7 @@
     </section>
 
     <section id="panel-grade-select" class="panel sub-panel">
-      <button class="back-btn" data-back="checklist"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>준비물</button>
+      <button class="back-btn" data-back="more"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>더보기</button>
       <h2 class="sub-title">학생 준비 현황</h2>
       <p class="students-note">학년을 선택하면 학생별 준비물·미션 체크 현황을 볼 수 있어요.</p>
       <div class="more-list">
@@ -2754,17 +2970,21 @@
   </main>
 
   <nav class="tabbar">
-    <button class="tab active" data-panel="notice">
-      <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ping" id="noticePing"></span></span>
-      공지
+    <button class="tab active" data-panel="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      홈
     </button>
     <button class="tab" data-panel="schedule">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>
       일정
     </button>
-    <button class="tab" data-panel="checklist">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-      준비물
+    <button class="tab" data-panel="people">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      인원
+    </button>
+    <button class="tab" data-panel="notice">
+      <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ping" id="noticePing" style="display:none"></span></span>
+      공지
     </button>
     <button class="tab" data-panel="chat">
       <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg><span class="ping" id="chatPing" style="display:none"></span></span>
@@ -2846,6 +3066,13 @@ let liveAssembly = false;
 // 배정 변경·조 편성은 Firebase에 저장된 값이 있을 때만 true (없으면 예전 시트 값을 그대로 씀)
 let liveAssign = false;
 let liveGroupCfg = false;
+// 홈·집합 확인이 함께 쓰는 값 (Firebase에서 받은 현재 집합, 최근 공지)
+let currentAssembly = null;
+let lastNotices = [];
+let assemblyEditId = null;   // 교사: 집합 "수정" 중이면 그 집합 ID (확인 기록을 그대로 이어감)
+// 아래 함수들은 스크립트가 끝까지 읽힌 뒤 실행되도록 잠깐 미룹니다.
+function requestHomeRender(){ clearTimeout(window.__homeRenderTimer); window.__homeRenderTimer = setTimeout(() => renderHome(), 0); }
+function requestAssemblyChange(){ setTimeout(() => onAssemblyChange(), 0); }
 
 // Firebase 키에는 . # $ [ ] / 를 쓸 수 없어서, 학생 이름·항목 이름은 인코딩해서 키로 씁니다.
 function fbKey(s){ return encodeURIComponent(String(s)).replace(/\./g, "%2E"); }
@@ -3360,6 +3587,8 @@ document.addEventListener("click", (e) => {
 });
 
 function renderNotices(list){
+  lastNotices = list;
+  requestHomeRender();
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
     document.getElementById("noticePing").style.display = "none";
@@ -3819,13 +4048,15 @@ initFirebase(true).then(db => {
     const list = [];
     snap.forEach(c => {
       const n = c.val() || {};
-      list.push({ key: c.key, time: n.time || "", important: !!n.important, title: n.title || "", body: n.body || "" });
+      list.push({ key: c.key, time: n.time || "", important: !!n.important, title: n.title || "", body: n.body || "", ts: n.ts || 0 });
     });
     renderNotices(list.reverse());
   }, () => { liveNotices = false; });
   db.ref("assembly").on("value", snap => {
     liveAssembly = true;
     const a = snap.val();
+    currentAssembly = a || null;
+    requestAssemblyChange();
     const target = a && a.targetTime ? new Date(a.targetTime) : null;
     if(!target || isNaN(target.getTime())){ hideAssembly(); return; }
     assemblyTarget = target;
@@ -3919,6 +4150,7 @@ document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
   const done = FIREBASE_CONFIG
     ? Promise.all([
         teacherDb().then(db => db.ref("assembly").set({
+          id: assemblyEditId || ("a" + Date.now()),   // 수정이면 같은 집합(확인 기록 유지), 새 등록이면 새 집합
           targetTime: t, place: place, lat: assemblyLat, lng: assemblyLng,
           ts: firebase.database.ServerValue.TIMESTAMP
         })),
@@ -5463,7 +5695,6 @@ const mannerFaqList = document.getElementById("mannerFaqList");
 renderFaqList(mannerFaqList, MANNER_FAQS);
 
 document.getElementById("openEmergencyFaqBtn").addEventListener("click", () => showPanel("emergency-faq"));
-document.getElementById("openMannerFaqBtn").addEventListener("click", () => showPanel("etiquette-faq"));
 
 /* ---- 서바이벌 일본어 회화 ---- */
 const PHRASES = [
@@ -5644,6 +5875,7 @@ function loadStudentStatus(){
         });
         renderStudentList();
         note.textContent = "";
+        requestHomeRender();
       }, () => { studentStatusLive = false; note.textContent = "학생 현황을 불러오지 못했어요."; });
     }).catch(() => { note.textContent = "학생 현황을 불러오지 못했어요."; });
     return;
@@ -5987,6 +6219,409 @@ document.querySelector('.tab[data-panel="chat"]').addEventListener("click", () =
 });
 
 chatSetup();
+
+/* ===== 홈 · 집합 확인 · 우리 조 · 연결 상태 =====
+   - 홈: 지금 판단해야 할 정보만 (긴급 공지, 출발 전 준비, 현재 일정, 다음 집합, 확인 필요한 일, 오늘 남은 일정)
+   - 집합 확인: 집합마다 따로 기록 (rollcall/집합ID, arrivals/집합ID)
+     상태 = 미확인 / 학생 도착 보고 / 교사 확인 완료 / 별도 인솔(사유)
+     학생의 도착 보고는 교사 확인으로 자동으로 바뀌지 않습니다. */
+const V2_IS_TEACHER = true;
+
+function goTab(panel){
+  const tab = document.querySelector(`.tab[data-panel="${panel}"]`);
+  if(tab) tab.click(); else showPanel(panel);
+}
+function hm(d){ return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
+function toMinutes(t){ const [h, m] = t.split(":").map(Number); return h * 60 + m; }
+
+// 여행 시기: 출발 전 / 여행 중 / 여행 후
+function tripPhase(now){
+  const start = dayDate(dayKeys[0]);
+  const end = dayDate(dayKeys[dayKeys.length - 1]); end.setHours(23, 59, 59);
+  if(now < start) return "before";
+  if(now > end) return "after";
+  return "during";
+}
+// 오늘 일정에서 지금 진행 중인 일정·다음 일정·남은 일정
+function scheduleNow(now){
+  const key = dayKeys.find(k => isSameDate(dayDate(k), now));
+  if(!key) return null;
+  const items = SCHEDULE[key].items;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let cur = -1;
+  items.forEach((it, i) => { if(toMinutes(it[0]) <= nowMin) cur = i; });
+  return { key, items, cur, current: items[cur] || null, next: items[cur + 1] || null, rest: items.slice(cur + 2, cur + 5) };
+}
+
+/* ---- 집합 확인 데이터 ---- */
+let rcAid = null, rcData = {}, rcArrivals = {}, rcRefs = [];
+let rcFilter = "all";
+function unkeyMap(v){ const o = {}; Object.keys(v || {}).forEach(k => { o[fbUnkey(k)] = v[k]; }); return o; }
+function rcState(name){
+  const r = rcData[name];
+  if(r && r.s === "special") return "special";
+  if(r && r.s === "ok") return "ok";
+  if(rcArrivals[name]) return "reported";
+  return "none";
+}
+const RC_LABEL = { none: "미확인", reported: "도착 보고", ok: "확인 완료", special: "별도 인솔" };
+function rcCounts(list){
+  const c = { none: 0, reported: 0, ok: 0, special: 0 };
+  (list || ROSTER).forEach(s => { c[rcState(s.name)]++; });
+  return c;
+}
+function subscribeRollcall(){
+  const aid = (currentAssembly && currentAssembly.id) || null;
+  if(aid === rcAid) return;
+  rcRefs.forEach(r => { try { r.off(); } catch(e){} });
+  rcRefs = []; rcAid = aid; rcData = {}; rcArrivals = {};
+  renderRollcall(); requestHomeRender();
+  if(!aid || !FIREBASE_CONFIG) return;
+  initFirebase(V2_IS_TEACHER).then(db => {
+    if(rcAid !== aid) return;
+    if(V2_IS_TEACHER){
+      const r1 = db.ref("rollcall/" + aid), r2 = db.ref("arrivals/" + aid);
+      r1.on("value", s => { rcData = unkeyMap(s.val()); renderRollcall(); requestHomeRender(); });
+      r2.on("value", s => { rcArrivals = unkeyMap(s.val()); renderRollcall(); requestHomeRender(); });
+      rcRefs = [r1, r2];
+    } else if(studentName){
+      const me = fbKey(studentName);
+      const r1 = db.ref("rollcall/" + aid + "/" + me), r2 = db.ref("arrivals/" + aid + "/" + me);
+      r1.on("value", s => { rcData = {}; if(s.val()) rcData[studentName] = s.val(); requestHomeRender(); });
+      r2.on("value", s => { rcArrivals = {}; if(s.val()) rcArrivals[studentName] = s.val(); requestHomeRender(); });
+      rcRefs = [r1, r2];
+    }
+  }).catch(() => {});
+}
+// 집합 정보가 바뀌면(Firebase) 집합 확인 구독을 새 집합으로 옮기고 화면을 다시 그림
+function onAssemblyChange(){
+  subscribeRollcall();
+  if(V2_IS_TEACHER) maybeOfferAssemblyNotice();
+  requestHomeRender();
+}
+
+/* ---- 교사: 집합 확인 화면 ---- */
+function renderRollcall(){
+  if(!V2_IS_TEACHER) return;
+  const head = document.getElementById("rcHead");
+  const sum = document.getElementById("rcSummary");
+  const listEl = document.getElementById("rcList");
+  const filterEl = document.getElementById("rcFilter");
+  if(!head) return;
+  if(!rcAid){
+    head.innerHTML = `<div class="home-card"><p class="home-empty">지금 진행 중인 집합이 없어요.<br>집합을 등록하면 이번 집합만의 확인 기록이 새로 만들어져요.</p>
+      <button type="button" class="home-btn primary" data-act="new-assembly">＋ 집합 등록</button></div>`;
+    sum.innerHTML = ""; listEl.innerHTML = ""; filterEl.hidden = true;
+    return;
+  }
+  filterEl.hidden = false;
+  const a = currentAssembly;
+  const t = a.targetTime ? new Date(a.targetTime) : null;
+  head.innerHTML = `<div class="home-card"><p class="home-card-title">이번 집합 <button type="button" class="home-link" data-act="edit-assembly">수정</button></p>
+    <p class="home-big">${t && !isNaN(t) ? hm(t) : "-"}<small>${chatEsc(a.place || "")}</small></p></div>`;
+  const students = ROSTER.filter(s => rcFilter === "all" || (rcFilter === "1" ? s.id.charAt(0) === "1" : s.id.charAt(0) === "2"));
+  const c = rcCounts(students);
+  sum.innerHTML = `
+    <div class="rc-sum warn"><b>${c.none}</b><span>미확인</span></div>
+    <div class="rc-sum"><b>${c.reported}</b><span>도착 보고</span></div>
+    <div class="rc-sum ok"><b>${c.ok}</b><span>확인 완료</span></div>
+    <div class="rc-sum"><b>${c.special}</b><span>별도 인솔</span></div>`;
+  filterEl.querySelectorAll(".pill").forEach(p => p.classList.toggle("active", p.dataset.grade === rcFilter));
+  const row = s => {
+    const st = rcState(s.name);
+    const r = rcData[s.name];
+    return `<div class="rc-row ${st}" data-name="${s.name}">
+      <span class="rc-name">${s.name}<span class="rc-id">${s.id}</span>${st === "special" && r && r.r ? `<span class="rc-reason">${chatEsc(r.r)}</span>` : ""}</span>
+      <span class="rc-badge ${st}">${RC_LABEL[st]}</span>
+      <button type="button" class="rc-special-btn" data-special="${s.name}">${st === "special" ? "해제" : "별도"}</button>
+    </div>`;
+  };
+  const need = students.filter(s => ["reported", "none"].includes(rcState(s.name)))
+    .sort((x, y) => (rcState(x.name) === "reported" ? 0 : 1) - (rcState(y.name) === "reported" ? 0 : 1));
+  const special = students.filter(s => rcState(s.name) === "special");
+  const done = students.filter(s => rcState(s.name) === "ok");
+  listEl.innerHTML =
+    `<p class="rc-section-title">확인 필요 ${need.length}명 <span style="font-weight:600">· 이름을 누르면 확인 완료</span></p>` +
+    (need.length ? need.map(row).join("") : `<p class="home-empty">모두 확인했어요 ✅</p>`) +
+    (special.length ? `<p class="rc-section-title">별도 인솔 ${special.length}명</p>` + special.map(row).join("") : "") +
+    `<details class="rc-done"><summary>확인 완료 ${done.length}명 (눌러서 펼치기)</summary>${done.map(row).join("")}</details>`;
+}
+function rcWrite(name, value){
+  if(!rcAid) return;
+  const aid = rcAid;
+  teacherDb().then(db => db.ref("rollcall/" + aid + "/" + fbKey(name)).set(value))
+    .catch(err => alert("저장하지 못했어요. (" + describeLoginError(err) + ")"));
+}
+if(V2_IS_TEACHER){
+  document.getElementById("rcList").addEventListener("click", (e) => {
+    const sp = e.target.closest("[data-special]");
+    if(sp){
+      const name = sp.dataset.special;
+      if(rcState(name) === "special"){
+        if(confirm(name + " 학생의 별도 인솔을 해제할까요?")) rcWrite(name, null);
+      } else {
+        const reason = (prompt(name + " 학생 별도 인솔 사유와 담당 선생님을 적어주세요.\n(예: 병원 동행 - 김○○ 선생님)") || "").trim();
+        if(reason) rcWrite(name, { s: "special", r: reason.slice(0, 100), ts: Date.now() });
+      }
+      return;
+    }
+    const rowEl = e.target.closest(".rc-row");
+    if(!rowEl) return;
+    const name = rowEl.dataset.name;
+    const st = rcState(name);
+    if(st === "ok"){
+      if(confirm(name + " 학생의 확인을 취소할까요?")) rcWrite(name, null);
+    } else if(st !== "special"){
+      rcWrite(name, { s: "ok", ts: Date.now() });
+    }
+  });
+  document.getElementById("rcFilter").addEventListener("click", (e) => {
+    const p = e.target.closest(".pill");
+    if(!p) return;
+    rcFilter = p.dataset.grade;
+    renderRollcall();
+  });
+  document.querySelector(".people-nav").addEventListener("click", (e) => {
+    const p = e.target.closest(".pill");
+    if(!p || !p.dataset.target) return;
+    showPanel(p.dataset.target);
+    if(p.dataset.target === "bus-roster") renderBusTabs();
+    if(p.dataset.target === "room-roster") renderRoomTabs();
+    if(p.dataset.target === "groups") fetchGroupConfig().then(renderGroups);
+    if(p.dataset.target === "name-list") renderNameList();
+  });
+}
+
+/* ---- 교사: 집합 등록·수정 (같은 집합 수정 시 확인 기록은 그대로 유지) ---- */
+let assemblyEditPending = null;   // 수정 저장 후 "공지로 알릴까요?"를 묻기 위한 기억
+function openAssemblyForm(edit){
+  assemblyEditId = edit && currentAssembly ? currentAssembly.id : null;
+  const overlay = document.getElementById("assemblyFormOverlay");
+  overlay.querySelector("h3").textContent = assemblyEditId ? "집합 정보 수정" : "새 집합 등록";
+  document.getElementById("assemblySubmitBtn").textContent = assemblyEditId ? "수정" : "등록";
+  // 수정이면 지금 값을 채우고, 새 등록이면 비워 둠
+  document.getElementById("assemblyTimeInput").value = assemblyEditId ? (currentAssembly.targetTime || "") : "";
+  document.getElementById("assemblyPlaceInput").value = assemblyEditId ? (currentAssembly.place || "") : "";
+  assemblyLat = assemblyEditId ? (currentAssembly.lat || null) : null;
+  assemblyLng = assemblyEditId ? (currentAssembly.lng || null) : null;
+  overlay.style.display = "flex";
+}
+function maybeOfferAssemblyNotice(){
+  const p = assemblyEditPending, a = currentAssembly;
+  if(!p || !a || a.id !== p.id) return;
+  if(a.targetTime === p.before.targetTime && a.place === p.before.place) return;
+  assemblyEditPending = null;
+  setTimeout(() => {
+    if(!confirm("집합 정보가 바뀌었어요. 학생들에게 공지로 알릴까요?")) return;
+    const t = new Date(a.targetTime);
+    document.getElementById("newNoticeFab").click();
+    document.getElementById("noticeTitleInput").value = "집합 정보 변경 안내";
+    document.getElementById("noticeBodyInput").value = `집합 시간: ${isNaN(t) ? a.targetTime : hm(t)}\n집합 장소: ${a.place}` +
+      (p.before.place !== a.place ? `\n(이전 장소: ${p.before.place})` : "") +
+      (p.before.targetTime !== a.targetTime && !isNaN(new Date(p.before.targetTime)) ? `\n(이전 시간: ${hm(new Date(p.before.targetTime))})` : "");
+  }, 400);
+}
+if(V2_IS_TEACHER){
+  // 수정 저장 버튼을 누를 때, 바꾸기 전 정보를 기억해 둠
+  document.getElementById("assemblySubmitBtn").addEventListener("click", () => {
+    assemblyEditPending = (assemblyEditId && currentAssembly) ? { id: assemblyEditId, before: { targetTime: currentAssembly.targetTime, place: currentAssembly.place } } : null;
+  }, true);
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-act]");
+    if(!b) return;
+    if(b.dataset.act === "new-assembly") openAssemblyForm(false);
+    if(b.dataset.act === "edit-assembly") openAssemblyForm(true);
+    if(b.dataset.act === "people") goTab("people");
+    if(b.dataset.act === "prep") showPanel("grade-select");
+  });
+  document.getElementById("noticeWriteBtn").addEventListener("click", () => document.getElementById("newNoticeFab").click());
+}
+
+/* ---- 학생: 도착했어요 ---- */
+if(!V2_IS_TEACHER){
+  document.getElementById("acArriveBtn").addEventListener("click", () => {
+    if(!rcAid || !studentName) return;
+    const aid = rcAid;
+    initFirebase(false).then(db => db.ref("arrivals/" + aid + "/" + fbKey(studentName)).set(firebase.database.ServerValue.TIMESTAMP))
+      .catch(() => alert("도착 보고를 보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러주세요."));
+  });
+}
+function renderArriveRow(){
+  if(V2_IS_TEACHER) return;
+  const wrap = document.getElementById("acArrive");
+  const btn = document.getElementById("acArriveBtn");
+  const status = document.getElementById("acArriveStatus");
+  if(!rcAid || !studentName){ wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const st = rcState(studentName);
+  btn.hidden = st !== "none";
+  status.textContent = st === "reported" ? "🙋 도착 보고 완료 · 선생님 확인을 기다리는 중이에요"
+    : st === "ok" ? "✅ 선생님이 확인했어요"
+    : st === "special" ? "선생님과 별도로 이동 중이에요" : "";
+}
+
+/* ---- 홈 ---- */
+function renderHome(){
+  const now = new Date();
+  const phase = tripPhase(now);
+  const sn = scheduleNow(now);
+
+  // ① 긴급 공지 (최근 12시간 안의 긴급 공지 1개)
+  const urgent = (lastNotices || []).find(n => n.important && n.ts && now - n.ts < 12 * 3600 * 1000);
+  const uEl = document.getElementById("homeUrgent");
+  uEl.hidden = !urgent;
+  if(urgent){
+    const body = String(urgent.body || "").replace(/https?:\/\/\S+/g, "").trim();
+    uEl.innerHTML = `<span class="hu-chip">긴급 공지 · ${chatEsc(urgent.time)}</span><p class="hu-title">${chatEsc(urgent.title)}</p>${body ? `<p class="hu-body">${chatEsc(body.slice(0, 80))}</p>` : ""}`;
+  }
+
+  // ② 시기별 카드 (출발 전: D-day·준비 / 여행 후: 마무리)
+  const pEl = document.getElementById("homePhase");
+  if(phase === "before"){
+    const dday = Math.ceil((dayDate(dayKeys[0]) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+    let extra = "";
+    if(V2_IS_TEACHER){
+      const missing = ROSTER.filter(s => { const d = studentDataMap[s.name]; return !d || String(d.essential || "").indexOf("미비") === 0; }).length;
+      extra = `<p class="home-sub">앱 접속 ${ROSTER.filter(s => studentDataMap[s.name]).length}/${ROSTER.length}명 · 필수 준비물 미완료 ${missing}명</p>
+        <button type="button" class="home-btn" data-act="prep">학생 준비 현황 보기</button>`;
+    } else {
+      const total = document.querySelectorAll("#checklistGroups .check-item").length;
+      const checked = document.querySelectorAll("#checklistGroups .check-item.checked").length;
+      const miss = getMissingEssentials();
+      extra = `<p class="home-sub">준비물 ${checked}/${total} 챙김${miss.length ? " · 필수 미완료: " + chatEsc(miss.join(", ")) : " · 필수 준비물 완료 ✅"}</p>
+        <button type="button" class="home-btn" data-go="checklist">준비물 체크하러 가기</button>`;
+    }
+    pEl.innerHTML = `<p class="home-card-title">출발까지</p><p class="home-big">D-${dday}<small>${SCHEDULE[dayKeys[0]].label} ${SCHEDULE[dayKeys[0]].items[0][0]} ${chatEsc(SCHEDULE[dayKeys[0]].items[0][2])}</small></p>${extra}`;
+    pEl.hidden = false;
+  } else if(phase === "after"){
+    pEl.innerHTML = `<p class="home-card-title">수학여행 끝!</p><p class="home-big">수고하셨어요 👏</p>
+      <p class="home-sub">사진 미션과 소감을 남겨 주세요.</p><button type="button" class="home-btn" data-go="missions">사진 미션 보기</button>`;
+    pEl.hidden = false;
+  } else pEl.hidden = true;
+
+  // ③ 현재 일정 (+ 작은 날씨)
+  const nEl = document.getElementById("homeNow");
+  const wTemp = (document.getElementById("weatherTempToday") || {}).textContent || "";
+  const wDesc = (document.getElementById("weatherDescToday") || {}).textContent || "";
+  const weather = wTemp && wTemp !== "-" ? `<span class="home-weather">오사카 ${chatEsc(wDesc)} ${chatEsc(wTemp)}</span>` : "";
+  const itemHtml = (label, it) => `<div class="home-now-row"><span class="hn-time">${label || it[0]}</span><span><p class="hn-name">${chatEsc(it[1])}</p><p class="hn-place">${chatEsc(it[2])}${label ? " · " + it[0] : ""}</p></span></div>`;
+  if(sn && (sn.current || sn.next)){
+    nEl.innerHTML = `<p class="home-card-title">${SCHEDULE[sn.key].label} ${weather}</p>` +
+      (sn.current ? itemHtml("지금", sn.current) : "") +
+      (sn.next ? `<div class="${sn.current ? "home-next" : ""}">${itemHtml("다음", sn.next)}</div>` : "");
+    nEl.hidden = false;
+  } else if(phase === "before"){
+    nEl.innerHTML = `<p class="home-card-title">첫날 일정 ${weather}</p>` + SCHEDULE[dayKeys[0]].items.slice(0, 3).map(it => itemHtml("", it)).join("");
+    nEl.hidden = false;
+  } else nEl.hidden = true;
+
+  // ④ 다음 집합: 카드가 없으면 안내 / 교사는 인원 확인 숫자
+  const hasAsm = document.getElementById("assemblyCard").style.display !== "none";
+  const emptyEl = document.getElementById("homeAsmEmpty");
+  emptyEl.hidden = hasAsm;
+  if(V2_IS_TEACHER){
+    const c = rcCounts();
+    document.getElementById("acPeopleCount").textContent = rcAid ? `${c.ok + c.special}/${ROSTER.length}` : "";
+  } else renderArriveRow();
+
+  // ⑤ 확인 필요한 일 (교사)
+  if(V2_IS_TEACHER){
+    const tEl = document.getElementById("homeTodo");
+    const items = [];
+    if(rcAid){
+      const c = rcCounts();
+      items.push(`<button type="button" class="home-todo-item" data-act="people"><span class="ht-text">이번 집합 미확인 학생</span><span class="ht-count${c.none + c.reported ? "" : " ok"}">${c.none + c.reported ? (c.none + c.reported) + "명" : "모두 확인 ✅"}</span></button>`);
+      if(c.reported) items.push(`<button type="button" class="home-todo-item" data-act="people"><span class="ht-text">도착 보고 · 확인 대기</span><span class="ht-count">${c.reported}명</span></button>`);
+    }
+    if(phase === "before"){
+      const missing = ROSTER.filter(s => { const d = studentDataMap[s.name]; return !d || String(d.essential || "").indexOf("미비") === 0; }).length;
+      items.push(`<button type="button" class="home-todo-item" data-act="prep"><span class="ht-text">필수 준비물 미완료</span><span class="ht-count${missing ? "" : " ok"}">${missing ? missing + "명" : "없음 ✅"}</span></button>`);
+    }
+    tEl.innerHTML = `<p class="home-card-title">확인 필요한 일</p>` + (items.length ? items.join("") : `<p class="home-empty">지금 확인할 일이 없어요 ✅</p>`);
+  }
+
+  // ⑥ 오늘 남은 일정
+  const upEl = document.getElementById("homeUpcoming");
+  if(sn && sn.rest.length){
+    upEl.innerHTML = `<p class="home-card-title">오늘 남은 일정 <button type="button" class="home-link" data-go="schedule">전체 일정</button></p>` +
+      sn.rest.map(it => `<div class="home-up-item"><b>${it[0]}</b><span>${chatEsc(it[1])}</span></div>`).join("");
+    upEl.hidden = false;
+  } else upEl.hidden = true;
+}
+document.getElementById("homeUrgent").addEventListener("click", () => goTab("notice"));
+document.getElementById("homeNow").addEventListener("click", (e) => { if(!e.target.closest("button")) goTab("schedule"); });
+document.addEventListener("click", (e) => {
+  const g = e.target.closest("[data-go]");
+  if(!g) return;
+  if(g.dataset.go === "schedule") goTab("schedule");
+  else showPanel(g.dataset.go);
+});
+setInterval(renderHome, 30 * 1000);
+
+/* ---- 학생: 우리 조 ---- */
+function renderMyTeam(){
+  if(V2_IS_TEACHER) return;
+  const el = document.getElementById("myTeamCards");
+  if(!studentName){ el.innerHTML = `<div class="myteam-card"><p class="mt-sub">학번으로 로그인하면 내 조·방·버스 자리가 보여요.</p></div>`; return; }
+  const room = findMyRoom();
+  let roomHtml = `<p class="mt-sub">배정된 방을 찾지 못했어요.</p>`;
+  if(room){
+    const r = applyRoomOverrides(ROOMS)[room.gender].find(x => String(x.no) === String(room.no));
+    const mates = r ? r.members.filter(m => m !== studentName) : [];
+    roomHtml = `<p class="mt-big">${room.no}호</p><p class="mt-sub">${mates.length ? "룸메이트: " + mates.join(", ") : "1인실"}</p>`;
+  }
+  const buses = applyBusOverrides(getBusRoster());
+  let busHtml = `<p class="mt-sub">배정된 자리를 찾지 못했어요.</p>`;
+  Object.keys(buses).forEach(b => { const s = buses[b].find(x => x.name === studentName); if(s) busHtml = `<p class="mt-big">${b} ${s.seat}</p>`; });
+  const groupRows = groupConfig.categories.map(c => {
+    const g = (groupConfig.data[c] || []).find(x => x.members.includes(studentName));
+    return `<div class="mt-group-row"><b>${chatEsc(c)}</b><span>${g ? chatEsc(g.name) + " · " + g.members.filter(m => m !== studentName).join(", ") : "배정 없음"}</span></div>`;
+  }).join("");
+  el.innerHTML = `
+    <div class="myteam-card"><h4>내 방</h4>${roomHtml}</div>
+    <div class="myteam-card"><h4>내 버스 자리</h4>${busHtml}</div>
+    <div class="myteam-card"><h4>일정별 내 조</h4>${groupRows}</div>`;
+}
+if(!V2_IS_TEACHER){
+  document.querySelector('.tab[data-panel="myteam"]').addEventListener("click", () => {
+    renderMyTeam();
+    fetchAssignOverrides().then(() => { refreshAssignmentViews(); renderMyTeam(); });
+    fetchGroupConfig().then(() => { refreshGroupView(); renderMyTeam(); });
+  });
+}
+if(V2_IS_TEACHER){
+  document.querySelector('.tab[data-panel="people"]').addEventListener("click", renderRollcall);
+}
+document.querySelector('.tab[data-panel="home"]').addEventListener("click", renderHome);
+
+// 비상상황 대처법 버튼은 SOS 창 안에 있으니, 누르면 SOS 창을 닫고 이동
+document.getElementById("openEmergencyFaqBtn").addEventListener("click", () => { document.getElementById("sosOverlay").style.display = "none"; });
+// 더보기의 엔화 계산기
+document.getElementById("moreExchangeBtn").addEventListener("click", () => { document.getElementById("exchangeOverlay").style.display = "flex"; });
+
+/* ---- 연결 상태: 끊기면 상단에 안내 (지난 정보를 최신으로 오해하지 않도록) ---- */
+let connEverOnline = false, connLastOnline = null, connTimer = null;
+if(FIREBASE_CONFIG){
+  initFirebase(V2_IS_TEACHER).then(db => {
+    db.ref(".info/connected").on("value", s => {
+      const el = document.getElementById("connBanner");
+      clearTimeout(connTimer);
+      if(s.val() === true){
+        connEverOnline = true; connLastOnline = new Date(); el.hidden = true;
+      } else if(connEverOnline){
+        connTimer = setTimeout(() => {
+          el.textContent = `인터넷 연결이 끊겼어요 · 마지막 연결 ${hm(connLastOnline || new Date())} · 화면 정보가 최신이 아닐 수 있어요`;
+          el.hidden = false;
+        }, 3000);
+      }
+    });
+    setInterval(() => { if(document.getElementById("connBanner").hidden) connLastOnline = new Date(); }, 30000);
+  }).catch(() => {});
+}
+
+if(V2_IS_TEACHER && FIREBASE_CONFIG) loadStudentStatus();   // 홈의 준비 현황 숫자용
+subscribeRollcall();
+renderHome();
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){
