@@ -2363,14 +2363,14 @@ const CONTACTS = [
 ];
 
 // 조 편성표 (조 번호, 조장, 조원 전체) — 선생님용 화면(teacher.html)과 같은 명단입니다.
-// 버스는 학년별(1학년 1호차·2학년 2호차), 숙소는 2인 1실(여학생 마지막 3명만 3인실)로
+// 버스는 학년별(1학년 1호차·2학년 2호차), 숙소는 2인 1실로
 // 별도 배정되며, 그 내용은 선생님용 화면의 "인원체크 및 조편성표"에서 확인할 수 있어요.
 const GROUPS = [
   { no:1, leader:"박서용", members:["박서용","박정호","유승균","이금강","임지율","하유민"] },
   { no:2, leader:"현영관", members:["현영관","고용석","김민호","김태원","박민웅"] },
   { no:3, leader:"신민수", members:["신민수","유지상","이승준","이진욱","최건우"] },
   { no:4, leader:"김도연", members:["김도연","김민지","김서연","김세영","박아람"] },
-  { no:5, leader:"서하원", members:["서하원","이은서","장은영","전서현","조하경","한다해"] },
+  { no:5, leader:"서하원", members:["서하원","이은서","장은영","조하경","한다해"] },
   { no:6, leader:"구은정", members:["구은정","김은주","김하영","박규빈","박서연"] },
   { no:7, leader:"박성희", members:["박성희","박수영","신소율","이수아","최해나"] }
 ];
@@ -2382,7 +2382,7 @@ const ROSTER = [
   // 1학년 (학번 11xx)
   { name:"김도연", id:"1101" }, { name:"김민지", id:"1102" }, { name:"김서연", id:"1103" }, { name:"김세영", id:"1104" }, { name:"박서용", id:"1105" },
   { name:"박아람", id:"1106" }, { name:"박정호", id:"1107" }, { name:"서하원", id:"1109" }, { name:"유승균", id:"1110" },
-  { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" }, { name:"전서현", id:"1115" },
+  { name:"이금강", id:"1111" }, { name:"이은서", id:"1112" }, { name:"임지율", id:"1113" }, { name:"장은영", id:"1114" },
   { name:"조하경", id:"1116" }, { name:"하유민", id:"1117" }, { name:"한다해", id:"1118" }, { name:"현영관", id:"1119" },
   // 2학년 (학번 21xx)
   { name:"고용석", id:"2101" }, { name:"구은정", id:"2102" }, { name:"김민호", id:"2104" }, { name:"김은주", id:"2105" },
@@ -2856,7 +2856,7 @@ const GROUP_CFG_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEin
 const GROUP_CFG_LS_KEY = "suhak_group_config";
 const DEFAULT_CATEGORIES = ["공항", "편의점투어(1일차)", "편의점투어(2일차)", "쇼핑몰투어(3일차)", "유니버셜 스튜디오", "산넨자카·닌넨자카", "도톤보리", "간사이 공항"];
 
-/* ---- 숙소 방 배정 (2인 1실, 여학생 마지막 방만 3인) ---- */
+/* ---- 숙소 방 배정 (2인 1실) ---- */
 const ROOMS = {
   "남학생": [
     { no:1, members:["고용석","김민호"] }, { no:2, members:["김태원","박민웅"] },
@@ -2869,7 +2869,7 @@ const ROOMS = {
     { no:11, members:["박서연","박성희"] }, { no:12, members:["박수영","김하영"] },
     { no:13, members:["구은정","최해나"] }, { no:14, members:["김민지","한다해"] },
     { no:15, members:["김세영","서하원"] }, { no:16, members:["이은서","장은영"] },
-    { no:17, members:["조하경","박아람"] }, { no:18, members:["전서현","김서연","김도연"] }
+    { no:17, members:["조하경","박아람"] }, { no:18, members:["김서연","김도연"] }
   ]
 };
 
@@ -2886,10 +2886,12 @@ function roomBasedGroups(){
   });
   return chunks.map((members, i) => ({ name: (i + 1) + "조", members: members.slice() }));
 }
+// 저장된 조 편성(시트·Firebase)에 명단(ROSTER)에서 빠진 학생이 남아 있으면 빼고 보여줍니다.
 function normGroupArr(arr){
+  const inRoster = m => ROSTER.some(r => r.name === m);
   return (arr || []).map((g, i) => Array.isArray(g)
-    ? { name: (i + 1) + "조", members: g.slice() }
-    : { name: (g && g.name) || ((i + 1) + "조"), members: Array.isArray(g && g.members) ? g.members.slice() : [] });
+    ? { name: (i + 1) + "조", members: g.filter(inRoster) }
+    : { name: (g && g.name) || ((i + 1) + "조"), members: Array.isArray(g && g.members) ? g.members.filter(inRoster) : [] });
 }
 function defaultGroupConfig(){
   const cfg = { categories: DEFAULT_CATEGORIES.slice(), data: {} };

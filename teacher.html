@@ -2902,13 +2902,13 @@ const GROUPS = [
   { no:2, leader:"현영관", members:["현영관","고용석","김민호","김태원","박민웅"] },
   { no:3, leader:"신민수", members:["신민수","유지상","이승준","이진욱","최건우"] },
   { no:4, leader:"김도연", members:["김도연","김민지","김서연","김세영","박아람"] },
-  { no:5, leader:"서하원", members:["서하원","이은서","장은영","전서현","조하경","한다해"] },
+  { no:5, leader:"서하원", members:["서하원","이은서","장은영","조하경","한다해"] },
   { no:6, leader:"구은정", members:["구은정","김은주","김하영","박규빈","박서연"] },
   { no:7, leader:"박성희", members:["박성희","박수영","신소율","이수아","최해나"] }
 ];
 
-// 숙소 편성표 — "방배정.xlsx"의 실제 호수 배정입니다. 기본은 2인 1실이며,
-// 여학생 명단 마지막 3명(전서현·김서연·김도연)만 3인 1실로 묶었습니다.
+// 숙소 편성표 — "방배정.xlsx"의 실제 호수 배정입니다. 모두 2인 1실이에요.
+// (전서현 학생은 수학여행 불참으로 명단에서 뺐습니다)
 // 방이 다시 정해지면 이 배열의 members만 바꿔주면 숙소 인원 체크 화면에 그대로 반영됩니다.
 const ROOMS = {
   "남학생": [
@@ -2931,7 +2931,7 @@ const ROOMS = {
     { no:15, members:["김세영","서하원"] },
     { no:16, members:["이은서","장은영"] },
     { no:17, members:["조하경","박아람"] },
-    { no:18, members:["전서현","김서연","김도연"] }
+    { no:18, members:["김서연","김도연"] }
   ]
 };
 
@@ -2942,7 +2942,7 @@ const ROSTER = [
   // 1학년 (학번 11xx)
   { name:"김도연", id:"1101", gender:"여" }, { name:"김민지", id:"1102", gender:"여" }, { name:"김서연", id:"1103", gender:"여" }, { name:"김세영", id:"1104", gender:"여" }, { name:"박서용", id:"1105", gender:"남" },
   { name:"박아람", id:"1106", gender:"여" }, { name:"박정호", id:"1107", gender:"남" }, { name:"서하원", id:"1109", gender:"여" }, { name:"유승균", id:"1110", gender:"남" },
-  { name:"이금강", id:"1111", gender:"남" }, { name:"이은서", id:"1112", gender:"여" }, { name:"임지율", id:"1113", gender:"남" }, { name:"장은영", id:"1114", gender:"여" }, { name:"전서현", id:"1115", gender:"여" },
+  { name:"이금강", id:"1111", gender:"남" }, { name:"이은서", id:"1112", gender:"여" }, { name:"임지율", id:"1113", gender:"남" }, { name:"장은영", id:"1114", gender:"여" },
   { name:"조하경", id:"1116", gender:"여" }, { name:"하유민", id:"1117", gender:"남" }, { name:"한다해", id:"1118", gender:"여" }, { name:"현영관", id:"1119", gender:"남" },
   // 2학년 (학번 21xx)
   { name:"고용석", id:"2101", gender:"남" }, { name:"구은정", id:"2102", gender:"여" }, { name:"김민호", id:"2104", gender:"남" }, { name:"김은주", id:"2105", gender:"여" },
@@ -4455,10 +4455,12 @@ function roomBasedGroups(){
   return chunks.map((members, i) => ({ name: (i + 1) + "조", members: members.slice() }));
 }
 // 저장된 조 배열을 {이름, 명단} 형태로 정규화 (옛 [["a","b"],...] 형식도 흡수)
+// 저장된 조 편성(시트·Firebase)에 명단(ROSTER)에서 빠진 학생이 남아 있으면 빼고 보여줍니다.
 function normGroupArr(arr){
+  const inRoster = m => ROSTER.some(r => r.name === m);
   return (arr || []).map((g, i) => Array.isArray(g)
-    ? { name: (i + 1) + "조", members: g.slice() }
-    : { name: (g && g.name) || ((i + 1) + "조"), members: Array.isArray(g && g.members) ? g.members.slice() : [] });
+    ? { name: (i + 1) + "조", members: g.filter(inRoster) }
+    : { name: (g && g.name) || ((i + 1) + "조"), members: Array.isArray(g && g.members) ? g.members.filter(inRoster) : [] });
 }
 function defaultGroupConfig(){
   const cfg = { categories: DEFAULT_CATEGORIES.slice(), data: {} };
