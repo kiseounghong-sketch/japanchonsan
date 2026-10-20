@@ -2158,6 +2158,13 @@
   .hni-body{font-size:12.5px;color:var(--ink-soft);margin:3px 0 0;}
   .ac-arrive-status{text-align:center;}
 
+
+  /* ===== 조편성표: 장소 버튼을 제목 옆에 여러 줄로 (옆으로 넘기지 않아도 다 보이게) ===== */
+  .groups-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+  .groups-head .sub-title{margin:3px 0 0;flex-shrink:0;}
+  .groups-head .group-cat-tabs{flex:1;min-width:0;flex-wrap:wrap;overflow:visible;margin-bottom:0;gap:5px;padding-bottom:0;}
+  .groups-head .group-cat-tabs .pill{padding:4px 9px;font-size:11.5px;}
+
   /* ===== PC(넓은 화면): 왼쪽 메뉴 + 넓은 작업 화면 — 다른 규칙보다 뒤에 있어야 적용됨 ===== */
   @media (min-width: 900px){
     .app{max-width:1100px;padding-left:210px;box-sizing:border-box;position:relative;}
@@ -2502,8 +2509,10 @@
 
     <section id="panel-groups" class="panel sub-panel">
       <button class="back-btn" data-back="myteam"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>우리 조</button>
-      <h2 class="sub-title">조편성표</h2>
-      <div class="group-cat-tabs" id="groupCatTabs"></div>
+      <div class="groups-head">
+        <h2 class="sub-title">조편성표</h2>
+        <div class="group-cat-tabs" id="groupCatTabs"></div>
+      </div>
       <div id="groupList"></div>
     </section>
 
