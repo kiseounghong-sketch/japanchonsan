@@ -1,0 +1,19 @@
+{
+  "id": "japanchonsan-jeju-teacher",
+  "name": "청산고 제주 캠프 (선생님용)",
+  "short_name": "제주 캠프 관리",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./teacher.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FF5A36",
+  "theme_color": "#FF5A36",
+  "categories": ["education", "travel"],
+  "icons": [
+    { "src": "../icon-teacher-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "../icon-teacher-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../icon-teacher-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
