@@ -1823,6 +1823,10 @@
   <div class="notice-form-overlay" id="sosOverlay">
     <div class="notice-form-card">
       <h3>🆘 긴급 SOS</h3>
+      <button type="button" id="kakaoSosBtnSos" class="kakao-sos-btn">
+        <svg viewBox="0 0 24 24" fill="#191919"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.86 1.8 5.37 4.5 6.83l-1.16 4.3c-.14.5.42.87.82.52l4.98-3.32c.28.02.56.03.86.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+        선생님께 카카오톡으로 내 위치 보내기
+      </button>
       <ul class="contact-list" id="sosContactList"></ul>
       <button type="button" class="sos-all-link" id="sosAllContactsBtn">전체 연락처 보기</button>
       <div class="nf-actions">
@@ -4145,10 +4149,13 @@ if(window.Kakao && !Kakao.isInitialized() && KAKAO_JS_KEY.indexOf("여기에") !
   Kakao.init(KAKAO_JS_KEY);
 }
 
-const kakaoSosBtnEl = document.getElementById("kakaoSosBtn");
-const KAKAO_SOS_BTN_ORIGINAL_HTML = kakaoSosBtnEl.innerHTML;
+// 비상 연락망 화면과 SOS 창에 같은 버튼이 있어요. 누른 버튼에 "확인 중..."을 표시합니다.
+const kakaoSosBtns = [document.getElementById("kakaoSosBtn"), document.getElementById("kakaoSosBtnSos")];
+kakaoSosBtns.forEach(btn => { btn.dataset.originalHtml = btn.innerHTML; });
+let kakaoSosBtnEl = kakaoSosBtns[0];   // 마지막으로 누른 버튼
 
-kakaoSosBtnEl.addEventListener("click", () => {
+kakaoSosBtns.forEach(btn => btn.addEventListener("click", () => {
+  kakaoSosBtnEl = btn;
   if(!window.Kakao || !Kakao.isInitialized()){
     alert("카카오톡 공유 기능이 아직 설정되지 않았어요. 선생님께 문의해주세요.");
     return;
@@ -4158,7 +4165,7 @@ kakaoSosBtnEl.addEventListener("click", () => {
     return;
   }
   attemptSendLocation();
-});
+}));
 
 function attemptSendLocation(){
   // 브라우저가 지원하면, 위치 팝업을 띄우기 전에 이미 차단된 상태인지 먼저 확인해서
@@ -4193,9 +4200,9 @@ function requestLocationAndSend(){
       ]
     });
 
-    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
+    kakaoSosBtnEl.innerHTML = kakaoSosBtnEl.dataset.originalHtml;
   }, () => {
-    kakaoSosBtnEl.innerHTML = KAKAO_SOS_BTN_ORIGINAL_HTML;
+    kakaoSosBtnEl.innerHTML = kakaoSosBtnEl.dataset.originalHtml;
     showLocationPermissionGuide();
   }, { enableHighAccuracy: false, timeout: 8000 });
 }
