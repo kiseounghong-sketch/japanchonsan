@@ -2496,6 +2496,34 @@
     body{background:var(--paper-dim);}
   }
 
+
+  /* ===== 앱 틀을 보이는 화면에 고정 (주소창 때문에 화면이 밀려 헤더가 잘리던 문제) ===== */
+  html, body{height:100%;overflow:hidden;overscroll-behavior:none;}
+  body{min-height:0;}
+  .app{position:fixed;top:0;bottom:0;left:0;right:0;height:auto;margin:0 auto;}
+
+  /* ===== 헤더: 글씨를 줄이고 제목은 한 줄로 ===== */
+  .ticket-top{padding:10px 14px;gap:8px;}
+  .trip-title{font-size:clamp(12px, 3.75vw, 17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .student-name-tag{font-size:12px;}
+  .trip-dates{font-size:9.5px;}
+  .hdr-sos{padding:5px 9px;font-size:11px;}
+
+  /* ===== 홈의 공지 (확인함을 누르면 홈에서만 사라짐) ===== */
+  .home-urgent{position:relative;}
+  .home-urgent .hu-read{position:absolute;top:10px;right:10px;}
+  .hni-read, .hu-read{
+    flex-shrink:0;background:#fff;border:1.5px solid var(--line);border-radius:999px;
+    padding:5px 11px;font-family:inherit;font-size:12px;font-weight:800;color:var(--ink-soft);cursor:pointer;
+  }
+  .home-notice-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid var(--line);}
+  .home-notice-item:first-of-type{border-top:none;padding-top:2px;}
+  .hni-main{flex:1;min-width:0;cursor:pointer;}
+  .hni-top{font-size:11.5px;color:var(--ink-soft);margin:0 0 3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .hni-title{font-size:14.5px;font-weight:800;margin:0;color:var(--ink);}
+  .hni-body{font-size:12.5px;color:var(--ink-soft);margin:3px 0 0;}
+  .ac-arrive-status{text-align:center;}
+
   /* ===== PC(넓은 화면): 왼쪽 메뉴 + 넓은 작업 화면 — 다른 규칙보다 뒤에 있어야 적용됨 ===== */
   @media (min-width: 900px){
     .app{max-width:1100px;padding-left:210px;box-sizing:border-box;position:relative;}
@@ -2686,6 +2714,7 @@
     <section id="panel-home" class="panel active">
       <div class="home-urgent" id="homeUrgent" hidden></div>
       <div class="home-urgent" id="homeAck" hidden></div>
+      <div class="home-card" id="homeNotices" hidden></div>
       <div class="home-card" id="homePhase" hidden></div>
       <div class="home-card" id="homeNow" hidden></div>
       <div class="assembly-card" id="assemblyCard" style="display:none;">
@@ -6611,12 +6640,35 @@ function renderHome(){
   const pend = pendingAckNotices();
   ackEl.hidden = !pend.length;
   if(pend.length) ackEl.innerHTML = `<span class="hu-chip">확인 필요</span><p class="hu-title">선생님이 확인을 요청한 공지 ${pend.length}개</p><p class="hu-body">${chatEsc(pend[0].title)}</p>`;
+
   const uEl = document.getElementById("homeUrgent");
   uEl.hidden = !urgent;
   if(urgent){
     const body = String(urgent.body || "").replace(/https?:\/\/\S+/g, "").trim();
     uEl.innerHTML = `<span class="hu-chip">긴급 공지 · ${chatEsc(urgent.time)}</span><p class="hu-title">${chatEsc(urgent.title)}</p>${body ? `<p class="hu-body">${chatEsc(body.slice(0, 80))}</p>` : ""}`;
   }
+
+  // 홈 공지: '확인함'을 누른 공지는 이 기기의 홈에서만 숨김 (공지 탭에는 그대로)
+  const readSet = homeReadSet();
+  if(urgent && readSet.includes(homeNoticeKey(urgent))) uEl.hidden = true;
+  else if(urgent) uEl.insertAdjacentHTML("beforeend", `<button type="button" class="hu-read" data-read="${chatEsc(homeNoticeKey(urgent))}">확인함</button>`);
+  const nowMs = Date.now(), lvOrder = { urgent: 0, important: 1, normal: 2 };
+  const recent = (lastNotices || []).filter(n => n !== urgent && noticeVisibleToMe(n) && !noticeEnded(n, nowMs) && !readSet.includes(homeNoticeKey(n)))
+    .sort((a, b) => lvOrder[noticeLevel(a)] - lvOrder[noticeLevel(b)] || (b.ts || 0) - (a.ts || 0)).slice(0, 3);
+  const hnEl = document.getElementById("homeNotices");
+  hnEl.hidden = !recent.length;
+  hnEl.innerHTML = `<p class="home-card-title">공지 <button type="button" class="home-link" data-go-tab="notice">전체 보기</button></p>` + recent.map(n => {
+    const lv = noticeLevel(n);
+    const body = String(n.body || "").replace(/https?:\/\/\S+/g, "").trim();
+    return `<div class="home-notice-item">
+      <div class="hni-main" data-go-tab="notice">
+        <p class="hni-top">${lv === "urgent" ? '<span class="notice-chip">긴급</span>' : lv === "important" ? '<span class="notice-chip important">중요</span>' : ""}<span>${chatEsc(n.time)}</span></p>
+        <p class="hni-title">${chatEsc(n.title)}</p>
+        ${body ? `<p class="hni-body">${chatEsc(body.slice(0, 70))}</p>` : ""}
+      </div>
+      <button type="button" class="hni-read" data-read="${chatEsc(homeNoticeKey(n))}">확인함</button>
+    </div>`;
+  }).join("");
 
   // ② 시기별 카드 (출발 전: D-day·준비 / 여행 후: 마무리)
   const pEl = document.getElementById("homePhase");
@@ -6697,6 +6749,23 @@ function renderHome(){
 }
 document.getElementById("homeUrgent").addEventListener("click", () => goTab("notice"));
 document.getElementById("homeAck").addEventListener("click", () => goTab("notice"));
+// 홈 공지 '확인함' (이 기기에만 기억, 최근 200개)
+const HOME_READ_KEY = "suhak_home_read_notices";
+function homeNoticeKey(n){ return n.key || (n.time + "|" + n.title); }
+function homeReadSet(){ try { return JSON.parse(localStorage.getItem(HOME_READ_KEY) || "[]"); } catch(e){ return []; } }
+document.addEventListener("click", (e) => {
+  const r = e.target.closest("[data-read]");
+  if(r){
+    e.stopPropagation();   // 카드를 눌렀을 때의 공지 탭 이동은 막고 확인함만
+    const set = homeReadSet();
+    if(!set.includes(r.dataset.read)) set.push(r.dataset.read);
+    try { localStorage.setItem(HOME_READ_KEY, JSON.stringify(set.slice(-200))); } catch(err){}
+    requestHomeRender();
+    return;
+  }
+  const g = e.target.closest("[data-go-tab]");
+  if(g){ e.stopPropagation(); goTab(g.dataset.goTab); }
+}, true);
 document.getElementById("homeNow").addEventListener("click", (e) => { if(!e.target.closest("button")) goTab("schedule"); });
 document.addEventListener("click", (e) => {
   const g = e.target.closest("[data-go]");
