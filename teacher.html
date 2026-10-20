@@ -2122,6 +2122,53 @@
 
   #panel-checklist > .back-btn{flex-shrink:0;align-self:flex-start;}
 
+  /* ===== 공지: 구분 · 대상 · 유효 기간 · 확인 응답 ===== */
+  .notice-card.level-important{border-color:var(--mustard);}
+  .notice-card.level-urgent{border-color:var(--coral);}
+  .notice-card.ended{opacity:.6;}
+  .notice-chip.important{background:var(--mustard);color:var(--ink);}
+  .notice-tag{font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--paper-dim);border-radius:999px;padding:2px 8px;}
+  .notice-ack-row{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .notice-ack-btn{
+    background:var(--coral);color:#fff;border:none;border-radius:999px;
+    padding:7px 14px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+  }
+  .notice-ack-done{font-size:12.5px;font-weight:700;color:#1F7A47;}
+  .notice-ack-count{
+    background:var(--paper-dim);border:none;border-radius:999px;padding:6px 12px;
+    font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink);cursor:pointer;
+  }
+  .notice-ack-missing{font-size:12px;color:var(--ink-soft);margin:6px 0 0;width:100%;}
+  .notice-section-title{font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:14px 2px 8px;}
+  details.notice-ended summary{cursor:pointer;font-size:12.5px;font-weight:800;color:var(--ink-soft);margin:14px 2px 8px;}
+  .urgency-toggle button.active[data-val="important"]{background:var(--mustard);border-color:var(--mustard);color:var(--ink);}
+  .nf-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:12px 0 4px;}
+  .nf-check input{width:18px;height:18px;}
+
+  /* ===== 일정 상세: 연결된 집합 · 교사 메모 · 일본어 바로가기 ===== */
+  .tl-extra{display:none;margin-top:8px;}
+  .timeline li.open .tl-extra{display:block;}
+  .tl-extra:empty{display:none !important;}
+  .tl-asm{font-size:12.5px;font-weight:800;color:var(--navy);background:#E8EEF8;border-radius:8px;padding:6px 10px;margin:0 0 6px;}
+  .tl-jp-btn, .tl-memo-btn{
+    background:var(--paper-dim);border:none;border-radius:999px;padding:5px 11px;
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;margin:0 6px 6px 0;
+  }
+  .tl-memo{font-size:12.5px;color:#5B3DB8;background:#F3EFFF;border-radius:8px;padding:6px 10px;margin:0 0 6px;white-space:pre-wrap;}
+  .tl-memo b{font-weight:800;}
+
+  /* ===== 일본어 도움 요청 문장 ===== */
+  .jp-help-card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;}
+  .jp-help-card .jp{font-size:19px;font-weight:800;line-height:1.5;margin:0;color:var(--ink);}
+  .jp-help-card .kr{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0;}
+  .jp-help-card .tel{font-size:22px;font-weight:900;margin:8px 0 0;color:var(--coral-deep);letter-spacing:.5px;}
+  #jpHelpOverlay .notice-form-card{max-height:86vh;overflow-y:auto;}
+
+  /* ===== 자료 내보내기 ===== */
+  .export-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+  .export-list .home-btn{margin-top:0;background:#fff;border:1.5px solid var(--line);}
+
+
   /* ===== 하단 탭바 ===== */
   .tabbar{
     position:fixed;
@@ -2438,6 +2485,30 @@
   @media (min-width:481px){
     body{background:var(--paper-dim);}
   }
+
+  /* ===== PC(넓은 화면): 왼쪽 메뉴 + 넓은 작업 화면 — 다른 규칙보다 뒤에 있어야 적용됨 ===== */
+  @media (min-width: 900px){
+    .app{max-width:1100px;padding-left:210px;box-sizing:border-box;position:relative;}
+    .tabbar{
+      top:0;bottom:0;left:max(0px, calc(50% - 550px));transform:none;
+      width:210px;max-width:210px;flex-direction:column;justify-content:flex-start;gap:4px;
+      border-top:none;border-right:1.5px solid var(--line);padding:24px 12px;
+    }
+    .tabbar .tab{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:12px;font-size:15px;}
+    .tabbar .tab.active{background:#FFF1EC;}
+    .panel.active{padding:20px 28px 28px;}
+    #panel-notice.active, #panel-schedule.active, #panel-checklist.active, #panel-chat.active{padding:20px 28px 0;}
+    .scroll-area{padding-bottom:28px;}
+    .chat-form{padding-bottom:16px;}
+    #panel-home.active{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-content:start;}
+    #panel-home > .home-urgent, #panel-home > .push-enable-banner{grid-column:1 / -1;}
+    #rcList{display:grid;grid-template-columns:repeat(3, 1fr);gap:0 8px;}
+    #rcList > .rc-section-title, #rcList > details, #rcList > .home-empty{grid-column:1 / -1;}
+    details.rc-done[open]{display:grid;grid-template-columns:repeat(3, 1fr);gap:0 8px;}
+    details.rc-done summary{grid-column:1 / -1;}
+    .notice-form-overlay{align-items:center;}
+    .notice-form-card{max-width:520px;border-radius:18px;}
+  }
 </style>
 </head>
 <body>
@@ -2467,6 +2538,7 @@
         <svg viewBox="0 0 24 24" fill="#191919"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.86 1.8 5.37 4.5 6.83l-1.16 4.3c-.14.5.42.87.82.52l4.98-3.32c.28.02.56.03.86.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
         선생님께 카카오톡으로 내 위치 보내기
       </button>
+      <button type="button" class="sos-faq-btn" id="openJpHelpBtn">🇯🇵 현지 직원에게 보여줄 일본어 도움 문장</button>
       <button type="button" class="sos-faq-btn" id="openEmergencyFaqBtn">🚨 비상상황 대처법 (길 잃음 · 여권 분실 · 지진 등)</button>
       <ul class="contact-list" id="sosContactList"></ul>
       <button type="button" class="sos-all-link" id="sosAllContactsBtn">전체 연락처 보기</button>
@@ -2552,9 +2624,10 @@
   <div class="notice-form-overlay" id="noticeFormOverlay">
     <div class="notice-form-card">
       <h3>새 공지 작성</h3>
-      <p class="nf-label">긴급 여부</p>
+      <p class="nf-label">구분</p>
       <div class="urgency-toggle" id="urgencyToggle">
         <button type="button" class="active" data-val="false">일반</button>
+        <button type="button" data-val="important">중요</button>
         <button type="button" data-val="true">긴급</button>
       </div>
       <p class="nf-label">제목</p>
@@ -2573,6 +2646,17 @@
         <img id="noticePhotoPreview" alt="첨부한 사진 미리보기">
         <button type="button" id="noticePhotoRemoveBtn">✕ 사진 제거</button>
       </div>
+      <p class="nf-label">대상</p>
+      <select id="noticeTargetSelect" class="nf-input"><option value="all">전체</option></select>
+      <p class="nf-label">표시 기간</p>
+      <select id="noticeUntilSelect" class="nf-input">
+        <option value="">계속 표시</option>
+        <option value="1h">1시간 동안</option>
+        <option value="3h">3시간 동안</option>
+        <option value="today">오늘까지</option>
+        <option value="tomorrow">내일까지</option>
+      </select>
+      <label class="nf-check"><input type="checkbox" id="noticeAckCheck"> 학생에게 "확인했어요" 응답 받기</label>
       <div class="nf-actions">
         <button type="button" id="cancelNoticeBtn">취소</button>
         <button type="button" id="submitNoticeBtn">등록</button>
@@ -2580,10 +2664,18 @@
       <p id="noticeStatusMsg"></p>
     </div>
   </div>
+  <div class="notice-form-overlay" id="jpHelpOverlay">
+    <div class="notice-form-card">
+      <h3>🇯🇵 이 화면을 보여주세요</h3>
+      <div id="jpHelpList"></div>
+      <div class="nf-actions"><button type="button" id="closeJpHelpBtn">닫기</button></div>
+    </div>
+  </div>
   <main class="content">
 
     <section id="panel-home" class="panel active">
       <div class="home-urgent" id="homeUrgent" hidden></div>
+      <div class="home-urgent" id="homeAck" hidden></div>
       <div class="home-card" id="homePhase" hidden></div>
       <div class="home-card" id="homeNow" hidden></div>
       <div class="assembly-card" id="assemblyCard" style="display:none;">
@@ -2799,6 +2891,11 @@
         </button>
       </div>
       <p class="more-group-title">운영 설정 (관리자)</p>
+      <div class="export-list">
+        <button type="button" class="home-btn" id="exportStatusBtn">📄 학생 준비 현황 내보내기 (엑셀)</button>
+        <button type="button" class="home-btn" id="exportRollcallBtn">📄 이번 집합 확인 기록 내보내기 (엑셀)</button>
+        <button type="button" class="home-btn" id="exportChatBtn">📄 톡방 내용 내보내기 (엑셀)</button>
+      </div>
       <button class="danger-link" id="resetNoticesBtn">공지 초기화</button>
       <button class="danger-link" id="resetStudentsBtn">학생 준비 현황 데이터 초기화</button>
     </section>
@@ -3589,6 +3686,7 @@ document.addEventListener("click", (e) => {
 function renderNotices(list){
   lastNotices = list;
   requestHomeRender();
+  if(window.__v3Ready) return renderNoticesV3(list);
   if(!list.length){
     noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
     document.getElementById("noticePing").style.display = "none";
@@ -4048,7 +4146,8 @@ initFirebase(true).then(db => {
     const list = [];
     snap.forEach(c => {
       const n = c.val() || {};
-      list.push({ key: c.key, time: n.time || "", important: !!n.important, title: n.title || "", body: n.body || "", ts: n.ts || 0 });
+      list.push({ key: c.key, time: n.time || "", important: !!n.important, title: n.title || "", body: n.body || "", ts: n.ts || 0,
+        level: n.level, target: n.target, until: n.until, ack: !!n.ack });
     });
     renderNotices(list.reverse());
   }, () => { liveNotices = false; });
@@ -4274,12 +4373,13 @@ submitNoticeBtn.addEventListener("click", () => {
   const sheetPost = fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
-    body: JSON.stringify({ title, body, important: noticeImportant })
+    body: JSON.stringify({ title: noticeTargetPrefix() + title, body, important: noticeImportant })
   });
   const done = FIREBASE_CONFIG
     ? Promise.all([
         teacherDb().then(db => db.ref("notices").push({
           time: stampLabel(new Date()), important: noticeImportant, title, body,
+          level: noticeLevelValue(), target: noticeTargetValue(), until: noticeUntilValue(), ack: noticeAckValue(),
           ts: firebase.database.ServerValue.TIMESTAMP
         })),
         sheetPost.catch(() => {})
@@ -4294,6 +4394,7 @@ submitNoticeBtn.addEventListener("click", () => {
     urgencyToggle.querySelectorAll("button").forEach(b => b.classList.remove("active"));
     urgencyToggle.querySelector('[data-val="false"]').classList.add("active");
     noticeImportant = false;
+    resetNoticeExtras();
     setTimeout(() => { noticeOverlay.style.display = "none"; noticeStatusMsg.textContent = ""; }, 900);
     setTimeout(loadNotices, 1500);
   }).catch(err => {
@@ -4328,10 +4429,12 @@ function renderDay(dayKey){
         <p class="name"><span class="title-text">${name}</span><span class="tl-more">자세히 <span class="tl-more-arrow">▾</span></span></p>
         <p class="place">${place}</p>
         ${note ? `<p class="tl-note">${note}</p>` : ""}
+        <div class="tl-extra"></div>
       </span>
     </li>`;
     }).join("");
   updateTimelineProgress();
+  setTimeout(() => fillScheduleExtras(dayKey), 0);   // 연결된 집합·메모·일본어 바로가기
 }
 
 function dayDate(dayKey){
@@ -5913,7 +6016,7 @@ document.getElementById("resetNoticesBtn").addEventListener("click", () => {
   });
   const done = FIREBASE_CONFIG
     ? Promise.all([
-        teacherDb().then(db => db.ref().update({ notices: null, assembly: null })),
+        teacherDb().then(db => db.ref().update({ notices: null, assembly: null, noticeAcks: null })),
         sheetReset.catch(() => {})
       ])
     : sheetReset;
@@ -6254,7 +6357,7 @@ function scheduleNow(now){
 }
 
 /* ---- 집합 확인 데이터 ---- */
-let rcAid = null, rcData = {}, rcArrivals = {}, rcRefs = [];
+let rcAid = null, rcData = {}, rcArrivals = {}, rcRefs = [], rcHistory = [];
 let rcFilter = "all";
 function unkeyMap(v){ const o = {}; Object.keys(v || {}).forEach(k => { o[fbUnkey(k)] = v[k]; }); return o; }
 function rcState(name){
@@ -6274,7 +6377,7 @@ function subscribeRollcall(){
   const aid = (currentAssembly && currentAssembly.id) || null;
   if(aid === rcAid) return;
   rcRefs.forEach(r => { try { r.off(); } catch(e){} });
-  rcRefs = []; rcAid = aid; rcData = {}; rcArrivals = {};
+  rcRefs = []; rcAid = aid; rcData = {}; rcArrivals = {}; rcHistory = [];
   renderRollcall(); requestHomeRender();
   if(!aid || !FIREBASE_CONFIG) return;
   initFirebase(V2_IS_TEACHER).then(db => {
@@ -6283,7 +6386,9 @@ function subscribeRollcall(){
       const r1 = db.ref("rollcall/" + aid), r2 = db.ref("arrivals/" + aid);
       r1.on("value", s => { rcData = unkeyMap(s.val()); renderRollcall(); requestHomeRender(); });
       r2.on("value", s => { rcArrivals = unkeyMap(s.val()); renderRollcall(); requestHomeRender(); });
-      rcRefs = [r1, r2];
+      const r3 = db.ref("assemblyHistory/" + aid);
+      r3.on("value", s => { rcHistory = []; s.forEach(c => { rcHistory.push(c.val()); }); renderRollcall(); });
+      rcRefs = [r1, r2, r3];
     } else if(studentName){
       const me = fbKey(studentName);
       const r1 = db.ref("rollcall/" + aid + "/" + me), r2 = db.ref("arrivals/" + aid + "/" + me);
@@ -6298,6 +6403,7 @@ function onAssemblyChange(){
   subscribeRollcall();
   if(V2_IS_TEACHER) maybeOfferAssemblyNotice();
   requestHomeRender();
+  setTimeout(() => fillScheduleExtras(currentDayKey), 0);
 }
 
 /* ---- 교사: 집합 확인 화면 ---- */
@@ -6318,7 +6424,8 @@ function renderRollcall(){
   const a = currentAssembly;
   const t = a.targetTime ? new Date(a.targetTime) : null;
   head.innerHTML = `<div class="home-card"><p class="home-card-title">이번 집합 <button type="button" class="home-link" data-act="edit-assembly">수정</button></p>
-    <p class="home-big">${t && !isNaN(t) ? hm(t) : "-"}<small>${chatEsc(a.place || "")}</small></p></div>`;
+    <p class="home-big">${t && !isNaN(t) ? hm(t) : "-"}<small>${chatEsc(a.place || "")}</small></p>
+    ${rcHistory.length ? `<p class="home-sub">변경 기록: ${rcHistory.map(h => { const bt = new Date(h.before.targetTime); return (h.ts ? hm(new Date(h.ts)) + " " : "") + (isNaN(bt) ? "" : hm(bt) + " ") + chatEsc(h.before.place || ""); }).join(" → ")} → 지금</p>` : ""}</div>`;
   const students = ROSTER.filter(s => rcFilter === "all" || (rcFilter === "1" ? s.id.charAt(0) === "1" : s.id.charAt(0) === "2"));
   const c = rcCounts(students);
   sum.innerHTML = `
@@ -6411,6 +6518,8 @@ function maybeOfferAssemblyNotice(){
   if(!p || !a || a.id !== p.id) return;
   if(a.targetTime === p.before.targetTime && a.place === p.before.place) return;
   assemblyEditPending = null;
+  // 이전 시간·장소를 변경 이력으로 보관
+  teacherDb().then(db => db.ref("assemblyHistory/" + a.id).push({ before: p.before, ts: firebase.database.ServerValue.TIMESTAMP })).catch(() => {});
   setTimeout(() => {
     if(!confirm("집합 정보가 바뀌었어요. 학생들에게 공지로 알릴까요?")) return;
     const t = new Date(a.targetTime);
@@ -6433,6 +6542,7 @@ if(V2_IS_TEACHER){
     if(b.dataset.act === "edit-assembly") openAssemblyForm(true);
     if(b.dataset.act === "people") goTab("people");
     if(b.dataset.act === "prep") showPanel("grade-select");
+    if(b.dataset.act === "notice") goTab("notice");
   });
   document.getElementById("noticeWriteBtn").addEventListener("click", () => document.getElementById("newNoticeFab").click());
 }
@@ -6467,7 +6577,11 @@ function renderHome(){
   const sn = scheduleNow(now);
 
   // ① 긴급 공지 (최근 12시간 안의 긴급 공지 1개)
-  const urgent = (lastNotices || []).find(n => n.important && n.ts && now - n.ts < 12 * 3600 * 1000);
+  const urgent = (lastNotices || []).find(n => noticeLevel(n) === "urgent" && noticeVisibleToMe(n) && (n.until ? n.until > now : (n.ts && now - n.ts < 12 * 3600 * 1000)));
+  const ackEl = document.getElementById("homeAck");
+  const pend = pendingAckNotices();
+  ackEl.hidden = !pend.length;
+  if(pend.length) ackEl.innerHTML = `<span class="hu-chip">확인 필요</span><p class="hu-title">선생님이 확인을 요청한 공지 ${pend.length}개</p><p class="hu-body">${chatEsc(pend[0].title)}</p>`;
   const uEl = document.getElementById("homeUrgent");
   uEl.hidden = !urgent;
   if(urgent){
@@ -6537,6 +6651,10 @@ function renderHome(){
       const missing = ROSTER.filter(s => { const d = studentDataMap[s.name]; return !d || String(d.essential || "").indexOf("미비") === 0; }).length;
       items.push(`<button type="button" class="home-todo-item" data-act="prep"><span class="ht-text">필수 준비물 미완료</span><span class="ht-count${missing ? "" : " ok"}">${missing ? missing + "명" : "없음 ✅"}</span></button>`);
     }
+    (lastNotices || []).filter(n => n.ack && n.key && !noticeEnded(n, Date.now())).forEach(n => {
+      const members = noticeTargetMembers(n.target), missing = members.filter(m => !(noticeAcks[n.key] || {})[m]).length;
+      items.push(`<button type="button" class="home-todo-item" data-act="notice"><span class="ht-text">공지 확인: ${chatEsc(n.title)}</span><span class="ht-count${missing ? "" : " ok"}">${missing ? "미확인 " + missing + "명" : "모두 확인 ✅"}</span></button>`);
+    });
     tEl.innerHTML = `<p class="home-card-title">확인 필요한 일</p>` + (items.length ? items.join("") : `<p class="home-empty">지금 확인할 일이 없어요 ✅</p>`);
   }
 
@@ -6549,6 +6667,7 @@ function renderHome(){
   } else upEl.hidden = true;
 }
 document.getElementById("homeUrgent").addEventListener("click", () => goTab("notice"));
+document.getElementById("homeAck").addEventListener("click", () => goTab("notice"));
 document.getElementById("homeNow").addEventListener("click", (e) => { if(!e.target.closest("button")) goTab("schedule"); });
 document.addEventListener("click", (e) => {
   const g = e.target.closest("[data-go]");
@@ -6621,7 +6740,268 @@ if(FIREBASE_CONFIG){
 
 if(V2_IS_TEACHER && FIREBASE_CONFIG) loadStudentStatus();   // 홈의 준비 현황 숫자용
 subscribeRollcall();
-renderHome();
+requestHomeRender();
+
+/* ===== 공지 구분·대상·유효 기간·확인 응답 / 일정 상세 / 일본어 도움 문장 / 내보내기 ===== */
+const V3_IS_TEACHER = true;
+let noticeAcks = {};      // 공지ID → {이름: 확인 시각}
+let teacherMemos = {};    // "일차-시각" → 교사 메모
+const ackOpen = {};       // 교사: 미확인 명단을 펼친 공지
+
+function noticeLevel(n){ return n.level || (n.important ? "urgent" : "normal"); }
+function noticeEnded(n, now){ return !!(n.until && n.until < now); }
+function noticeTargetLabel(t){
+  if(!t || t === "all") return "";
+  if(t === "g1") return "1학년";
+  if(t === "g2") return "2학년";
+  if(typeof t === "object" && t.type === "group") return t.cat + " " + t.name;
+  return "";
+}
+function noticeTargetMembers(t){
+  if(!t || t === "all") return ROSTER.map(s => s.name);
+  if(t === "g1" || t === "g2") return ROSTER.filter(s => s.id.charAt(0) === t.charAt(1)).map(s => s.name);
+  if(typeof t === "object" && t.type === "group"){
+    const g = (groupConfig.data[t.cat] || []).find(x => x.name === t.name);
+    return g ? g.members.slice() : [];
+  }
+  return [];
+}
+function noticeVisibleToMe(n){
+  if(V3_IS_TEACHER) return true;
+  if(!n.target || n.target === "all") return true;
+  return !!studentName && noticeTargetMembers(n.target).includes(studentName);
+}
+function untilLabel(ms){
+  const d = new Date(ms);
+  return (isSameDate(d, new Date()) ? "" : (d.getMonth() + 1) + "." + d.getDate() + " ") + hm(d) + "까지";
+}
+// 학생이 아직 확인 응답을 안 한 공지 (확인 요청 + 나에게 온 + 끝나지 않은)
+function pendingAckNotices(){
+  if(V3_IS_TEACHER || !studentName) return [];
+  const now = Date.now();
+  return (lastNotices || []).filter(n => n.ack && n.key && noticeVisibleToMe(n) && !noticeEnded(n, now) && !(noticeAcks[n.key] || {})[studentName]);
+}
+
+function renderNoticesV3(list){
+  const now = Date.now();
+  const mine = list.filter(noticeVisibleToMe);
+  const active = mine.filter(n => !noticeEnded(n, now));
+  const ended = mine.filter(n => noticeEnded(n, now));
+  const order = { urgent: 0, important: 1, normal: 2 };
+  active.sort((a, b) => order[noticeLevel(a)] - order[noticeLevel(b)] || (b.ts || 0) - (a.ts || 0));
+  const card = n => {
+    const lvl = noticeLevel(n);
+    const tgt = noticeTargetLabel(n.target);
+    const acks = noticeAcks[n.key] || {};
+    let ackRow = "";
+    if(n.ack && n.key){
+      if(V3_IS_TEACHER){
+        const members = noticeTargetMembers(n.target);
+        const done = members.filter(m => acks[m]);
+        const missing = members.filter(m => !acks[m]);
+        ackRow = `<div class="notice-ack-row"><button type="button" class="notice-ack-count" data-ackview="${n.key}">확인 ${done.length} / 대상 ${members.length}${missing.length ? " · 미확인 보기" : " ✅"}</button>
+          ${ackOpen[n.key] && missing.length ? `<p class="notice-ack-missing">미확인: ${missing.join(", ")}</p>` : ""}</div>`;
+      } else if(studentName){
+        ackRow = acks[studentName]
+          ? `<div class="notice-ack-row"><span class="notice-ack-done">✅ 확인했어요 (${hm(new Date(acks[studentName]))})</span></div>`
+          : `<div class="notice-ack-row"><button type="button" class="notice-ack-btn" data-ack="${n.key}">확인했어요</button><span class="notice-tag">선생님이 확인을 요청했어요</span></div>`;
+      }
+    }
+    return `
+    <div class="notice-card level-${lvl}${noticeEnded(n, now) ? " ended" : ""}">
+      <div class="notice-top">
+        <span class="notice-time">${n.time}</span>
+        ${lvl === "urgent" ? '<span class="notice-chip">긴급</span>' : lvl === "important" ? '<span class="notice-chip important">중요</span>' : ""}
+        ${tgt ? `<span class="notice-tag">${chatEsc(tgt)}</span>` : ""}
+        ${n.until ? `<span class="notice-tag">${noticeEnded(n, now) ? "종료" : untilLabel(n.until)}</span>` : ""}
+        ${V3_IS_TEACHER ? (n.key ? `<button class="notice-delete-btn" data-key="${n.key}" title="삭제">${trashIcon}</button>`
+          : n.row ? `<button class="notice-delete-btn" data-row="${n.row}" title="삭제">${trashIcon}</button>` : "") : ""}
+      </div>
+      <p class="notice-title">${linkify(n.title)}</p>
+      <p class="notice-body">${linkify(n.body)}</p>
+      ${ackRow}
+    </div>`;
+  };
+  if(!mine.length){
+    noticeList.innerHTML = '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:30px 0;">아직 등록된 공지가 없어요.</p>';
+  } else {
+    noticeList.innerHTML = (active.length ? active.map(card).join("") : '<p style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px 0;">지금 유효한 공지가 없어요.</p>')
+      + (ended.length ? `<details class="notice-ended"><summary>종료된 공지 ${ended.length}개</summary>${ended.map(card).join("")}</details>` : "");
+  }
+  const urgentNow = active.filter(n => noticeLevel(n) === "urgent");
+  document.getElementById("noticePing").style.display = (urgentNow.length || pendingAckNotices().length) ? "block" : "none";
+  if(!V3_IS_TEACHER) maybeShowUrgentToast(urgentNow.map(n => Object.assign({}, n, { important: true })));
+}
+
+// 공지 확인 응답 (학생 버튼 / 교사 미확인 명단)
+document.getElementById("noticeList").addEventListener("click", (e) => {
+  const a = e.target.closest("[data-ack]");
+  if(a && studentName){
+    const key = a.dataset.ack;
+    a.disabled = true;
+    initFirebase(false).then(db => db.ref("noticeAcks/" + key + "/" + fbKey(studentName)).set(firebase.database.ServerValue.TIMESTAMP))
+      .catch(() => { a.disabled = false; alert("확인을 보내지 못했어요. 인터넷 연결을 확인해주세요."); });
+    return;
+  }
+  const v = e.target.closest("[data-ackview]");
+  if(v){ ackOpen[v.dataset.ackview] = !ackOpen[v.dataset.ackview]; renderNoticesV3(lastNotices); }
+});
+
+/* ---- 교사: 공지 작성 창의 대상·유효 기간·확인 요청 ---- */
+function fillNoticeTargetOptions(){
+  const sel = document.getElementById("noticeTargetSelect");
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="all">전체</option><option value="g1">1학년</option><option value="g2">2학년</option>` +
+    groupConfig.categories.map(c => `<optgroup label="${chatEsc(c)}">${(groupConfig.data[c] || []).map(g =>
+      `<option value="${chatEsc(JSON.stringify({ type: "group", cat: c, name: g.name }))}">${chatEsc(c)} · ${chatEsc(g.name)} (${g.members.length}명)</option>`).join("")}</optgroup>`).join("");
+  if([...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+function noticeLevelValue(){
+  const b = document.querySelector("#urgencyToggle button.active");
+  const v = b ? b.dataset.val : "false";
+  return v === "true" ? "urgent" : v === "important" ? "important" : "normal";
+}
+function noticeTargetValue(){
+  const v = (document.getElementById("noticeTargetSelect") || {}).value || "all";
+  if(v === "all" || v === "g1" || v === "g2") return v;
+  try { return JSON.parse(v); } catch(e){ return "all"; }
+}
+function noticeUntilValue(){
+  const v = (document.getElementById("noticeUntilSelect") || {}).value || "";
+  const now = new Date();
+  if(v === "1h") return now.getTime() + 3600 * 1000;
+  if(v === "3h") return now.getTime() + 3 * 3600 * 1000;
+  if(v === "today"){ const d = new Date(now); d.setHours(23, 59, 59, 0); return d.getTime(); }
+  if(v === "tomorrow"){ const d = new Date(now); d.setDate(d.getDate() + 1); d.setHours(23, 59, 59, 0); return d.getTime(); }
+  return null;
+}
+function noticeAckValue(){ return !!(document.getElementById("noticeAckCheck") || {}).checked; }
+// 푸시 알림은 전체에게 가므로, 대상이 있으면 제목 앞에 [대상]을 붙여 보냄
+function noticeTargetPrefix(){ const l = noticeTargetLabel(noticeTargetValue()); return l ? "[" + l + "] " : ""; }
+function resetNoticeExtras(){
+  const s = document.getElementById("noticeTargetSelect"); if(s) s.value = "all";
+  const u = document.getElementById("noticeUntilSelect"); if(u) u.value = "";
+  const c = document.getElementById("noticeAckCheck"); if(c) c.checked = false;
+}
+if(V3_IS_TEACHER){
+  document.getElementById("newNoticeFab").addEventListener("click", fillNoticeTargetOptions);
+}
+
+/* ---- 일정 상세: 연결된 집합 · 식당 일본어 · 교사 메모 ---- */
+function openPhraseCategory(cat){
+  showPanel("phrases");
+  const el = document.querySelector(`.phrase-category[data-category="${cat}"]`);
+  if(el){ el.classList.add("open"); setTimeout(() => el.scrollIntoView({ block: "start" }), 50); }
+}
+function fillScheduleExtras(dayKey){
+  const lis = document.querySelectorAll("#timeline li");
+  const items = SCHEDULE[dayKey].items;
+  const a = currentAssembly;
+  const at = a && a.targetTime ? new Date(a.targetTime) : null;
+  lis.forEach((li, i) => {
+    const box = li.querySelector(".tl-extra");
+    const it = items[i];
+    if(!box || !it) return;
+    let html = "";
+    // 이 일정 시간대(이번 일정 ~ 다음 일정)에 잡힌 집합이 있으면 연결해서 보여줌
+    if(at && !isNaN(at) && isSameDate(at, dayDate(dayKey))){
+      const m = at.getHours() * 60 + at.getMinutes();
+      const start = toMinutes(it[0]), end = items[i + 1] ? toMinutes(items[i + 1][0]) : 24 * 60;
+      if(m >= start && m < end) html += `<p class="tl-asm">🧭 집합 ${hm(at)} · ${chatEsc(a.place || "")}</p>`;
+    }
+    if(/식|중식|석식|조식/.test(it[1])) html += `<button type="button" class="tl-jp-btn" data-phrase="식당">🍴 식당 일본어</button>`;
+    if(/편의점/.test(it[1])) html += `<button type="button" class="tl-jp-btn" data-phrase="편의점">🏪 편의점 일본어</button>`;
+    if(/쇼핑|도톤보리|산넨자카/.test(it[1])) html += `<button type="button" class="tl-jp-btn" data-phrase="쇼핑">🛍 쇼핑 일본어</button>`;
+    if(V3_IS_TEACHER){
+      const key = dayKey + "-" + it[0];
+      const memo = teacherMemos[key];
+      html += (memo ? `<p class="tl-memo"><b>교사 메모</b> ${chatEsc(memo)}</p>` : "") +
+        `<button type="button" class="tl-memo-btn" data-memo="${key}">📝 ${memo ? "메모 수정" : "교사 메모 추가"}</button>`;
+    }
+    box.innerHTML = html;
+  });
+}
+document.getElementById("timeline").addEventListener("click", (e) => {
+  const p = e.target.closest("[data-phrase]");
+  const m = e.target.closest("[data-memo]");
+  if(!p && !m) return;
+  e.stopPropagation();   // 일정 펼치기/접기는 그대로 두고 버튼 동작만
+  if(p) openPhraseCategory(p.dataset.phrase);
+  if(m){
+    const key = m.dataset.memo;
+    const text = prompt("이 일정의 교사용 운영 메모 (학생에게는 보이지 않아요)\n예: 예약번호, 담당 선생님, 주의사항", teacherMemos[key] || "");
+    if(text === null) return;
+    teacherDb().then(db => db.ref("teacherMemos/" + fbKey(key)).set(text.trim() ? text.trim().slice(0, 1000) : null))
+      .catch(err => alert("저장하지 못했어요. (" + describeLoginError(err) + ")"));
+  }
+}, true);
+
+/* ---- SOS: 현지 직원에게 보여줄 일본어 도움 문장 ---- */
+function intlPhone(tel){
+  const d = String(tel || "").replace(/\D/g, "");
+  return d.startsWith("0") ? "+82-" + d.slice(1, 3) + "-" + d.slice(3, d.length - 4) + "-" + d.slice(-4) : tel;
+}
+document.getElementById("openJpHelpBtn").addEventListener("click", () => {
+  const tel = intlPhone(CONTACTS[0] && CONTACTS[0][2]);
+  const cards = [
+    ["すみません。韓国から修学旅行に来た高校生です。道に迷いました。この番号の先生に電話していただけますか。", "길을 잃었어요. 이 번호의 선생님께 전화해 주실 수 있나요?", true],
+    ["具合が悪いです。けがをしました。この番号の先生に連絡してください。", "몸이 아파요 / 다쳤어요. 이 번호의 선생님께 연락해 주세요.", true],
+    ["パスポート（携帯電話）をなくしました。近くの交番はどこですか。", "여권(휴대폰)을 잃어버렸어요. 근처 파출소가 어디인가요?", false],
+    ["日本語が話せません。助けていただけますか。", "일본어를 못해요. 도와주실 수 있나요?", false]
+  ];
+  document.getElementById("jpHelpList").innerHTML = cards.map(([jp, kr, withTel]) =>
+    `<div class="jp-help-card"><p class="jp">${jp}</p>${withTel ? `<p class="tel">☎ ${chatEsc(tel)}</p>` : ""}<p class="kr">${kr}</p></div>`).join("");
+  document.getElementById("sosOverlay").style.display = "none";
+  document.getElementById("jpHelpOverlay").style.display = "flex";
+});
+document.getElementById("closeJpHelpBtn").addEventListener("click", () => { document.getElementById("jpHelpOverlay").style.display = "none"; });
+
+/* ---- 교사: 자료 내보내기 (엑셀에서 열리는 CSV) ----
+   파일 이름은 기기마다 한글이 깨지지 않도록 영어로 둡니다. (student_status / rollcall / chat) */
+function downloadCsv(name, rows){
+  const csv = "﻿" + rows.map(r => r.map(v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = name + "_" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+if(V3_IS_TEACHER){
+  document.getElementById("exportStatusBtn").addEventListener("click", () => {
+    downloadCsv("student_status", [["학번", "이름", "학년", "앱 접속", "준비물", "미션", "필수 준비물"]].concat(
+      ROSTER.map(s => { const d = studentDataMap[s.name] || {}; return [s.id, s.name, d.grade || "", d.attendance || "", d.checklist || "", d.mission || "", d.essential || ""]; })));
+  });
+  document.getElementById("exportRollcallBtn").addEventListener("click", () => {
+    if(!rcAid){ alert("진행 중인 집합이 없어요."); return; }
+    const a = currentAssembly;
+    downloadCsv("rollcall", [["집합 시각", a.targetTime || ""], ["집합 장소", a.place || ""], [], ["학번", "이름", "상태", "사유", "확인 시각"]].concat(
+      ROSTER.map(s => { const st = rcState(s.name), r = rcData[s.name] || {}; return [s.id, s.name, RC_LABEL[st], r.r || "", r.ts ? stampLabel(new Date(r.ts)) : (rcArrivals[s.name] ? "보고 " + stampLabel(new Date(rcArrivals[s.name])) : "")]; })));
+  });
+  document.getElementById("exportChatBtn").addEventListener("click", () => {
+    const rows = [["방", "시각", "이름", "구분", "내용"]];
+    Object.keys(CHAT_ROOMS).forEach(r => (chatMsgs[r] || []).forEach(m => rows.push([CHAT_ROOMS[r], m.ts ? stampLabel(new Date(m.ts)) : "", m.name, m.role === "teacher" ? "선생님" : "학생", m.text])));
+    downloadCsv("chat", rows);
+  });
+}
+
+/* ---- 데이터 연결 ---- */
+if(FIREBASE_CONFIG){
+  initFirebase(V3_IS_TEACHER).then(db => {
+    db.ref("noticeAcks").on("value", s => {
+      noticeAcks = {};
+      const v = s.val() || {};
+      Object.keys(v).forEach(k => { noticeAcks[k] = unkeyMap(v[k]); });
+      renderNoticesV3(lastNotices); requestHomeRender();
+    });
+    if(V3_IS_TEACHER){
+      db.ref("teacherMemos").on("value", s => { teacherMemos = unkeyMap(s.val()); fillScheduleExtras(currentDayKey); });
+    }
+  }).catch(() => {});
+}
+window.__v3Ready = true;
+renderNoticesV3(lastNotices);
+fillScheduleExtras(currentDayKey);
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){

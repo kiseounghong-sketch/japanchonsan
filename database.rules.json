@@ -131,6 +131,27 @@
           ".validate": "newData.isNumber() && newData.val() === now && $name.length <= 200"
         }
       }
+    },
+    "noticeAcks": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$nid": {
+        "$name": {
+          ".write": "root.child('notices').child($nid).child('ack').val() === true",
+          ".validate": "newData.isNumber() && newData.val() === now && $name.length <= 200"
+        }
+      }
+    },
+    "teacherMemos": {
+      ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$key": {
+        ".validate": "newData.isString() && newData.val().length <= 1000"
+      }
+    },
+    "assemblyHistory": {
+      ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'"
     }
   }
 }
