@@ -152,6 +152,33 @@
     "assemblyHistory": {
       ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
       ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'"
+    },
+    "groupRounds": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$rid": {
+        ".validate": "newData.hasChildren(['cat', 'start', 'deadline']) && newData.child('start').isNumber() && newData.child('deadline').isNumber()"
+      }
+    },
+    "groupChecks": {
+      ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$rid": {
+        "$g": {
+          ".write": "root.child('groupRounds').child($rid).exists()",
+          ".validate": "newData.hasChildren(['by', 'ts', 'img']) && newData.child('ts').val() === now && newData.child('by').isString() && newData.child('by').val().length <= 20 && newData.child('img').isString() && newData.child('img').val().length <= 400000"
+        }
+      }
+    },
+    "groupCheckStatus": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$rid": {
+        "$g": {
+          ".write": "root.child('groupRounds').child($rid).exists()",
+          ".validate": "newData.hasChildren(['by', 'ts']) && (auth != null && auth.token.email === 'teacher@japanchonsan.app' || (newData.child('ts').val() === now && !newData.child('state').exists()))"
+        }
+      }
     }
   }
 }

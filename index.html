@@ -2170,6 +2170,45 @@
   .event .name .tl-more{font-size:14px;font-weight:700;color:var(--ink-soft);padding:0 2px;}
   .event .name .tl-more .tl-more-arrow{display:inline-block;transition:transform .2s ease;}
 
+
+  /* ===== 조 인증 (단체 셀카) ===== */
+  .gc-card{border:1.5px solid var(--navy);}
+  .gc-card.overdue{border-color:var(--coral);}
+  .gc-time{font-size:13px;font-weight:800;color:var(--coral-deep);}
+  .gc-status{font-size:13.5px;font-weight:700;margin:8px 0 0;text-align:center;}
+  .gc-status.ok{color:#1F7A47;}
+  .gc-status.redo{color:var(--coral-deep);}
+  .gc-status.late{color:var(--coral-deep);}
+  .gc-upload-label{display:block;text-align:center;cursor:pointer;}
+  .gc-toolbar{display:flex;gap:8px;margin-bottom:10px;}
+  .gc-round{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;}
+  .gc-round-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .gc-round-title{font-size:15px;font-weight:900;margin:0;color:var(--ink);}
+  .gc-round-sub{font-size:12px;color:var(--ink-soft);margin:2px 0 0;}
+  .gc-del{background:none;border:none;color:var(--ink-soft);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px;}
+  .gc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);}
+  .gc-row:first-of-type{border-top:none;}
+  .gc-thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--paper-dim);cursor:pointer;}
+  .gc-thumb.empty{display:flex;align-items:center;justify-content:center;font-size:20px;cursor:default;}
+  .gc-info{flex:1;min-width:0;}
+  .gc-gname{font-size:14.5px;font-weight:800;margin:0;color:var(--ink);}
+  .gc-gmeta{font-size:12px;color:var(--ink-soft);margin:2px 0 0;}
+  .gc-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .gc-actions a, .gc-actions button{
+    font-family:inherit;font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 9px;
+    border:1.5px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer;white-space:nowrap;
+  }
+  .gc-badge{font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;}
+  .gc-badge.ok{background:#E3F4EA;color:#1F7A47;}
+  .gc-badge.wait{background:var(--paper-dim);color:var(--ink-soft);}
+  .gc-badge.late{background:#FFE5DE;color:var(--coral-deep);}
+  .gc-badge.redo{background:#FFF4D6;color:#9A6B00;}
+  .gc-form-row{display:flex;gap:8px;}
+  .gc-form-row > *{flex:1;}
+  .gc-mode{display:flex;gap:8px;margin-bottom:6px;}
+  .gc-mode button{flex:1;padding:10px 0;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .gc-mode button.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
   /* ===== PC(넓은 화면): 왼쪽 메뉴 + 넓은 작업 화면 — 다른 규칙보다 뒤에 있어야 적용됨 ===== */
   @media (min-width: 900px){
     .app{max-width:1100px;padding-left:210px;box-sizing:border-box;position:relative;}
@@ -2309,6 +2348,8 @@
       </div>
       <div class="home-urgent" id="homeUrgent" hidden></div>
       <div class="home-urgent" id="homeAck" hidden></div>
+      <div class="home-card" id="homeGroupCheck" hidden></div>
+      <input type="file" accept="image/*" capture="user" id="gcFileInput" hidden>
       <div class="home-card" id="homeNotices" hidden></div>
       <div class="home-card" id="homePhase" hidden></div>
       <div class="home-card" id="homeNow" hidden></div>
@@ -3197,7 +3238,7 @@ function linkify(text){
 const photoLightbox = document.getElementById("photoLightbox");
 const photoLightboxImg = document.getElementById("photoLightboxImg");
 document.addEventListener("click", (e) => {
-  const img = e.target.closest(".notice-photo, .mission-photo-preview");
+  const img = e.target.closest(".notice-photo, .mission-photo-preview, img.gc-thumb");
   if(img){
     photoLightboxImg.src = img.src;
     photoLightbox.classList.add("show");
@@ -5254,6 +5295,8 @@ function renderHome(){
     tEl.innerHTML = `<p class="home-card-title">확인 필요한 일</p>` + (items.length ? items.join("") : `<p class="home-empty">지금 확인할 일이 없어요 ✅</p>`);
   }
 
+  renderGroupCheckHome();
+
   // ⑥ 오늘 남은 일정
   const upEl = document.getElementById("homeUpcoming");
   if(sn && sn.rest.length){
@@ -5614,6 +5657,232 @@ if(FIREBASE_CONFIG){
 window.__v3Ready = true;
 renderNoticesV3(lastNotices);
 fillScheduleExtras(currentDayKey);
+
+/* ===== 조 인증 (단체 셀카) =====
+   선생님이 인증 요청(라운드)을 열면 각 조는 마감 전까지 단체 셀카를 한 장 올립니다.
+   - groupRounds/라운드ID       : {cat(조 편성 항목), title, start, deadline}
+   - groupCheckStatus/라운드/조 : {by, ts, state("redo"=다시 찍기 요청)}  ← 누구나 읽기
+   - groupChecks/라운드/조      : {by, ts, img(작은 사진), lat, lng}     ← 선생님만 읽기
+   원본 사진은 구글 드라이브의 미션 사진 폴더("조 인증 - …")에도 함께 보관됩니다. */
+const GC_IS_TEACHER = false;
+let gcRounds = {};       // 라운드ID → 라운드
+let gcStatus = {};       // 라운드ID → {조키: 상태}
+let gcPhotos = {};       // 라운드ID → {조키: 사진 데이터} (선생님)
+const gcPhotoSubs = {};
+
+function gcKey(name){ return fbKey(name); }
+function gcActiveRounds(now){
+  return Object.keys(gcRounds).map(id => Object.assign({ id }, gcRounds[id]))
+    .filter(r => r.start <= now && now <= r.deadline + 10 * 60 * 1000)   // 마감 뒤 10분까지는 "마감됨"으로 보여줌
+    .sort((a, b) => a.deadline - b.deadline);
+}
+function gcMyGroup(r){
+  return (groupConfig.data[r.cat] || []).find(g => g.members.includes(studentName)) || null;
+}
+function gcLeft(ms){
+  const m = Math.ceil(ms / 60000);
+  return m >= 60 ? Math.floor(m / 60) + "시간 " + (m % 60) + "분" : m + "분";
+}
+
+/* ---- 학생: 홈 카드 ---- */
+let gcUploadNote = "";   // 올리는 중/실패 안내 (카드를 다시 그려도 남도록)
+function renderGroupCheckHome(){
+  const el = document.getElementById("homeGroupCheck");
+  if(!el) return;
+  if(GC_IS_TEACHER){ el.hidden = true; return; }
+  const now = Date.now();
+  // 여러 개가 열려 있으면 아직 안 낸(또는 다시 찍기) 것을 먼저
+  const mine = gcActiveRounds(now).filter(x => gcMyGroup(x));
+  const todo = x => { const st = (gcStatus[x.id] || {})[gcKey(gcMyGroup(x).name)]; return !st || st.state === "redo"; };
+  const r = mine.find(todo) || mine[mine.length - 1];
+  if(!r || !studentName){ el.hidden = true; return; }
+  const g = gcMyGroup(r);
+  const st = (gcStatus[r.id] || {})[gcKey(g.name)];
+  const over = now > r.deadline;
+  let status = "", button = true;
+  if(st && st.state === "redo"){ status = `<p class="gc-status redo">🔁 선생님이 다시 찍어 달라고 했어요. 조원이 모두 나오게 찍어 주세요.</p>`; }
+  else if(st){ status = `<p class="gc-status ok">✅ ${hm(new Date(st.ts))} ${chatEsc(st.by)} 학생이 올렸어요</p>`; button = false; }
+  else if(over){ status = `<p class="gc-status late">⏰ 마감이 지났어요. 지금이라도 바로 올려 주세요!</p>`; }
+  el.className = "home-card gc-card" + (over && !st ? " overdue" : "");
+  el.innerHTML = `<p class="home-card-title">📸 조 인증 · ${chatEsc(r.title || r.cat)} <span class="gc-time">${over ? "마감됨" : hm(new Date(r.deadline)) + "까지 (" + gcLeft(r.deadline - now) + " 남음)"}</span></p>
+    <p class="home-big" style="font-size:18px">${chatEsc(g.name)}<small>${g.members.join(", ")}</small></p>
+    <p class="home-sub">조원이 모두 나오게 단체 셀카를 찍어 올려 주세요. 한 명만 올리면 돼요.</p>
+    ${button ? `<label class="home-btn primary gc-upload-label" for="gcFileInput" data-gc-round="${r.id}">📸 단체 셀카 올리기</label>` : ""}
+    <p class="gc-status" id="gcUploadMsg">${gcUploadNote}</p>${gcUploadNote ? "" : status}`;
+  el.hidden = false;
+}
+document.addEventListener("click", (e) => {
+  const l = e.target.closest("[data-gc-round]");
+  if(l) document.getElementById("gcFileInput").dataset.round = l.dataset.gcRound;
+});
+document.addEventListener("change", async (e) => {
+  const input = e.target.closest("#gcFileInput");
+  if(!input || !input.files[0]) return;
+  const file = input.files[0];
+  const rid = input.dataset.round || (gcActiveRounds(Date.now()).find(x => gcMyGroup(x)) || {}).id;
+  const r = Object.assign({ id: rid }, gcRounds[rid]);
+  const g = gcMyGroup(r);
+  const note = t => { gcUploadNote = t; renderGroupCheckHome(); };
+  if(!g){ alert("이 인증에 배정된 조가 없어요."); input.value = ""; return; }
+  note("올리는 중...");
+  try {
+    const small = await compressImageFile(file, 640, 0.6);
+    // 위치는 허용한 경우에만 (최대 6초 기다림)
+    const pos = await new Promise(res => {
+      if(!navigator.geolocation) return res(null);
+      navigator.geolocation.getCurrentPosition(p => res(p.coords), () => res(null), { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 });
+    });
+    const db = await initFirebase(false);
+    const TS = firebase.database.ServerValue.TIMESTAMP, k = gcKey(g.name);
+    const check = { by: studentName, ts: TS, img: small, group: g.name };
+    if(pos){ check.lat = Math.round(pos.latitude * 1e5) / 1e5; check.lng = Math.round(pos.longitude * 1e5) / 1e5; }
+    await db.ref().update({ [`groupChecks/${r.id}/${k}`]: check, [`groupCheckStatus/${r.id}/${k}`]: { by: studentName, ts: TS } });
+    note("");
+    // 원본은 드라이브에도 보관 (실패해도 인증은 완료)
+    if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0){
+      compressImageFile(file, 1600, 0.72).then(big => fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({
+        action: "missionPhoto", name: studentName, grade: studentGrade || "학년미상",
+        mission: "조 인증 - " + (r.title || r.cat) + " - " + g.name, mimeType: "image/jpeg", data: big }) })).catch(() => {});
+    }
+  } catch(err){
+    note("올리지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.");
+  }
+  input.value = "";
+});
+
+/* ---- 선생님: 조 인증 화면 ---- */
+function gcGroupsOf(r){ return groupConfig.data[r.cat] || []; }
+function gcMissingCount(r){ const st = gcStatus[r.id] || {}; return gcGroupsOf(r).filter(g => !st[gcKey(g.name)] || st[gcKey(g.name)].state === "redo").length; }
+function renderGroupCheckTeacher(){
+  if(!GC_IS_TEACHER) return;
+  const box = document.getElementById("gcRounds");
+  if(!box) return;
+  const now = Date.now();
+  const all = Object.keys(gcRounds).map(id => Object.assign({ id }, gcRounds[id])).sort((a, b) => a.start - b.start);
+  const active = all.filter(r => r.start <= now && now <= r.deadline + 10 * 60 * 1000);
+  const upcoming = all.filter(r => r.start > now);
+  const past = all.filter(r => now > r.deadline + 10 * 60 * 1000).reverse();
+  active.concat(past.slice(0, 3)).forEach(r => gcWatchPhotos(r.id));
+  const roundHtml = (r, open) => {
+    const st = gcStatus[r.id] || {}, ph = gcPhotos[r.id] || {};
+    const over = now > r.deadline;
+    const groups = gcGroupsOf(r);
+    const done = groups.filter(g => st[gcKey(g.name)] && st[gcKey(g.name)].state !== "redo").length;
+    return `<div class="gc-round">
+      <div class="gc-round-head"><div><p class="gc-round-title">${chatEsc(r.title || r.cat)}</p>
+        <p class="gc-round-sub">${chatEsc(r.cat)} · ${hm(new Date(r.start))}~${hm(new Date(r.deadline))} · 제출 ${done}/${groups.length}${!over && r.start <= now ? " · " + gcLeft(r.deadline - now) + " 남음" : ""}</p></div>
+        <button type="button" class="gc-del" data-gc-del="${r.id}">삭제</button></div>
+      ${open ? groups.map(g => {
+        const k = gcKey(g.name), s = st[k], p = ph[k];
+        const badge = s && s.state === "redo" ? '<span class="gc-badge redo">다시 요청함</span>'
+          : s ? `<span class="gc-badge ok">${hm(new Date(s.ts))} 제출</span>`
+          : over ? '<span class="gc-badge late">미제출</span>' : '<span class="gc-badge wait">기다리는 중</span>';
+        return `<div class="gc-row">
+          ${p && p.img ? `<img class="gc-thumb" src="data:image/jpeg;base64,${p.img}" alt="${chatEsc(g.name)} 단체 사진">` : `<span class="gc-thumb empty">${s ? "🖼" : "⏳"}</span>`}
+          <div class="gc-info"><p class="gc-gname">${chatEsc(g.name)} ${badge}</p>
+            <p class="gc-gmeta">${s ? chatEsc(s.by) + " 학생이 올림 · " : ""}${g.members.join(", ")}</p></div>
+          <div class="gc-actions">
+            ${p && p.lat != null ? `<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" rel="noopener">📍 위치</a>` : ""}
+            ${s && s.state !== "redo" ? `<button type="button" data-gc-redo="${r.id}|${k}">다시 찍기</button>` : ""}
+          </div></div>`;
+      }).join("") : ""}
+    </div>`;
+  };
+  box.innerHTML =
+    (active.length ? `<p class="rc-section-title">진행 중</p>` + active.map(r => roundHtml(r, true)).join("") : `<div class="home-card"><p class="home-empty">진행 중인 조 인증이 없어요.</p></div>`) +
+    (upcoming.length ? `<p class="rc-section-title">예정 ${upcoming.length}개</p>` + upcoming.map(r => roundHtml(r, false)).join("") : "") +
+    (past.length ? `<details class="rc-done"><summary>지난 조 인증 ${past.length}개 (눌러서 펼치기)</summary>${past.map(r => roundHtml(r, true)).join("")}</details>` : "");
+}
+function gcWatchPhotos(rid){
+  if(gcPhotoSubs[rid]) return;
+  gcPhotoSubs[rid] = true;
+  initFirebase(true).then(db => db.ref("groupChecks/" + rid).on("value", s => {
+    gcPhotos[rid] = s.val() || {};
+    renderGroupCheckTeacher();
+  }, () => { gcPhotoSubs[rid] = false; })).catch(() => {});
+}
+
+if(GC_IS_TEACHER){
+  let gcMode = "now";
+  document.getElementById("gcNewBtn").addEventListener("click", () => {
+    const sel = document.getElementById("gcCatSelect");
+    sel.innerHTML = groupConfig.categories.map(c => `<option value="${chatEsc(c)}">${chatEsc(c)} (${(groupConfig.data[c] || []).length}개 조)</option>`).join("");
+    const d = new Date(); d.setMinutes(d.getMinutes() < 30 ? 30 : 60, 0, 0);
+    const pad = n => String(n).padStart(2, "0");
+    const local = x => `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}T${pad(x.getHours())}:${pad(x.getMinutes())}`;
+    document.getElementById("gcRepeatStart").value = local(d);
+    const e2 = new Date(d); e2.setHours(e2.getHours() + 4);
+    document.getElementById("gcRepeatEnd").value = local(e2);
+    document.getElementById("gcStatusMsg").textContent = "";
+    document.getElementById("gcFormOverlay").style.display = "flex";
+  });
+  document.getElementById("gcModeToggle").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if(!b) return;
+    gcMode = b.dataset.mode;
+    document.querySelectorAll("#gcModeToggle button").forEach(x => x.classList.toggle("active", x === b));
+    document.getElementById("gcNowFields").hidden = gcMode !== "now";
+    document.getElementById("gcRepeatFields").hidden = gcMode !== "repeat";
+  });
+  document.getElementById("gcCancelBtn").addEventListener("click", () => { document.getElementById("gcFormOverlay").style.display = "none"; });
+  document.getElementById("gcSubmitBtn").addEventListener("click", () => {
+    const cat = document.getElementById("gcCatSelect").value;
+    const title = document.getElementById("gcTitleInput").value.trim() || cat;
+    const win = Number(document.getElementById("gcWindowSelect").value) * 60000;
+    const msg = document.getElementById("gcStatusMsg");
+    const rounds = [];
+    if(gcMode === "now"){
+      rounds.push({ cat, title, start: Date.now(), deadline: Date.now() + win });
+    } else {
+      const s = new Date(document.getElementById("gcRepeatStart").value).getTime();
+      const e = new Date(document.getElementById("gcRepeatEnd").value).getTime();
+      const step = Number(document.getElementById("gcIntervalSelect").value) * 60000;
+      if(!s || !e || e < s){ msg.textContent = "시작·끝 시각을 확인해 주세요."; return; }
+      for(let t = s; t <= e && rounds.length < 30; t += step) rounds.push({ cat, title, start: t, deadline: t + win });
+    }
+    const push = gcMode === "now" && document.getElementById("gcPushCheck").checked;
+    msg.textContent = "등록하는 중...";
+    teacherDb().then(db => {
+      const updates = {};
+      rounds.forEach(r => { updates["groupRounds/" + db.ref("groupRounds").push().key] = Object.assign({ ts: firebase.database.ServerValue.TIMESTAMP }, r); });
+      const jobs = [db.ref().update(updates)];
+      if(push){
+        const t = `📸 조 인증: ${title}`, body = `${hm(new Date(rounds[0].deadline))}까지 조원 모두 나오게 단체 셀카를 올려 주세요. (앱 홈 화면)`;
+        jobs.push(db.ref("notices").push({ time: stampLabel(new Date()), important: false, level: "important", title: t, body, until: rounds[0].deadline, ts: firebase.database.ServerValue.TIMESTAMP }));
+        if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0) fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ title: t, body, important: false }) }).catch(() => {});
+      }
+      return Promise.all(jobs);
+    }).then(() => {
+      msg.textContent = rounds.length > 1 ? `${rounds.length}번의 조 인증을 예약했어요.` : "조 인증을 시작했어요!";
+      setTimeout(() => { document.getElementById("gcFormOverlay").style.display = "none"; }, 900);
+    }).catch(err => { msg.textContent = "등록하지 못했어요. (" + describeLoginError(err) + ")"; });
+  });
+  document.getElementById("gcRounds").addEventListener("click", (e) => {
+    const d = e.target.closest("[data-gc-del]");
+    if(d){
+      if(!confirm("이 조 인증을 삭제할까요? 올라온 사진 기록도 함께 지워져요.")) return;
+      const id = d.dataset.gcDel;
+      teacherDb().then(db => db.ref().update({ ["groupRounds/" + id]: null, ["groupChecks/" + id]: null, ["groupCheckStatus/" + id]: null }))
+        .catch(err => alert("삭제하지 못했어요. (" + describeLoginError(err) + ")"));
+      return;
+    }
+    const rd = e.target.closest("[data-gc-redo]");
+    if(rd){
+      const [id, k] = rd.dataset.gcRedo.split("|");
+      if(!confirm("이 조에 다시 찍어 달라고 요청할까요?")) return;
+      teacherDb().then(db => db.ref("groupCheckStatus/" + id + "/" + k + "/state").set("redo"))
+        .catch(err => alert("요청하지 못했어요. (" + describeLoginError(err) + ")"));
+    }
+  });
+}
+
+/* ---- 데이터 연결 ---- */
+if(FIREBASE_CONFIG){
+  initFirebase(GC_IS_TEACHER).then(db => {
+    db.ref("groupRounds").on("value", s => { gcRounds = s.val() || {}; renderGroupCheckHome(); renderGroupCheckTeacher(); requestHomeRender(); });
+    db.ref("groupCheckStatus").on("value", s => { gcStatus = s.val() || {}; renderGroupCheckHome(); renderGroupCheckTeacher(); requestHomeRender(); });
+  }).catch(() => {});
+}
+setInterval(() => { renderGroupCheckHome(); renderGroupCheckTeacher(); }, 20 * 1000);
 
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){
