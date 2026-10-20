@@ -1,0 +1,18 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "notices": {
+      ".read": true,
+      ".write": "auth != null",
+      "$id": {
+        ".validate": "newData.hasChildren(['title', 'time']) && newData.child('title').isString() && newData.child('title').val().length <= 500 && (!newData.child('body').exists() || (newData.child('body').isString() && newData.child('body').val().length <= 5000))"
+      }
+    },
+    "assembly": {
+      ".read": true,
+      ".write": "auth != null",
+      ".validate": "newData.hasChildren(['targetTime', 'place']) && newData.child('place').isString() && newData.child('place').val().length <= 200"
+    }
+  }
+}

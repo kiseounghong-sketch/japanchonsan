@@ -2145,6 +2145,42 @@ const NOTICES_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJr
 const ASSEMBLY_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1F7vtEinJrNHjCu4J5kAPVpJP0ajtqZmj2Mxpog8OA-o/gviz/tq?tqx=out:csv&sheet=집합안내";
 const NOTICES_REFRESH_SECONDS = 30; // 페이지를 열어둔 동안 몇 초마다 새 공지를 확인할지
 
+// Firebase 실시간 데이터베이스: 공지·집합 안내를 30초 기다림 없이 바로 모든 화면에 반영합니다.
+// Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)의 firebaseConfig 값을 아래 { } 자리에 붙여넣으세요.
+// null로 두면 예전처럼 위 구글시트를 NOTICES_REFRESH_SECONDS마다 확인하는 방식으로 동작합니다.
+// (선생님용 페이지와 동일한 값)
+const FIREBASE_CONFIG = null;
+const FIREBASE_SDK_URL = "https://www.gstatic.com/firebasejs/10.12.2/";
+
+function loadScriptOnce(src){
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+let firebaseDbPromise = null;
+function initFirebase(withAuth){
+  if(!FIREBASE_CONFIG) return Promise.reject(new Error("no-firebase-config"));
+  if(!firebaseDbPromise){
+    firebaseDbPromise = loadScriptOnce(FIREBASE_SDK_URL + "firebase-app-compat.js")
+      .then(() => Promise.all([
+        loadScriptOnce(FIREBASE_SDK_URL + "firebase-database-compat.js"),
+        withAuth ? loadScriptOnce(FIREBASE_SDK_URL + "firebase-auth-compat.js") : null
+      ]))
+      .then(() => {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        return firebase.database();
+      });
+  }
+  return firebaseDbPromise;
+}
+// Firebase에 연결되면 true가 되어, 구글시트 주기 확인(loadNotices/loadAssembly)은 쉬게 됩니다.
+let liveNotices = false;
+let liveAssembly = false;
+
 // 출석/체크리스트·미션 진행률을 시트로 보내는 주소 (선생님용 페이지와 동일한 값)
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
 
@@ -2853,6 +2889,7 @@ function fetchGroupConfig(){
 }
 
 function loadNotices(){
+  if(liveNotices) return;
   if(!NOTICES_SHEET_CSV_URL){
     renderNotices(NOTICES);
     return;
@@ -2933,6 +2970,7 @@ function updateAssemblyCountdown(){
 }
 
 function loadAssembly(){
+  if(liveAssembly) return;
   fetch(ASSEMBLY_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
@@ -2948,6 +2986,28 @@ function loadAssembly(){
 
 loadAssembly();
 setInterval(loadAssembly, NOTICES_REFRESH_SECONDS * 1000);
+
+/* ---- Firebase 실시간 반영 (FIREBASE_CONFIG가 있을 때만) ---- */
+// 연결에 실패하거나 읽기가 거부되면 위의 구글시트 주기 확인이 그대로 이어집니다.
+initFirebase(false).then(db => {
+  db.ref("notices").on("value", snap => {
+    liveNotices = true;
+    const list = [];
+    snap.forEach(c => {
+      const n = c.val() || {};
+      list.push({ time: n.time || "", important: !!n.important, title: n.title || "", body: n.body || "" });
+    });
+    renderNotices(list.reverse());
+  }, () => { liveNotices = false; });
+  db.ref("assembly").on("value", snap => {
+    liveAssembly = true;
+    const a = snap.val();
+    const target = a && a.targetTime ? new Date(a.targetTime) : null;
+    if(!target || isNaN(target.getTime())){ hideAssembly(); return; }
+    assemblyTarget = target;
+    showAssembly(a.place || "", a.lat, a.lng);
+  }, () => { liveAssembly = false; });
+}).catch(() => {});
 
 /* ---- 일정 렌더 ---- */
 const dayPills = document.getElementById("dayPills");
