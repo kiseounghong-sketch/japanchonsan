@@ -5434,7 +5434,11 @@ document.getElementById("retryLocationBtn").addEventListener("click", () => {
 // 앱처럼 홈 화면에서 열리고, 신호가 약해도 화면 골격은 뜨도록 등록
 if("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    // 이미 등록된 서비스워커(OneSignal이 등록한 것 포함)가 있으면 그대로 둡니다.
+    // 서로 다른 파일로 번갈아 등록하면 알림 구독이 깨질 수 있어서예요.
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if(!reg) return navigator.serviceWorker.register("sw.js");
+    }).catch(() => {});
   });
 }
 </script>
