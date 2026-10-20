@@ -4,15 +4,61 @@
     ".write": false,
     "notices": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
       "$id": {
         ".validate": "newData.hasChildren(['title', 'time']) && newData.child('title').isString() && newData.child('title').val().length <= 500 && (!newData.child('body').exists() || (newData.child('body').isString() && newData.child('body').val().length <= 5000))"
       }
     },
     "assembly": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
       ".validate": "newData.hasChildren(['targetTime', 'place']) && newData.child('place').isString() && newData.child('place').val().length <= 200"
+    },
+    "assign": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      ".validate": "newData.hasChildren(['json']) && newData.child('json').isString() && newData.child('json').val().length <= 100000"
+    },
+    "groupConfig": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      ".validate": "newData.hasChildren(['json']) && newData.child('json').isString() && newData.child('json').val().length <= 100000"
+    },
+    "checks": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'"
+    },
+    "status": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$name": {
+        ".write": true,
+        ".validate": "$name.length <= 200 && newData.hasChildren(['name'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "grade": {
+          ".validate": "newData.isString() && newData.val().length <= 10"
+        },
+        "attendance": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "checklist": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "mission": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "essential": {
+          ".validate": "newData.isString() && newData.val().length <= 300"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }

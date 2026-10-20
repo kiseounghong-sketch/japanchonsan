@@ -2676,6 +2676,18 @@ function initFirebase(withAuth){
 // Firebase에 연결되면 true가 되어, 구글시트 주기 확인(loadNotices/loadAssembly)은 쉬게 됩니다.
 let liveNotices = false;
 let liveAssembly = false;
+// 배정 변경·조 편성은 Firebase에 저장된 값이 있을 때만 true (없으면 예전 시트 값을 그대로 씀)
+let liveAssign = false;
+let liveGroupCfg = false;
+
+// Firebase 키에는 . # $ [ ] / 를 쓸 수 없어서, 학생 이름·항목 이름은 인코딩해서 키로 씁니다.
+function fbKey(s){ return encodeURIComponent(String(s)).replace(/\./g, "%2E"); }
+function fbUnkey(k){ try { return decodeURIComponent(k); } catch(e){ return k; } }
+// 시트에 쓰던 것과 같은 시각 표기 (예: 10.20(화) 11:16)
+function stampLabel(d){
+  const w = ["일","월","화","수","목","금","토"][d.getDay()];
+  return (d.getMonth() + 1) + "." + d.getDate() + "(" + w + ") " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
 
 // 공지·집합 등록/삭제는 선생님 계정으로 로그인해야 할 수 있습니다(학생이 가짜 공지를 못 올리게).
 // Firebase 콘솔 > Authentication > 사용자에 아래 이메일로 계정을 만들고 비밀번호를 정하세요.
@@ -2702,9 +2714,6 @@ function teacherDb(){
       return auth.signInWithEmailAndPassword(TEACHER_EMAIL, pw).then(() => db);
     });
   });
-}
-function noticeTimeLabel(d){
-  return (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
 }
 
 // 학생현황(출석·체크리스트·미션) 시트 주소 — Apps Script가 자동으로 "학생현황" 탭을 만들어줍니다.
@@ -3288,17 +3297,36 @@ function applyAssignRows(rows){
   saveAssignLocal();
 }
 function fetchAssignOverrides(){
+  if(liveAssign) return Promise.resolve();
   return fetch(ASSIGN_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
+      if(liveAssign) return;
       const rows = parseCSV(text).filter(r => r.length >= 3 && r[0] && r[0] !== "종류");
       applyAssignRows(rows);
     })
     .catch(() => {});
 }
-// 저장: 로컬에 저장하고, SCRIPT_URL이 설정돼 있으면 시트로도 보냅니다.
+// 저장: 로컬에 저장하고 Firebase로 보냅니다(학생 화면에 바로 반영).
+// Firebase 설정이 없으면 예전처럼 시트로 보냅니다.
+let lastAssignJson = null;   // 마지막으로 Firebase에서 받은 값 — 저장 실패 시 되돌리는 용도
 function pushAssignOverrides(){
   saveAssignLocal();
+  if(FIREBASE_CONFIG){
+    teacherDb().then(db => db.ref("assign").set({
+      json: JSON.stringify(assignOverrides),
+      ts: firebase.database.ServerValue.TIMESTAMP
+    })).catch(err => {
+      alert("배정 변경을 저장하지 못했어요. (" + describeLoginError(err) + ")");
+      if(lastAssignJson){
+        assignOverrides = JSON.parse(lastAssignJson);
+        saveAssignLocal();
+        renderBusTabs();
+        renderRoomTabs();
+      }
+    });
+    return;
+  }
   if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0){
     fetch(SCRIPT_URL, {
       method: "POST",
@@ -3843,7 +3871,7 @@ submitNoticeBtn.addEventListener("click", () => {
   const done = FIREBASE_CONFIG
     ? Promise.all([
         teacherDb().then(db => db.ref("notices").push({
-          time: noticeTimeLabel(new Date()), important: noticeImportant, title, body,
+          time: stampLabel(new Date()), important: noticeImportant, title, body,
           ts: firebase.database.ServerValue.TIMESTAMP
         })),
         sheetPost.catch(() => {})
@@ -4435,16 +4463,34 @@ let currentGroupCat = groupConfig.categories[0];
 function saveGroupConfigLocal(){
   try { localStorage.setItem(GROUP_CFG_KEY, JSON.stringify(groupConfig)); } catch(e){}
 }
+let lastGroupCfgJson = null;   // 마지막으로 Firebase에서 받은 값 — 저장 실패 시 되돌리는 용도
 function pushGroupConfig(){
   saveGroupConfigLocal();
+  if(FIREBASE_CONFIG){
+    teacherDb().then(db => db.ref("groupConfig").set({
+      json: JSON.stringify(groupConfig),
+      ts: firebase.database.ServerValue.TIMESTAMP
+    })).catch(err => {
+      alert("조 편성을 저장하지 못했어요. (" + describeLoginError(err) + ")");
+      if(lastGroupCfgJson){
+        groupConfig = normalizeGroupConfig(JSON.parse(lastGroupCfgJson));
+        saveGroupConfigLocal();
+        if(!groupConfig.categories.includes(currentGroupCat)) currentGroupCat = groupConfig.categories[0];
+        renderGroups();
+      }
+    });
+    return;
+  }
   if(typeof SCRIPT_URL === "string" && SCRIPT_URL.indexOf("http") === 0){
     fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify({ action:"saveGroupConfig", data: groupConfig }) }).catch(() => {});
   }
 }
 function fetchGroupConfig(){
+  if(liveGroupCfg) return Promise.resolve();
   return fetch(GROUP_CFG_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
+      if(liveGroupCfg) return;
       const rows = parseCSV(text);
       // A2 셀(2행 1열)에 JSON 한 덩어리
       const cell = rows[1] && rows[1][0];
@@ -4679,6 +4725,7 @@ function loadAttendState(key){
 }
 function saveAttendState(key, state){
   localStorage.setItem(key, JSON.stringify(state));
+  syncAttendState(key, state);
 }
 let busAttend = loadAttendState(BUS_ATTEND_KEY);
 let roomAttend = loadAttendState(ROOM_ATTEND_KEY);
@@ -4904,6 +4951,92 @@ fetchAssignOverrides().then(() => {
   renderRoomTabs();
 });
 fetchGroupConfig().then(renderGroups);
+
+/* ---- 배정 변경·조 편성·인원 체크를 Firebase로 공유 (여러 선생님이 실시간으로 같은 화면을 봄) ---- */
+// 인원 체크는 학생 한 명씩 따로 저장해서, 두 선생님이 동시에 체크해도 서로 덮어쓰지 않습니다.
+const CHECK_SYNC = {
+  [GROUP_ATTEND_KEY]:    { path: "checks/groups",   set: v => { groupAttend = v; },    render: () => renderGroups() },
+  [NAMELIST_ATTEND_KEY]: { path: "checks/namelist", set: v => { nameListAttend = v; }, render: () => renderNameList() },
+  [BUS_ATTEND_KEY]:      { path: "checks/bus",      set: v => { busAttend = v; },      render: () => renderBusList() },
+  [ROOM_ATTEND_KEY]:     { path: "checks/room",     set: v => { roomAttend = v; },     render: () => renderRoomList() }
+};
+// {항목: {이름: true}} 같은 체크 상태 ↔ {"항목/이름": true} 평평한 경로 목록
+function flattenChecks(obj, prefix, out){
+  out = out || {};
+  Object.keys(obj || {}).forEach(k => {
+    const p = (prefix ? prefix + "/" : "") + fbKey(k);
+    if(obj[k] && typeof obj[k] === "object") flattenChecks(obj[k], p, out);
+    else if(obj[k]) out[p] = true;
+  });
+  return out;
+}
+function unflattenChecks(v){
+  const out = {};
+  Object.keys(v || {}).forEach(k => {
+    out[fbUnkey(k)] = (v[k] && typeof v[k] === "object") ? unflattenChecks(v[k]) : true;
+  });
+  return out;
+}
+function applyRemoteChecks(key){
+  const s = CHECK_SYNC[key];
+  const state = JSON.parse(JSON.stringify(s.lastState || {}));
+  s.remote = flattenChecks(state);
+  s.set(state);
+  try { localStorage.setItem(key, JSON.stringify(state)); } catch(e){}
+  s.render();
+}
+// 바뀐 체크만 골라서 Firebase에 보냅니다.
+function syncAttendState(key, state){
+  const s = CHECK_SYNC[key];
+  if(!FIREBASE_CONFIG || !s) return;
+  // 아직 Firebase 값을 못 받았으면(신호 약함 등) 새로 체크한 것만 더해서 보냅니다.
+  const before = s.remote || {};
+  const after = flattenChecks(state);
+  const updates = {};
+  Object.keys(after).forEach(p => { if(!before[p]) updates[p] = true; });
+  Object.keys(before).forEach(p => { if(!after[p]) updates[p] = null; });
+  if(!Object.keys(updates).length) return;
+  s.remote = after;   // 연달아 누를 때를 대비해 보낸 상태를 바로 기준으로 삼음
+  teacherDb().then(db => db.ref(s.path).update(updates)).catch(err => {
+    alert("체크를 저장하지 못했어요. (" + describeLoginError(err) + ")");
+    applyRemoteChecks(key);
+  });
+}
+
+initFirebase(true).then(db => {
+  Object.keys(CHECK_SYNC).forEach(key => {
+    db.ref(CHECK_SYNC[key].path).on("value", snap => {
+      CHECK_SYNC[key].lastState = unflattenChecks(snap.val());
+      applyRemoteChecks(key);
+    });
+  });
+  db.ref("assign").on("value", snap => {
+    const v = snap.val();
+    if(!v || !v.json) return;
+    try {
+      const o = JSON.parse(v.json);
+      if(!o || !o.groups || !o.bus || !o.rooms) return;
+      liveAssign = true;
+      lastAssignJson = v.json;
+      assignOverrides = o;
+      saveAssignLocal();
+      renderBusTabs();
+      renderRoomTabs();
+    } catch(e){}
+  });
+  db.ref("groupConfig").on("value", snap => {
+    const v = snap.val();
+    if(!v || !v.json) return;
+    try {
+      groupConfig = normalizeGroupConfig(JSON.parse(v.json));
+      liveGroupCfg = true;
+      lastGroupCfgJson = v.json;
+      saveGroupConfigLocal();
+      if(!groupConfig.categories.includes(currentGroupCat)) currentGroupCat = groupConfig.categories[0];
+      renderGroups();
+    } catch(e){}
+  });
+}).catch(() => {});
 
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
@@ -5278,6 +5411,7 @@ function renderStudentList(){
   list.innerHTML = students.map(s => {
     const data = studentDataMap[s.name];
     const checklist = data ? (data.checklist || "0/0") : "0/0";
+    const mission = data && data.mission ? data.mission : "";
     const essential = data ? (data.essential || "") : "";
     const essentialMissing = essential.indexOf("미비") === 0;
     const essentialText = essential ? essential : "아직 확인 전";
@@ -5289,14 +5423,35 @@ function renderStudentList(){
         </span>
         <span class="s-progress">
           <span class="s-chip">준비물 ${checklist}</span>
+          ${mission ? `<span class="s-chip">미션 ${mission}</span>` : ""}
         </span>
       </div>
     `;
   }).join("");
 }
 
+// Firebase가 있으면 학생들이 체크하는 대로 이 화면이 실시간으로 바뀝니다(한 번만 연결).
+let studentStatusLive = false;
 function loadStudentStatus(){
   const note = document.getElementById("studentsNote");
+  if(FIREBASE_CONFIG){
+    renderStudentList();
+    if(studentStatusLive) return;
+    note.textContent = "불러오는 중...";
+    initFirebase(true).then(db => {
+      studentStatusLive = true;
+      db.ref("status").on("value", snap => {
+        studentDataMap = {};
+        snap.forEach(c => {
+          const d = c.val() || {};
+          studentDataMap[d.name || fbUnkey(c.key)] = d;
+        });
+        renderStudentList();
+        note.textContent = "";
+      }, () => { studentStatusLive = false; note.textContent = "학생 현황을 불러오지 못했어요."; });
+    }).catch(() => { note.textContent = "학생 현황을 불러오지 못했어요."; });
+    return;
+  }
   note.textContent = "불러오는 중...";
   fetch(STUDENT_SHEET_CSV_URL)
     .then(res => res.text())
@@ -5347,11 +5502,15 @@ document.getElementById("resetStudentsBtn").addEventListener("click", () => {
     return;
   }
   if(!confirm("정말로 학생 준비 현황(체크리스트·미션) 데이터를 지울까요? 되돌릴 수 없어요.")) return;
-  fetch(SCRIPT_URL, {
+  const sheetReset = fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({ action: "reset_students" })
-  }).then(() => {
+  });
+  const done = FIREBASE_CONFIG
+    ? Promise.all([teacherDb().then(db => db.ref("status").remove()), sheetReset.catch(() => {})])
+    : sheetReset;
+  done.then(() => {
     alert("학생 준비 현황 초기화 요청을 보냈어요. 잠시 후 새로고침하면 반영됩니다.");
   }).catch(() => {
     alert("초기화 요청에 실패했어요. 인터넷 연결을 확인해주세요.");

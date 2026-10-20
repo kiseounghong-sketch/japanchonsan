@@ -2189,6 +2189,18 @@ function initFirebase(withAuth){
 // Firebase에 연결되면 true가 되어, 구글시트 주기 확인(loadNotices/loadAssembly)은 쉬게 됩니다.
 let liveNotices = false;
 let liveAssembly = false;
+// 배정 변경·조 편성은 Firebase에 저장된 값이 있을 때만 true (없으면 예전 시트 값을 그대로 씀)
+let liveAssign = false;
+let liveGroupCfg = false;
+
+// Firebase 키에는 . # $ [ ] / 를 쓸 수 없어서, 학생 이름·항목 이름은 인코딩해서 키로 씁니다.
+function fbKey(s){ return encodeURIComponent(String(s)).replace(/\./g, "%2E"); }
+function fbUnkey(k){ try { return decodeURIComponent(k); } catch(e){ return k; } }
+// 시트에 쓰던 것과 같은 시각 표기 (예: 10.20(화) 11:16)
+function stampLabel(d){
+  const w = ["일","월","화","수","목","금","토"][d.getDay()];
+  return (d.getMonth() + 1) + "." + d.getDate() + "(" + w + ") " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
 
 // 출석/체크리스트·미션 진행률을 시트로 보내는 주소 (선생님용 페이지와 동일한 값)
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyq2zErSPLMzXZaPXonIASiHzgNTJkWDsz37DZK2ErzNxyU_DJ4y_uRn3UlNDmXpH00/exec";
@@ -2392,8 +2404,19 @@ function scriptReady(){
   return SCRIPT_URL && SCRIPT_URL.indexOf("여기에") !== 0;
 }
 
+// 학생 현황(출석·준비물·미션)은 Firebase의 status/학생이름 에 저장해 선생님 화면에 바로 보입니다.
+function writeStatus(fields){
+  initFirebase(false).then(db => db.ref("status/" + fbKey(studentName)).update(Object.assign({
+    name: studentName,
+    grade: studentGrade || "",
+    ts: firebase.database.ServerValue.TIMESTAMP
+  }, fields))).catch(() => {});
+}
+
 function reportAttendance(){
-  if(!studentName || !scriptReady()) return;
+  if(!studentName) return;
+  if(FIREBASE_CONFIG){ writeStatus({ attendance: stampLabel(new Date()) }); return; }
+  if(!scriptReady()) return;
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -2769,9 +2792,11 @@ function applyAssignRows(rows){
   saveAssignLocal();
 }
 function fetchAssignOverrides(){
+  if(liveAssign) return Promise.resolve();
   return fetch(ASSIGN_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
+      if(liveAssign) return;
       const rows = parseCSV(text).filter(r => r.length >= 3 && r[0] && r[0] !== "종류");
       applyAssignRows(rows);
     })
@@ -2884,9 +2909,11 @@ let groupConfig = (function(){
 })();
 let currentGroupCat = groupConfig.categories[0];
 function fetchGroupConfig(){
+  if(liveGroupCfg) return Promise.resolve();
   return fetch(GROUP_CFG_SHEET_CSV_URL)
     .then(res => res.text())
     .then(text => {
+      if(liveGroupCfg) return;
       const rows = parseCSV(text);
       const cell = rows[1] && rows[1][0];
       if(!cell) return;
@@ -3694,6 +3721,33 @@ function refreshGroupView(){
 }
 fetchGroupConfig().then(refreshGroupView);
 
+/* ---- 배정 변경·조 편성 Firebase 실시간 반영 (선생님이 바꾸면 바로 화면에 반영) ---- */
+// Firebase에 아직 저장된 값이 없으면 위의 구글시트 값을 그대로 씁니다.
+initFirebase(false).then(db => {
+  db.ref("assign").on("value", snap => {
+    const v = snap.val();
+    if(!v || !v.json) return;
+    try {
+      const o = JSON.parse(v.json);
+      if(!o || !o.groups || !o.bus || !o.rooms) return;
+      liveAssign = true;
+      assignOverrides = o;
+      saveAssignLocal();
+      refreshAssignmentViews();
+    } catch(e){}
+  });
+  db.ref("groupConfig").on("value", snap => {
+    const v = snap.val();
+    if(!v || !v.json) return;
+    try {
+      liveGroupCfg = true;
+      groupConfig = normalizeGroupConfig(JSON.parse(v.json));
+      try { localStorage.setItem(GROUP_CFG_LS_KEY, JSON.stringify(groupConfig)); } catch(e){}
+      refreshGroupView();
+    } catch(e){}
+  });
+}).catch(() => {});
+
 /* ---- 사진 미션 렌더 ---- */
 const missionList = document.getElementById("missionList");
 document.getElementById("missionTotalCount").textContent = MISSIONS.length;
@@ -3786,13 +3840,29 @@ function getMissingEssentials(){
   return missing;
 }
 
+// 체크를 연달아 누를 때마다 보내지 않고, 잠깐 멈추면 마지막 상태만 한 번 보냅니다.
+let reportProgressTimer = null;
 function reportProgress(){
-  if(!studentName || !scriptReady()) return;
+  if(!studentName) return;
+  clearTimeout(reportProgressTimer);
+  reportProgressTimer = setTimeout(sendProgress, 800);
+}
+function sendProgress(){
+  if(!studentName) return;
   const checklistTotal = groupsEl.querySelectorAll(".check-item").length;
   const checklistChecked = groupsEl.querySelectorAll(".check-item.checked").length;
   const missionChecked = missionList.querySelectorAll(".check-item.checked").length;
   const missingEssentials = getMissingEssentials();
   const essentialStatus = missingEssentials.length ? ("미비: " + missingEssentials.join(", ")) : "완료";
+  if(FIREBASE_CONFIG){
+    writeStatus({
+      checklist: checklistChecked + "/" + checklistTotal,
+      mission: missionChecked + "/" + MISSIONS.length,
+      essential: essentialStatus
+    });
+    return;
+  }
+  if(!scriptReady()) return;
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
