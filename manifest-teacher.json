@@ -1,6 +1,6 @@
 {
   "id": "japanchonsan-teacher",
-  "name": "청산고 수학여행 (선생님용)",
+  "name": "2026 청산고 일본 수학여행 (선생님용)",
   "short_name": "수학여행 관리",
   "lang": "ko",
   "dir": "ltr",
@@ -8,8 +8,8 @@
   "scope": "./teacher",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FF5A36",
-  "theme_color": "#FF5A36",
+  "background_color": "#FFF4F7",
+  "theme_color": "#FFE4EE",
   "categories": ["education", "travel"],
   "icons": [
     { "src": "icon-teacher-192.png", "sizes": "192x192", "type": "image/png" },

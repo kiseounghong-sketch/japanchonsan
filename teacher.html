@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>2026 청산고등학교 2학년 수학여행 (선생님용)</title>
+<title>2026 청산고 일본 수학여행 (선생님용)</title>
 <link rel="manifest" href="manifest-teacher.json">
-<meta name="theme-color" content="#FF5A36">
+<meta name="theme-color" content="#FFE4EE">
 <link rel="apple-touch-icon" href="icon-teacher-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="수학여행 관리">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js" crossorigin="anonymous"></script>
@@ -2595,6 +2595,87 @@
     details.rc-done summary{grid-column:1 / -1;}
     .notice-form-overlay{align-items:center;}
     .notice-form-card{max-width:520px;border-radius:18px;}
+  }
+
+  /* =========================================================
+     ===== 심플 테마 (2026.10.) =====
+     흰 카드 + 연분홍 바탕, 강조색은 핑크 하나만, 그림자·두꺼운 테두리 없이.
+     위쪽 스타일은 그대로 두고 여기서 덮어씁니다. 이 블록만 지우면 예전 디자인으로 돌아가요.
+     ========================================================= */
+  :root{
+    --paper:#FFF4F7;
+    --paper-dim:#FFE9F0;
+    --ink:#191F28;
+    --ink-soft:#7A6B72;
+    --navy:#191F28;
+    --navy-deep:#0B0E13;
+    --coral:#FF5C8A;
+    --coral-deep:#E8467A;
+    --mustard:#FFB800;
+    --line:#F7E1E9;
+    --radius:16px;
+  }
+  body{letter-spacing:-0.01em;}
+  .app{box-shadow:none;}
+
+  /* 헤더: 남색 띠 대신 연분홍 그라데이션 + 얇은 선 */
+  .ticket{background:linear-gradient(90deg,#FFE4EE 0%,#FFF0F5 100%);color:var(--ink);border-bottom:1px solid var(--line);}
+  .ticket-top{padding:12px 16px;}
+  .trip-title{font-family:'Noto Sans KR', sans-serif;font-weight:800;font-size:clamp(14px, 4.4vw, 17px);color:var(--ink);}
+  .student-name-tag{color:var(--ink);font-weight:700;}
+  .trip-dates{color:var(--ink-soft);}
+  .hdr-sos{background:#fff;color:#E5343D;font-weight:800;letter-spacing:0;}
+
+  /* 카드: 흰색, 테두리 없이 둥글게 */
+  .home-card, .weather-card, .assembly-card, .notice-card, .group-card, .room-card,
+  .contact-card, .faq-item, .phrase-category, .phrase-card, .more-list, .myteam-card,
+  .findway-item, .next-stop-card, .amenity-card, .gc-card, .check-item, .mission-item{
+    border:none !important;box-shadow:none !important;background:#fff;border-radius:var(--radius);
+  }
+  .contact-card::before{display:none;}
+  .home-card{padding:18px;margin-bottom:12px;}
+  .home-card-title{font-size:13px;color:var(--ink-soft);font-weight:700;}
+  .home-big{color:var(--ink);}
+  .home-btn{border:none !important;background:var(--paper) !important;color:var(--ink) !important;border-radius:12px;}
+  .home-btn.primary{background:var(--coral) !important;color:#fff !important;}
+  .home-urgent{background:#FFF4F4;border:none;}
+
+  /* 알림 켜기 배너: 연한 분홍 바탕 */
+  .push-enable-banner{background:#FFE4EE;color:var(--ink);}
+  .push-enable-banner .pe-dismiss-btn{color:var(--ink-soft);}
+
+  /* 알약 버튼(일차·탭 선택): 흰 바탕, 선택하면 핑크 */
+  .pill{border:none !important;background:#fff;color:var(--ink-soft);font-weight:700;}
+  .pill.active{background:var(--coral) !important;color:#fff !important;}
+
+  /* 일정 타임라인: 가는 선과 작은 점 */
+  .timeline::before{background:var(--line);width:2px;}
+  .dot{box-shadow:none;}
+  .time{color:var(--coral-deep);}
+
+  /* 하단 탭: 흰 바탕, 선택된 탭만 진하게 */
+  .tabbar{border-top:1px solid var(--line);box-shadow:none;}
+  .tab{color:#C9B8BF;font-weight:600;}
+  .tab svg{stroke:#C9B8BF;}
+  .tab.active{color:var(--coral-deep);}
+  .tab.active svg{stroke:var(--coral-deep);}
+
+  /* 팝업 */
+  .notice-form-card{border-radius:20px;box-shadow:none;}
+  .nf-input, .nf-textarea{border:1px solid var(--line) !important;background:var(--paper);border-radius:12px;}
+
+  /* 처음 학번 입력 화면: 분홍 그라데이션 */
+  .name-gate{background:linear-gradient(180deg,#FFE4EE 0%,#FFF8FA 100%);}
+  .name-gate-card{color:var(--ink);}
+  .name-gate-card .badge{background:#fff;border:none;color:var(--coral-deep);}
+  .name-gate-card h2{font-family:'Noto Sans KR', sans-serif;font-weight:800;color:var(--ink);}
+  .birth-input{background:#fff;border:none;}
+  .name-gate-card button{border-radius:14px;}
+  .name-choice-btn{background:#fff;border:none;color:var(--ink);}
+
+  /* 제목용 굵은 글꼴을 본문 글꼴(굵게)로 통일 */
+  .sub-title, .notice-form-card h3, .next-stop-card .name, .weather-day .weather-temp, .assembly-card .ac-countdown{
+    font-family:'Noto Sans KR', sans-serif;font-weight:800;letter-spacing:-0.02em;
   }
 </style>
 </head>
