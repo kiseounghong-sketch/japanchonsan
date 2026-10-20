@@ -59,6 +59,47 @@
           ".validate": false
         }
       }
+    },
+    "chats": {
+      "$room": {
+        ".read": "$room !== 'teachers' || (auth != null && auth.token.email === 'teacher@japanchonsan.app')",
+        ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+        "$msg": {
+          ".write": "$room !== 'teachers' && !data.exists() && newData.exists() && root.child('chatSettings').child($room).child('teachersOnly').val() !== true",
+          ".validate": "($room === 'all' || $room === 'g1' || $room === 'g2' || $room === 'teachers') && newData.hasChildren(['name', 'role', 'text', 'ts']) && newData.child('ts').val() === now && (newData.child('role').val() === 'student' || (newData.child('role').val() === 'teacher' && auth != null && auth.token.email === 'teacher@japanchonsan.app'))",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          },
+          "role": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "grade": {
+            ".validate": "newData.isString() && newData.val().length <= 10"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "chatSettings": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+      "$room": {
+        ".validate": "$room === 'all' || $room === 'g1' || $room === 'g2'",
+        "teachersOnly": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
