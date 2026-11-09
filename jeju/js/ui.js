@@ -49,10 +49,11 @@ export function statusChip(row) {
   return "";
 }
 
-export function kakaoUrl(place, fallbackName) {
-  if (place && place.kakao) return encodeURI(decodeURI(place.kakao));
-  const q = (place && place.name) || fallbackName || "";
-  return "https://map.kakao.com/link/search/" + encodeURIComponent(q.replace(/\s*\(.*?\)\s*/g, " ").trim());
+// 네이버 지도 검색 링크. 휴대폰에서는 네이버 지도 앱(없으면 모바일 웹)으로 열립니다.
+// places.json의 "naver"는 검색어이며, 첫 결과가 맞는 장소인지 확인해 둔 값입니다.
+export function mapUrl(place, fallbackName) {
+  const q = (place && place.naver) || ((place && place.name) || fallbackName || "").replace(/\s*\(.*?\)\s*/g, " ").trim();
+  return "https://map.naver.com/p/search/" + encodeURIComponent(q);
 }
 
 let toastTimer = null;
