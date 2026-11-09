@@ -10,7 +10,8 @@
       ".claude/**",
       ".gitattributes",
       ".nojekyll",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "jeju/README.md"
     ],
     "headers": [
       {
@@ -37,6 +38,19 @@
           {
             "key": "Cache-Control",
             "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "jeju/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
           }
         ]
       }

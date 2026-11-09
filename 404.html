@@ -18,7 +18,9 @@
 // (GitHub 주소는 /japanchonsan/ 폴더 아래, Firebase 주소는 맨 앞에 앱이 있습니다)
 (function(){
   var base = /github\.io$/.test(location.hostname) ? "/japanchonsan/" : "/";
-  var target = base + (/teacher/i.test(location.pathname) ? "teacher.html" : "");
+  // 제주 캠프 앱(/jeju/) 주소를 잘못 치면 제주 캠프 앱 첫 화면으로 보냅니다.
+  var target = /\/jeju/i.test(location.pathname) ? base + "jeju/" + location.search
+    : base + (/teacher/i.test(location.pathname) ? "teacher.html" : "");
   location.replace(target);
 })();
 </script>

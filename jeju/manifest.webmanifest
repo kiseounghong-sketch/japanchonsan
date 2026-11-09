@@ -1,0 +1,20 @@
+{
+  "id": "gasseulsinje-jeju-camp",
+  "name": "가쓸신제 · 제주 캠프",
+  "short_name": "가쓸신제",
+  "description": "가보면 쓸모있고 신비한 즐거운 제주도 캠프 — 일정·집결·안전·미션 기록",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F2EC",
+  "theme_color": "#0B6E8A",
+  "categories": ["education", "travel"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "emergency": [
+    { "name": "119", "desc": "응급·화재·구조", "tel": "119" },
+    { "name": "112", "desc": "경찰", "tel": "112" }
+  ],
+  "teacher": { "name": "홍기성 선생님", "desc": "인솔교사", "note": "번호는 단톡방에서 확인하세요. 입장 코드를 넣으면 여기에도 보여요." },
+  "places": [
+    { "name": "제주분원", "desc": "1일차 숙소", "tel": "064-798-0104" }
+  ],
+  "hospitals": [
+    { "name": "제주한라병원", "area": "제주시", "address": "제주시 도령로 65", "kakao": "https://map.kakao.com/link/map/8084305" },
+    { "name": "서귀포의료원", "area": "서귀포시", "address": "서귀포시 장수로 47", "kakao": "https://map.kakao.com/link/map/9872734" }
+  ]
+}
