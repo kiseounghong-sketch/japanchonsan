@@ -77,3 +77,10 @@ export function errorText(error) {
   if (code) return "요청을 처리하지 못했어요. 다시 시도해 주세요.";
   return error?.message || "다시 시도해 주세요.";
 }
+
+export async function loadExpenses() { return (await request("expenses")).data || {}; }
+export async function loadExpense(id) { return request(`expenses/${id}`); }
+export async function saveExpense(id, data, etag) {
+  return request(`expenses/${id}`, "PUT", { ...data, updatedAt: { ".sv": "timestamp" }, updatedBy: currentUser().uid }, etag || 'null_etag');
+}
+export async function deleteExpense(id, etag) { return request(`expenses/${id}`, "DELETE", undefined, etag); }

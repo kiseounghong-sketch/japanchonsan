@@ -69,6 +69,23 @@ await pass(request('jeju/budgetAccess',owner.idToken,'PUT',{editorEmail:'other@e
 await deny(request('jeju/budget',editor.idToken));
 await deny(request('jeju/budget',editor.idToken,'PUT',data(editor.localId)));
 await pass(request('jeju/budgetAccess',owner.idToken,'PUT',{editorEmail:'editor@example.test'}));
+// Ledger entries are private and validated independently of budget edits.
+const expense={category:'item-0',amount:100,text:'테스트 결제',date:'2026-11-10',included:false,updatedAt:{'.sv':'timestamp'},updatedBy:owner.localId};
+await pass(request('jeju/expenses/entry-a',owner.idToken,'PUT',expense));
+await pass(request('jeju/expenses',editor.idToken));
+for (const u of [null,other,pending]) {
+ await deny(request('jeju/expenses',u?.idToken));
+ await deny(request('jeju/expenses/entry-a',u?.idToken,'PUT',expense));
+ await deny(request('jeju/expenses/entry-a',u?.idToken,'DELETE'));
+}
+for (const patch of [{amount:0},{amount:-1},{amount:1.5},{category:'item-29'},{text:''},{included:'yes'}]) {
+ await deny(request('jeju/expenses/invalid',owner.idToken,'PUT',{...expense,...patch}));
+}
+const entryRead=await request('jeju/expenses/entry-a',owner.idToken,'GET',undefined,{'X-Firebase-ETag':'true'});
+await pass(request('jeju/expenses/entry-a',editor.idToken,'PUT',{...expense,amount:200,updatedBy:editor.localId}));
+const stale=await request('jeju/expenses/entry-a',owner.idToken,'PUT',expense,{'if-match':entryRead.headers.get('etag')});
+assert.equal(stale.status,412);checks++;
+await pass(request('jeju/expenses/entry-a',editor.idToken,'DELETE'));
 // Empty document for browser import flow; only local emulator fixture is removed.
 await pass(request('jeju/budget','owner','DELETE'));
 console.log('PASS',checks,'REST database permission, validation and concurrency checks');

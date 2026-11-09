@@ -16,3 +16,11 @@ input[type="email"] { width: 100%; min-width: 0; min-height: 44px; border: 1px s
 .budget-tools .btn { flex: 1; }
 .budget-owner summary { cursor: pointer; font-size: 0.95rem; font-weight: 800; min-height: 36px; display: flex; align-items: center; }
 .budget-owner[open] > .stack { margin-top: 8px; }
+
+.budget-settings { display: flex; flex-direction: column; gap: 10px; }
+.budget-settings > .card { margin-top: 10px; }
+.budget-balances > div { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; padding: 4px 0; }
+.expense-row { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 6px; }
+.expense-row strong { flex: none; font-size: .95rem; }
+.negative { color: var(--danger); }
+[data-form="expense"] .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }

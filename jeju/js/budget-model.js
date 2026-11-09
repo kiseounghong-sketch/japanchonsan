@@ -72,3 +72,11 @@ export function parseBudget(text) {
   data.excluded = excluded.join("\n");
   return validateBudget(data);
 }
+
+export function withExpenses(items, expenses) {
+  const result = structuredClone(items);
+  for (const entry of Object.values(expenses)) {
+    if (!entry.included && result[entry.category]) result[entry.category].spent = (result[entry.category].spent ?? 0) + entry.amount;
+  }
+  return result;
+}
