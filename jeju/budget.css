@@ -1,0 +1,18 @@
+.brand { color: var(--ink); text-decoration: none; }
+[hidden] { display: none !important; }
+main { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+.budget-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.budget-values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.budget-values > div { min-width: 0; }
+.budget-values dt { color: var(--ink-2); font-size: 0.75rem; }
+.budget-values dd { margin: 2px 0 0; font-size: 0.85rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.budget-values .negative { color: var(--danger); }
+.budget-note { white-space: pre-wrap; }
+.budget-form { padding-top: 8px; border-top: 1px solid var(--line); }
+.budget-form .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+input[type="email"] { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--card-2); font-size: 1rem; }
+.budget-import { width: 100%; max-width: 100%; font-size: 0.85rem; }
+.budget-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.budget-tools .btn { flex: 1; }
+.budget-owner summary { cursor: pointer; font-size: 0.95rem; font-weight: 800; min-height: 36px; display: flex; align-items: center; }
+.budget-owner[open] > .stack { margin-top: 8px; }

@@ -45,7 +45,7 @@ export function viewTeacher() {
       <button class="linkbtn" data-act="t-hide">선생님 탭 숨기기</button>
     </section>`;
   }
-  let h = codeCard();
+  let h = `<a class="btn ghost" href="budget.html">${icon("record")}예산</a>` + codeCard();
   if (!S.code) return h + logoutRow();
   h += `<section class="card" id="t-notice-card">
     <h2>${icon("bell")}공지 보내기</h2>

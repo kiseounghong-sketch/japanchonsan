@@ -2,11 +2,16 @@
 // - 같은 주소의 파일(화면·일정 JSON)은 "인터넷 먼저, 3초 안에 안 오면 저장본" → 일정 JSON을 고쳐 다시 배포하면 바로 반영
 // - Firebase 프로그램(gstatic, 버전 고정)은 한 번 받으면 저장본 사용
 // - Firebase 실시간 연결·네이버 지도 등 그 밖의 주소는 건드리지 않습니다.
-const CACHE = "gsj-v11";
+const CACHE = "gsj-v12";
 const SHELL = [
   "./",
   "./index.html",
   "./app.css",
+  "./budget.html",
+  "./budget.css",
+  "./js/budget.js",
+  "./js/budget-api.js",
+  "./js/budget-model.js",
   "./manifest.webmanifest",
   "./js/app.js",
   "./js/state.js",

@@ -295,6 +295,63 @@
             ".validate": false
           }
         }
+      },
+      "budgetAccess": {
+        ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+        ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+        ".validate": "newData.hasChildren(['editorEmail'])",
+        "editorEmail": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val().matches(/^[^@ ]+@[^@ ]+\\.[^@ ]+$/)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      },
+      "budget": {
+        ".read": "auth != null && (auth.token.email === 'teacher@japanchonsan.app' || (auth.token.email_verified === true && auth.token.email === root.child('jeju').child('budgetAccess').child('editorEmail').val()))",
+        ".write": "auth != null && (auth.token.email === 'teacher@japanchonsan.app' || (auth.token.email_verified === true && auth.token.email === root.child('jeju').child('budgetAccess').child('editorEmail').val())) && newData.exists()",
+        ".validate": "newData.hasChildren(['items', 'updatedAt', 'updatedBy']) && newData.child('items').hasChildren()",
+        "items": {
+          "$id": {
+            ".validate": "$id.matches(/^item-([0-9]|[12][0-9])$/) && newData.hasChildren(['label', 'budget', 'approximate', 'order'])",
+            "label": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+            },
+            "budget": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0"
+            },
+            "spent": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0"
+            },
+            "approximate": {
+              ".validate": "newData.isBoolean()"
+            },
+            "order": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 30 && newData.val() % 1 === 0"
+            },
+            "note": {
+              ".validate": "newData.isString() && newData.val().length <= 1000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "pending": {
+          ".validate": "newData.isString() && newData.val().length <= 5000"
+        },
+        "excluded": {
+          ".validate": "newData.isString() && newData.val().length <= 5000"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "updatedBy": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }
