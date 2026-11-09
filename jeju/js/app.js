@@ -86,6 +86,14 @@ function renderHeader() {
   net.className = "net " + cls;
   net.innerHTML = txt ? `${cls === "off" ? icon("wifiOff") : '<i aria-hidden="true"></i>'}${txt}` : "";
   net.title = cls === "off" ? "인터넷이 없어도 저장된 일정·안전 정보는 그대로 보여요" : "";
+  // 로고 옆 작은 글씨: 출발 전 D-n / 캠프 중 n일차 날짜 / 끝난 뒤
+  const sub = document.getElementById("brand-sub");
+  if (sub && S.data) {
+    const today = T.parts(now).date;
+    const days = S.data.schedule;
+    const d = days.find((x) => x.date === today);
+    sub.textContent = d ? `${d.day}일차 · ${d.label}` : today < days[0].date ? `D-${T.daysBetween(today, days[0].date)}` : "캠프 끝";
+  }
   const sim = document.getElementById("sim");
   if (sim) sim.hidden = !T.isSimulated;
   if (T.isSimulated && sim) sim.textContent = `미리보기 시각 ${T.todayLabel(now)} ${T.hm(now)}`;
