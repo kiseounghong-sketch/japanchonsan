@@ -4,12 +4,14 @@ import { save, load } from "./store.js";
 import * as T from "./time.js";
 import { esc, icon, toast, copyText } from "./ui.js";
 import { prepare } from "./plan.js";
+import { unlockFolders } from "./folders.js";
 import * as Live from "./live.js";
 import { live, CODE_RE } from "./live.js";
 import { viewToday, viewSchedule, viewMap, viewRecord, viewInfo, savedText, shareBar } from "./views.js";
 import { viewTeacher, noticesList, gatherPanel, collectView, collectText, shareLink, kakaoText } from "./teacher.js";
 
 const FILES = ["camp", "schedule", "places", "rules", "contacts", "checklist", "missions", "roles", "info", "shots"];
+const OPTIONAL = ["folders"]; // 없어도 앱은 동작
 const TABS = [
   ["today", "오늘", "today"],
   ["schedule", "일정", "schedule"],
@@ -33,6 +35,9 @@ async function fetchData() {
     return [f, await r.json()];
   }));
   const data = Object.fromEntries(entries);
+  await Promise.all(OPTIONAL.map(async (f) => {
+    try { const r = await fetch(`data/${f}.json`, { cache: "no-cache" }); data[f] = r.ok ? await r.json() : null; } catch (e) { data[f] = null; }
+  }));
   save("data", data); // 서비스워커가 없는 브라우저(카카오톡 안 등)를 위한 예비 저장
   return data;
 }
@@ -598,6 +603,7 @@ async function boot() {
   Live.setOnChange((kind) => {
     if (kind === "connected") scheduleSync(300);
     if (kind !== "all") ensureWatchAll();
+    if (kind === "meta") unlockFolders().then((changed) => { if (changed && !editing()) render(true); });
     refreshLive(kind);
   });
   try {
@@ -608,6 +614,7 @@ async function boot() {
   }
   if (S.me && !roster().includes(S.me)) { S.me = ""; persist("me"); }
   render();
+  unlockFolders().then((changed) => { if (changed && !editing()) render(true); });
   if (S.tab === "schedule") { const cur = document.getElementById("cur-row"); if (cur) cur.scrollIntoView({ block: "center" }); }
   if (S.code) Live.start(S.code);
   if (S.teacherUI) Live.initTeacher();

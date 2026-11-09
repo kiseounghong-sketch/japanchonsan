@@ -359,6 +359,9 @@ textarea:focus, input:focus { outline: none; border-color: var(--sea); box-shado
 .uses small { color: var(--ink-3); }
 details.card summary { font-weight: 800; cursor: pointer; min-height: 32px; display: flex; align-items: center; }
 details.card[open] summary { margin-bottom: 6px; }
+.shot .btn.up { align-self: flex-start; margin-top: 2px; }
+.shot-card.focus { border: 2px solid var(--sea); }
+.past-title { margin-top: 22px; padding-top: 12px; border-top: 1px dashed var(--line); color: var(--ink-2); }
 .role-head { display: flex; align-items: center; gap: 6px; }
 .role-name { font-weight: 800; color: var(--sea); }
 .role .who { font-size: 1.2rem; }
