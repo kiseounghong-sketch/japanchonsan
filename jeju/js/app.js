@@ -91,7 +91,7 @@ function render(keepScroll) {
   if (S.tab === "teacher" && !S.teacherUI) S.tab = "today";
   const y = window.scrollY;
   $main.innerHTML = (VIEWS[S.tab] || viewToday)();
-  $main.setAttribute("data-tab", S.tab);
+  $main.setAttribute("data-view", S.tab);
   renderTabs();
   renderHeader();
   if (keepScroll) window.scrollTo(0, y);
