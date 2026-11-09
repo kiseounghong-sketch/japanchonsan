@@ -4,7 +4,7 @@ import { save, load } from "./store.js";
 import * as T from "./time.js";
 import { esc, icon, toast, copyText } from "./ui.js";
 import { prepare } from "./plan.js";
-import { unlockFolders } from "./folders.js";
+import { unlockFolders, refreshUploads } from "./folders.js";
 import * as Live from "./live.js";
 import { live, CODE_RE } from "./live.js";
 import { viewToday, viewSchedule, viewMap, viewRecord, viewInfo, savedText, shareBar } from "./views.js";
@@ -100,6 +100,13 @@ function render(keepScroll) {
   renderTabs();
   renderHeader();
   if (keepScroll) window.scrollTo(0, y);
+  checkUploads(false);
+}
+
+// 화면에 보이는 촬영 장소들의 업로드 여부 확인 (드라이브에서 돌아오면 바로 다시 확인)
+function checkUploads(force) {
+  const keys = [...new Set([...document.querySelectorAll("[data-upcount]")].map((el) => el.getAttribute("data-upcount")))];
+  if (keys.length) refreshUploads(keys, force);
 }
 
 function editing() {
@@ -260,7 +267,10 @@ function goto(el) {
   const tab = el.dataset.tab;
   if (el.dataset.seg) { S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); }
   if (el.dataset.day) S.ui.day = Number(el.dataset.day);
-  if (/^s-\d/.test(el.dataset.anchor || "")) S.ui.shotDay = Number(el.dataset.anchor[2]);
+  const a = el.dataset.anchor || "";
+  if (/^s-\d/.test(a)) S.ui.shotDay = Number(a[2]);
+  if (/^m-/.test(a)) { const m = S.data.missions.list.find((x) => "m-" + x.id === a); if (m) S.ui.shotDay = m.day; }
+  if (el.dataset.seg === "refl" || el.dataset.seg === "mission") { if (!/^m-/.test(a)) S.ui.shotDay = null; }
   setTab(tab, el.dataset.anchor);
 }
 
@@ -563,6 +573,7 @@ document.addEventListener("visibilitychange", async () => {
     } catch (e) { /* 그대로 */ }
   }
   if (!editing()) render(true);
+  checkUploads(true);
   Live.retry();
 });
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyPrefs);
