@@ -1,0 +1,105 @@
+[
+  {
+    "day": 1, "date": "2026-11-10", "label": "11. 10.(화)",
+    "stay": "제주분원", "stayPlace": "bunwon",
+    "safety": [
+      "해안도로에서는 차도로 나가지 않기, 사진은 보도에서",
+      "동문시장은 2인 1조, 18:05 8번 게이트 재집결 5분 전 도착"
+    ],
+    "rows": [
+      { "time": "06:50", "title": "영동역 집결", "place": "youngdong", "memo": "영동 출발조 3명", "type": "gather", "status": "ok", "gather": true, "gatherAt": "영동역" },
+      { "time": "07:07", "title": "영동역 출발 (무궁화 4301)", "place": "youngdong", "type": "move", "status": "ok" },
+      { "time": "07:25", "title": "옥천역 집결 → 07:38 출발", "place": "okcheon", "memo": "옥천 출발조 4명, 열차 안에서 합류", "type": "gather", "status": "ok", "gather": true, "gatherAt": "옥천역" },
+      { "time": "08:52", "title": "청주공항역 도착 → 국내선 청사 도보 5분", "place": "cjj", "type": "move", "status": "ok" },
+      { "time": "09:00", "title": "인원 점검, 신분증 확인, 수하물 위탁", "place": "cjj", "memo": "아시아나 카운터", "type": "gather", "status": "ok", "gather": true, "gatherAt": "청주공항 아시아나 카운터" },
+      { "time": "09:20", "title": "보안검색 → 탑승구", "place": "cjj", "memo": "보조배터리 기내 휴대, 탑승 마감 09:50", "type": "activity", "status": "ok" },
+      { "time": "10:00", "end": "11:10", "title": "OZ8231 청주 출발 → 11:10 제주 도착", "type": "move", "status": "ok" },
+      { "time": "11:10", "title": "하기, 수하물, 화장실, 인원 점검", "place": "cju", "type": "gather", "status": "ok", "gather": true, "gatherAt": "제주공항 (내린 뒤)" },
+      { "time": "11:40", "title": "렌터카 셔틀 → 11:50 오토하우스 접수 → 11:55 차량 인수", "place": "autohouse", "type": "move", "status": "ok" },
+      { "time": "12:20", "title": "짐 싣기, 좌석 배정, 안전띠 안전교육", "place": "autohouse", "type": "activity", "status": "ok" },
+      { "time": "12:25", "title": "이동 → 자매국수", "place": "jamae", "memo": "15분", "type": "move", "status": "ok" },
+      { "time": "12:40", "end": "13:30", "title": "점심 – 자매국수", "place": "jamae", "memo": "고기국수", "type": "meal", "status": "ok" },
+      { "time": "13:35", "title": "이동 → 무지개 해안도로", "place": "rainbow", "memo": "5분", "type": "move", "status": "ok" },
+      { "time": "13:40", "title": "해안도로 걷기·사진", "place": "rainbow", "memo": "사진은 보도 쪽에서, 차도 진입 금지", "type": "activity", "status": "ok" },
+      { "time": "14:10", "title": "이동 → 제주마방목지", "place": "horse", "memo": "40분", "type": "move", "status": "ok" },
+      { "time": "14:50", "title": "제주마방목지 전망대·해설판 관람", "place": "horse", "memo": "울타리 안 출입·먹이 주기 금지", "type": "activity", "status": "ok" },
+      { "time": "15:30", "title": "이동 → 제주4·3평화공원", "place": "peace43", "memo": "10분", "type": "move", "status": "ok" },
+      { "time": "15:45", "end": "16:05", "title": "위령제단·각명비·행방불명인 표석 참배·관람", "place": "peace43", "memo": "20분 · 조용히, 예의 지키기", "type": "activity", "status": "ok" },
+      { "time": "16:10", "title": "이동 → 동문재래시장 공영주차장", "place": "dongmun", "memo": "35분", "type": "move", "status": "ok" },
+      { "time": "16:45", "title": "8번 게이트 집결, 2인 1조 편성", "place": "dongmun", "memo": "재집결 18:05", "type": "gather", "status": "ok", "gather": true, "gatherAt": "동문시장 8번 게이트" },
+      { "time": "16:55", "title": "시장 구경·저녁", "place": "dongmun", "memo": "각자 개인 돈", "type": "meal", "status": "ok", "pay": "self" },
+      { "time": "18:05", "title": "8번 게이트 재집결, 인원 점검", "place": "dongmun", "type": "gather", "status": "ok", "gather": true, "gatherAt": "동문시장 8번 게이트" },
+      { "time": "18:15", "title": "이동 → 제주분원", "place": "bunwon", "memo": "1시간", "type": "move", "status": "ok" },
+      { "time": "19:15", "title": "분원 체크인, 방 배정", "place": "bunwon", "type": "stay", "status": "ok" },
+      { "time": "19:45", "end": "21:00", "title": "비상구·대피로 안내, 건강 확인, 하루 기록", "place": "bunwon", "type": "stay", "status": "ok" }
+    ]
+  },
+  {
+    "day": 2, "date": "2026-11-11", "label": "11. 11.(수)",
+    "stay": "루시드엠 펜션 (1박째)", "stayPlace": "lucid",
+    "safety": [
+      "수월봉: 낙석·절벽 구간 가까이 가지 않기",
+      "배(노을투어): 구명조끼 착용, 난간 밖 출입 금지, 멀미약은 30분 전"
+    ],
+    "rows": [
+      { "time": "08:00", "title": "분원 체크아웃, 이동 → 태공식당", "place": "taegong", "memo": "5~10분", "type": "move", "status": "ok", "gather": true, "gatherAt": "제주분원 (체크아웃)" },
+      { "time": "08:15", "title": "아침 – 태공식당", "place": "taegong", "memo": "갈치조림·해장국", "type": "meal", "status": "ok" },
+      { "time": "09:05", "title": "이동 → 새별프렌즈", "place": "saebyeol", "memo": "약 25분", "type": "move", "status": "ok" },
+      { "time": "09:30", "title": "새별프렌즈 동물원", "place": "saebyeol", "type": "activity", "status": "ok" },
+      { "time": "11:10", "title": "이동 → 그리스신화박물관", "place": "greek", "memo": "약 5분", "type": "move", "status": "ok" },
+      { "time": "11:20", "title": "그리스신화박물관", "place": "greek", "memo": "협약기관", "type": "activity", "status": "ok" },
+      { "time": "12:40", "title": "이동 → 홍회장보말칼국수", "place": "hong", "memo": "약 10분", "type": "move", "status": "ok" },
+      { "time": "12:50", "title": "점심 – 홍회장보말칼국수", "place": "hong", "type": "meal", "status": "ok" },
+      { "time": "13:40", "title": "이동 → 수월봉", "place": "suwol", "memo": "약 35분", "type": "move", "status": "ok" },
+      { "time": "14:20", "title": "수월봉 엉알해안", "place": "suwol", "memo": "낙석·절벽 구간 주의", "type": "activity", "status": "ok" },
+      { "time": "15:30", "title": "이동 → 자구내포구", "place": "jagunae", "memo": "약 5분", "type": "move", "status": "ok" },
+      { "time": "15:40", "title": "승선 수속", "place": "jagunae", "memo": "멀미약은 30분 전", "type": "gather", "status": "ok", "gather": true, "gatherAt": "자구내포구" },
+      { "time": "16:00", "title": "차귀도 섬탐방 노을투어", "place": "jagunae", "memo": "구명조끼, 탐방로 난간 밖 출입 금지", "type": "activity", "status": "ok" },
+      { "time": "17:50", "title": "저녁 – 엄블랑", "place": "umblang", "memo": "감귤탕수육 + 각자 메뉴", "type": "meal", "status": "ok" },
+      { "time": "19:30", "end": "21:00", "title": "루시드엠 펜션 체크인", "place": "lucid", "type": "stay", "status": "ok" }
+    ]
+  },
+  {
+    "day": 3, "date": "2026-11-12", "label": "11. 12.(목)",
+    "stay": "루시드엠 펜션 (2박째)", "stayPlace": "lucid",
+    "safety": [
+      "돌고래 투어: 구명조끼 착용, 난간에 기대지 않기, 멀미약은 30분 전",
+      "고기 구울 때 불판 화상 주의, 방어회는 바로 먹고 남은 건 버리기"
+    ],
+    "rows": [
+      { "time": "08:30", "title": "숙소 조식", "place": "lucid", "type": "meal", "status": "ok" },
+      { "time": "09:10", "title": "이동 → 색달동", "place": "yeondon", "memo": "약 25분", "type": "move", "status": "ok", "gather": true, "gatherAt": "루시드엠 펜션 (출발)" },
+      { "time": "09:35", "title": "연돈 대기 등록", "place": "yeondon", "type": "activity", "status": "need" },
+      { "time": "10:00", "title": "세계자동차&피아노박물관", "place": "carmuseum", "type": "activity", "status": "ok" },
+      { "time": "11:40", "title": "점심 – 연돈", "place": "yeondon", "memo": "각자 계산, 영업 시작 시간 확인 중", "type": "meal", "status": "need", "pay": "self" },
+      { "time": "13:00", "title": "은하감귤체험농장", "place": "eunha", "type": "activity", "status": "ok" },
+      { "time": "14:30", "title": "집결 → 제주돌고래힐링투어", "place": "dolphin", "memo": "출발 20분 전 승선 신고", "type": "gather", "status": "need", "gather": true, "gatherAt": "은하감귤체험농장 (투어 출발)" },
+      { "time": "15:00", "end": "16:30", "title": "제주돌고래힐링투어", "place": "dolphin", "memo": "결항 시 신도리 해안 관찰", "type": "activity", "status": "need" },
+      { "time": "17:10", "title": "저녁 – 상원가든", "place": "sangwon", "memo": "흑돼지", "type": "meal", "status": "ok" },
+      { "time": "18:20", "title": "홍마트 모슬포점, 방어회 포장", "place": "hongmart", "type": "activity", "status": "ok" },
+      { "time": "18:50", "title": "이동 → 펜션", "place": "lucid", "memo": "약 15분", "type": "move", "status": "ok" },
+      { "time": "19:05", "end": "21:00", "title": "펜션 도착, 방어회, 짐 미리 싸기", "place": "lucid", "memo": "회는 바로 먹고 남은 건 버리기", "type": "stay", "status": "ok" }
+    ]
+  },
+  {
+    "day": 4, "date": "2026-11-13", "label": "11. 13.(금)",
+    "stay": "귀가", "stayPlace": "",
+    "safety": [
+      "보조배터리는 기내 휴대 (위탁 수하물에 넣지 않기)",
+      "공항·역에서도 2인 1조, 집결 5분 전 도착"
+    ],
+    "rows": [
+      { "time": "07:30", "title": "기상, 짐 정리", "place": "lucid", "type": "stay", "status": "ok" },
+      { "time": "08:30", "title": "조식", "place": "lucid", "type": "meal", "status": "ok" },
+      { "time": "09:00", "title": "체크아웃·출발", "place": "lucid", "memo": "성산까지 약 1시간 20분", "type": "move", "status": "ok", "gather": true, "gatherAt": "루시드엠 펜션 (체크아웃)" },
+      { "time": "10:20", "title": "성산일출봉 (무료 구간)", "place": "seongsan", "type": "activity", "status": "ok" },
+      { "time": "11:10", "title": "아쿠아플라넷", "place": "aqua", "type": "activity", "status": "ok" },
+      { "time": "12:20", "title": "점심 – 성산", "memo": "식당 미정", "type": "meal", "status": "tbd" },
+      { "time": "13:10", "title": "이동 → 렌터카 반납, 주유", "place": "autohouse", "memo": "약 1시간", "type": "move", "status": "ok" },
+      { "time": "14:20", "title": "렌터카 반납", "place": "autohouse", "type": "activity", "status": "ok" },
+      { "time": "15:15", "title": "공항 수속", "place": "cju", "type": "gather", "status": "ok", "gather": true, "gatherAt": "제주공항" },
+      { "time": "16:20", "end": "17:30", "title": "RF610 제주 출발 → 17:30 청주 도착", "place": "cju", "type": "move", "status": "ok" },
+      { "time": "19:22", "end": "20:55", "title": "무궁화 4304 청주공항역 출발", "place": "cjj", "memo": "옥천 20:33 / 영동 20:55 하차, 보호자 인계 후 해산", "type": "move", "status": "ok" }
+    ]
+  }
+]

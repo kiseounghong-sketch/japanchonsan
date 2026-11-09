@@ -179,6 +179,123 @@
           ".validate": "newData.hasChildren(['by', 'ts']) && (auth != null && auth.token.email === 'teacher@japanchonsan.app' || (newData.child('ts').val() === now && !newData.child('state').exists()))"
         }
       }
+    },
+    "jeju": {
+      "keys": {
+        ".read": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+        ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+        "$code": {
+          ".validate": "$code.matches(/^[A-Z0-9]{6,20}$/) && newData.isBoolean()"
+        }
+      },
+      "s": {
+        "$code": {
+          ".read": "root.child('jeju').child('keys').child($code).val() === true",
+          ".write": "auth != null && auth.token.email === 'teacher@japanchonsan.app'",
+          "meta": {
+            "created": {
+              ".validate": "newData.isNumber()"
+            },
+            "driveUrl": {
+              ".validate": "newData.isString() && newData.val().beginsWith('https://') && newData.val().length <= 500"
+            },
+            "teacherTel": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9+() -]{3,20}$/)"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "notices": {
+            "$id": {
+              ".validate": "newData.hasChildren(['text', 'ts'])",
+              "text": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+              },
+              "level": {
+                ".validate": "newData.val() === 'info' || newData.val() === 'important'"
+              },
+              "ts": {
+                ".validate": "newData.isNumber()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "gather": {
+            ".validate": "newData.hasChildren(['id', 'date', 'time', 'place'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9]{1,30}$/)"
+            },
+            "date": {
+              ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
+            },
+            "time": {
+              ".validate": "newData.isString() && newData.val().matches(/^\\d{2}:\\d{2}$/)"
+            },
+            "place": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+            },
+            "label": {
+              ".validate": "newData.isString() && newData.val().length <= 80"
+            },
+            "ts": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "arrivals": {
+            "$gid": {
+              "$name": {
+                ".write": "root.child('jeju').child('keys').child($code).val() === true && root.child('jeju').child('s').child($code).child('gather').child('id').val() === $gid",
+                ".validate": "$name.length <= 12 && newData.isNumber() && newData.val() === now"
+              }
+            }
+          },
+          "answers": {
+            "$name": {
+              "$mid": {
+                ".write": "root.child('jeju').child('keys').child($code).val() === true",
+                ".validate": "$name.length <= 12 && $mid.length <= 40 && newData.isString() && newData.val().length <= 1000"
+              }
+            }
+          },
+          "reflections": {
+            "$name": {
+              "$day": {
+                ".write": "root.child('jeju').child('keys').child($code).val() === true",
+                ".validate": "$name.length <= 12 && $day.matches(/^d[1-4]$/) && newData.isString() && newData.val().length <= 500"
+              }
+            }
+          },
+          "shots": {
+            "$name": {
+              "$sid": {
+                ".write": "root.child('jeju').child('keys').child($code).val() === true",
+                ".validate": "$name.length <= 12 && $sid.length <= 40 && newData.hasChildren()",
+                "p": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "v": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "n": {
+                  ".validate": "newData.isString() && newData.val().length <= 300"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }
