@@ -15,7 +15,7 @@ export const S = {
   theme: load("theme", "auto"),
   big: load("big", false),
   teacherUI: load("teacherUI", false),
-  ui: { day: null, shotDay: null, seg: load("seg", "mission"), mapDay: 0, tseg: "answers", oldNotices: false },
+  ui: { day: null, shotDay: null, seg: load("seg", "mission"), tseg: "answers", oldNotices: false },
 };
 
 export function persist(key) {

@@ -256,6 +256,7 @@ function todaySchedule(day, now) {
   const stayP = place(day.stayPlace);
   return `<section class="card">
     ${ch("schedule", "오늘 일정", stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${icon("home")}${esc(day.stay)}</a>` : esc(day.stay))}
+    ${stayP && stayP.rooms ? `<p class="sub">${esc(stayP.rooms)}</p>` : ""}
     <ol class="tl-mini">${rows.map((r) => {
       const cur = r.start <= now && now < r.endMs;
       const past = r.endMs <= now;
@@ -346,7 +347,7 @@ export function viewSchedule() {
   const stayP = place(day.stayPlace);
   let h = dayTabs("day", day.day);
   h += `<section class="card flush">
-    <div class="tl-head">${icon("home")}<span>숙소</span>${stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${esc(day.stay)}</a>` : `<b>${esc(day.stay)}</b>`}</div>
+    <div class="tl-head">${icon("home")}<span>숙소</span>${stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${esc(day.stay)}</a>` : `<b>${esc(day.stay)}</b>`}${stayP && stayP.rooms ? `<small>${esc(stayP.rooms)}</small>` : ""}</div>
     <ol class="timeline">${day.rows.map((r) => rowHtml(r, now)).join("")}</ol>
   </section>`;
   return h;
@@ -377,24 +378,7 @@ function rowHtml(r, now) {
   return wrap(`row${r.gather ? " gather" : ""}${state}`, inner, `${r.time} ${r.title}${p ? `, ${p.name} 지도` : ""}`);
 }
 
-/* ---------- 지도 ---------- */
-export function viewMap() {
-  if (!S.ui.mapDay) S.ui.mapDay = autoDay();
-  const d = S.ui.mapDay;
-  const day = S.data.schedule[d - 1];
-  const P = S.data.places;
-  const ids = [];
-  day.rows.forEach((r) => { if (r.place && !ids.includes(r.place)) ids.push(r.place); });
-  P.forEach((p) => { if (p.day.includes(d) && !ids.includes(p.id)) ids.push(p.id); });
-  const list = ids.map(place).filter((p) => p && !p.stay);
-  const C = S.data.contacts;
-  let h = dayTabs("mapday", d);
-  h += `<section class="card flush">${ch("home", "숙소")}<ul class="list">${P.filter((p) => p.stay).map((p) => placeRow(p, p.day.includes(d))).join("")}</ul></section>`;
-  h += `<section class="card flush">${ch("pin", `${d}일차 장소`, `${list.length}곳`)}<ul class="list">${list.map((p) => placeRow(p)).join("")}</ul></section>`;
-  h += `<section class="card flush">${ch("alert", "가까운 병원")}<ul class="list">${C.hospitals.map((x) => placeRow({ name: x.name, address: x.address, nid: x.nid, naver: x.naver })).join("")}</ul></section>`;
-  return h;
-}
-
+/* ---------- 장소 줄 (안내 탭 병원 등) ---------- */
 function placeRow(p, hl) {
   return `<li><a class="li place ${hl ? "hl" : ""}" ${mapAttrs(p)}>
     <span class="p-body"><b>${esc(p.name)}</b>${p.address ? `<small>${esc(p.address)}</small>` : ""}${p.note ? `<small class="p-note">${esc(p.note)}</small>` : ""}</span>

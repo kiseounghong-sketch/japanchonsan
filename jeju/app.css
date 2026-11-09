@@ -279,6 +279,7 @@ input:focus-visible + .box { outline: 3px solid var(--sea); outline-offset: 2px;
 /* ---------- 일정 ---------- */
 .tl-head { display: flex; align-items: center; gap: 6px; padding: 10px var(--pad); font-size: 0.8125rem; font-weight: 800; color: var(--ink-2); border-bottom: 1px solid var(--line); }
 .tl-head .ico { color: var(--sea); }
+.tl-head small { margin-left: auto; font-weight: 700; color: var(--tang-ink); font-size: 0.75rem; text-align: right; }
 .timeline li + li { border-top: 1px solid var(--line); }
 .timeline a, .timeline li > div { display: grid; grid-template-columns: 3.3em 1fr auto; gap: 10px; padding: 9px var(--pad); color: inherit; text-decoration: none; align-items: start; }
 .timeline a:active { background: var(--sea-soft); }
