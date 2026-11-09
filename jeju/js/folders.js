@@ -54,3 +54,54 @@ export async function unlockFolders() {
     return false;
   }
 }
+
+// ---- 업로드 확인: 장소 폴더에 사진이 있으면 '업로드 완료' 표시 ----
+// 구글 드라이브 API(이 Firebase 프로젝트의 웹 API 키)로 폴더 안 파일 수만 확인합니다.
+// 드라이브 API가 꺼져 있거나 인터넷이 없으면 아무것도 표시하지 않습니다.
+const API_KEY = "AIzaSyCXNr_vRO-PaZMEuiFYdLzqNqTKRef3Yf4";
+const counts = load("upcounts", {}); // { 장면id: 장수 } — 마지막으로 확인한 값(오프라인에서도 보이게)
+const checkedAt = {};
+
+export function uploadCount(key) {
+  return counts[key] || 0;
+}
+
+async function countFiles(folderId) {
+  const q = encodeURIComponent(`'${folderId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`);
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&pageSize=200&key=${API_KEY}`);
+  if (!r.ok) throw new Error("drive " + r.status);
+  const j = await r.json();
+  return (j.files || []).length;
+}
+
+// 화면에 보이는 장소들의 업로드 수를 확인해서 표시를 바로 바꿉니다. force면 1분 안에 확인한 것도 다시.
+export async function refreshUploads(keys, force) {
+  const m = current();
+  if (!m || !navigator.onLine) return;
+  await Promise.all(keys.map(async (k) => {
+    if (!m[k]) return;
+    if (!force && checkedAt[k] && Date.now() - checkedAt[k] < 60e3) return;
+    checkedAt[k] = Date.now();
+    try {
+      const n = await countFiles(m[k]);
+      if (n !== (counts[k] || 0)) {
+        counts[k] = n;
+        save("upcounts", counts);
+      }
+      paint(k);
+    } catch (e) { /* API 꺼짐·오프라인: 표시 안 함 */ }
+  }));
+}
+
+export function uploadBadge(key) {
+  const n = counts[key] || 0;
+  return `<span class="upd ${n ? "on" : ""}" data-upcount="${key}">${n ? `✓ 업로드 완료 · ${n}장` : ""}</span>`;
+}
+
+function paint(k) {
+  document.querySelectorAll(`[data-upcount="${k}"]`).forEach((el) => {
+    const n = counts[k] || 0;
+    el.className = "upd" + (n ? " on" : "");
+    el.textContent = n ? `✓ 업로드 완료 · ${n}장` : "";
+  });
+}

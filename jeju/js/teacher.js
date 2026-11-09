@@ -59,7 +59,7 @@ export function viewTeacher() {
   h += `<section class="card" id="t-gather-card"><h2>${icon("flag")}집결·인원 점검</h2><div id="t-gather">${gatherPanel()}</div></section>`;
   h += `<section class="card" id="t-collect-card">
     <h2>${icon("record")}모아 보기 <small class="muted">결과보고서용</small></h2>
-    <div class="seg">${[["answers", "미션 답"], ["reflections", "소감"], ["shots", "사진 설명"]].map(([k, l]) => `<button class="${S.ui.tseg === k ? "on" : ""}" data-act="t-seg" data-v="${k}">${l}</button>`).join("")}</div>
+    <div class="seg">${[["answers", "미션 답"], ["reflections", "소감"]].map(([k, l]) => `<button class="${S.ui.tseg === k ? "on" : ""}" data-act="t-seg" data-v="${k}">${l}</button>`).join("")}</div>
     <div id="t-collect">${collectView()}</div>
     <button class="btn ghost" data-act="t-copy">${icon("copy")}지금 보이는 내용 전체 복사</button>
   </section>`;

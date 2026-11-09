@@ -4,7 +4,7 @@ import { live } from "./live.js";
 import * as T from "./time.js";
 import { esc, icon, statusChip, mapAttrs } from "./ui.js";
 import { compute, dayOf, activeGather, shotsFor, missionsFor, missionForRow } from "./plan.js";
-import { folderUrl } from "./folders.js";
+import { folderUrl, uploadBadge } from "./folders.js";
 
 const place = (id) => (id && S.data.placeById[id]) || null;
 const has = (v) => !!(v && String(v).trim());
@@ -222,14 +222,13 @@ function shotsNow(t) {
   return `<section class="card shots-now">
     <div class="label">${icon("camera")}지금 찍을 장면</div>
     ${list.map((s) => shotItem(s, true)).join("")}
-    <button class="linkbtn" data-act="goto" data-tab="record" data-seg="shots" data-anchor="s-${esc(s0(list))}">사진 설명 쓰기</button>
   </section>`;
 }
 const s0 = (list) => list[0].id;
 
 function uploadBtn(s) {
   const u = folderUrl(s.id);
-  return u ? `<a class="btn sm up" href="${esc(u)}" target="_blank" rel="noopener">${icon("folder")}사진 올리기</a>` : "";
+  return u ? `<div class="up-row"><a class="btn sm up" href="${esc(u)}" target="_blank" rel="noopener">${icon("folder")}사진 올리기</a>${uploadBadge(s.id)}</div>` : "";
 }
 
 export function shotItem(s, compact, mark) {
@@ -245,7 +244,6 @@ export function shotItem(s, compact, mark) {
     ${s.photo ? line("p", s.photo) : ""}
     ${s.warn ? `<p class="warn">${icon("alert")}<span>${esc(s.warn)}</span></p>` : ""}
     ${uploadBtn(s)}
-    ${compact ? "" : `<input class="s-note" type="text" maxlength="200" data-note="${esc(s.id)}" placeholder="사진 설명 한 줄 (보고서용)" value="${esc(st.n || "")}">${savedLine("shots/" + s.id, st.n)}`}
   </div>`;
 }
 
@@ -336,7 +334,6 @@ function todayAfter(now) {
   const M = S.data.missions.list;
   const answered = M.filter((m) => has(S.answers[m.id])).length;
   const refl = S.data.schedule.filter((d) => has(S.refl["d" + d.day])).length;
-  const notes = Object.values(S.shots).filter((x) => x && has(x.n)).length;
   let h = `<section class="hero before">
     <div class="dday">${dd > 0 ? `D-${dd}` : dd === 0 ? "D-day" : "끝"}</div>
     <div><b>캠프 끝! 모두 수고했어요</b><span>제출 마감 ${esc(info.deadlineLabel)}</span></div>
@@ -348,10 +345,9 @@ function todayAfter(now) {
   </section>
   <section class="card">
     <div class="label">내 기록 (결과보고서 재료)</div>
-    <ul class="stats">
+    <ul class="stats two">
       <li><b>${answered}</b><span>/ ${M.length}<br>미션 답</span></li>
       <li><b>${refl}</b><span>/ 4<br>한 줄 소감</span></li>
-      <li><b>${notes}</b><span>사진 설명</span></li>
     </ul>
     <button class="btn sm" data-act="goto" data-tab="record" data-seg="mission">기록 이어서 쓰기</button>
   </section>`;
@@ -370,7 +366,6 @@ export function viewSchedule() {
   const stayP = place(day.stayPlace);
   let h = `<div class="seg days" role="tablist">${days.map((d) => `<button role="tab" aria-selected="${d.day === day.day}" class="${d.day === day.day ? "on" : ""}" data-act="day" data-day="${d.day}"><b>${d.day}일차</b><small>${esc(d.label)}</small></button>`).join("")}</div>`;
   h += `<div class="dayhead">${icon("home")}<span>숙소</span>${stayP ? mapLink(stayP, day.stay) : `<b>${esc(day.stay)}</b>`}</div>`;
-  h += `<p class="legend">표시 없는 일정은 <b>확정</b> · 흐린 줄은 <b>이동</b> · 장소가 있는 줄을 누르면 네이버 지도</p>`;
   h += `<ol class="timeline">${day.rows.map((r) => rowHtml(r, now)).join("")}</ol>`;
   return h;
 }
@@ -379,6 +374,14 @@ function rowHtml(r, now) {
   const past = r.endMs <= now;
   const cur = r.start <= now && now < r.endMs;
   const p = place(r.place);
+  if (r.type === "move" && !r.gather) {
+    // 이동은 한 줄로 얇게: "12:25 → 자매국수 · 15분"
+    const t = r.title.replace(/^이동\s*/, "");
+    const inner = `<span class="r-time">${esc(r.time)}</span><span class="r-title">${esc(t)}${r.memo ? `<small> · ${esc(r.memo)}</small>` : ""}${cur ? ' <span class="chip st-now">지금</span>' : ""}</span>`;
+    return `<li class="row slim ${past ? "past" : ""} ${cur ? "cur" : ""}"${cur ? ' id="cur-row"' : ""}>${p
+      ? `<a ${mapAttrs(p)} aria-label="${esc(`${r.time} ${r.title}`)}">${inner}</a>`
+      : `<div>${inner}</div>`}</li>`;
+  }
   const cls = ["row", r.type === "move" ? "move" : "", past ? "past" : "", cur ? "cur" : "", r.gather ? "gather" : ""].join(" ").trim();
   const tags = [];
   if (cur) tags.push('<span class="chip st-now">지금</span>');
@@ -426,13 +429,27 @@ function placeCard(p, big) {
 /* ---------- 미션·기록 ---------- */
 export function viewRecord() {
   const seg = S.ui.seg;
-  let h = shareBar() + driveCard();
-  h += `<div class="seg" role="tablist">${[["mission", "미션"], ["refl", "소감"], ["shots", "촬영"], ["roles", "역할"]].map(([k, l]) => `<button role="tab" aria-selected="${seg === k}" class="${seg === k ? "on" : ""}" data-act="seg" data-seg="${k}">${l}</button>`).join("")}</div>`;
-  if (seg === "refl") h += reflList();
-  else if (seg === "shots") h += shotsList();
-  else if (seg === "roles") h += rolesList();
-  else h += missionsList();
-  return h;
+  let h = `<div class="seg" role="tablist">${[["mission", "미션"], ["refl", "소감"], ["shots", "촬영"], ["roles", "역할"]].map(([k, l]) => `<button role="tab" aria-selected="${seg === k}" class="${seg === k ? "on" : ""}" data-act="seg" data-seg="${k}">${l}</button>`).join("")}</div>`;
+  if (seg === "roles") return h + rolesList();
+  h += dayTabs();
+  if (seg === "shots") return h + driveCard() + shotsList();
+  if (!S.code || !S.me || live.status === "badcode") h += shareBar();
+  return h + (seg === "refl" ? reflList() : missionsList());
+}
+
+// 미션·소감·촬영 공통 일차 탭 (처음엔 오늘 날짜의 일차)
+function recDay() {
+  if (S.ui.shotDay == null) {
+    const now = T.now();
+    const d = dayOf(now);
+    S.ui.shotDay = d ? d.day : T.parts(now).date < S.data.schedule[0].date ? 1 : S.data.schedule.length;
+  }
+  return S.ui.shotDay;
+}
+
+function dayTabs() {
+  const day = recDay();
+  return `<div class="seg days">${S.data.schedule.map((d) => `<button class="${d.day === day ? "on" : ""}" data-act="shotday" data-day="${d.day}"><b>${d.day}일차</b><small>${esc(d.label)}</small></button>`).join("")}</div>`;
 }
 
 function driveCard() {
@@ -449,49 +466,30 @@ function driveCard() {
 }
 
 function missionsList() {
-  const M = S.data.missions;
-  let h = `<p class="lead">캠프 목표: <b>${esc(M.goal)}</b></p>`;
-  [1, 2, 3, 4].forEach((d) => {
-    const list = M.list.filter((m) => m.day === d);
-    if (!list.length) return;
-    h += `<h2 class="sec-title">${d}일차 <small>${esc(S.data.schedule[d - 1].label)}</small></h2>`;
-    h += list.map((m) => `<article class="card mission" id="m-${m.id}">
-      <div class="m-head"><b>${esc(m.title)}</b>${has(S.answers[m.id]) ? '<span class="chip st-ok">씀</span>' : ""}</div>
-      <label class="m-q" for="ta-${m.id}">${esc(m.q)}</label>
-      <textarea id="ta-${m.id}" data-bind="answers" data-key="${m.id}" rows="2" maxlength="1000" placeholder="여기에 적어요">${esc(S.answers[m.id] || "")}</textarea>
-      ${savedLine("answers/" + m.id, S.answers[m.id])}
-    </article>`).join("");
-  });
-  return h;
+  const list = S.data.missions.list.filter((m) => m.day === recDay());
+  if (!list.length) return `<p class="muted">이날은 미션이 없어요.</p>`;
+  return list.map((m) => `<article class="card mission" id="m-${m.id}">
+    <div class="m-head"><b>${esc(m.title)}</b>${has(S.answers[m.id]) ? '<span class="chip st-ok">씀</span>' : ""}</div>
+    <label class="m-q" for="ta-${m.id}">${esc(m.q)}</label>
+    <textarea id="ta-${m.id}" data-bind="answers" data-key="${m.id}" rows="2" maxlength="1000">${esc(S.answers[m.id] || "")}</textarea>
+    ${savedLine("answers/" + m.id, S.answers[m.id])}
+  </article>`).join("");
 }
 
 function reflList() {
-  let h = `<p class="lead">매일 밤 <b>오늘 가장 기억에 남는 것 + 이유</b>를 한 문장으로. 결과보고서에 들어가요.</p>`;
-  S.data.schedule.forEach((d) => {
-    const k = "d" + d.day;
-    h += `<article class="card refl" id="r-${k}">
-      <div class="m-head"><b>${d.day}일차</b><span class="muted">${esc(d.label)}</span></div>
-      <textarea data-bind="refl" data-key="${k}" rows="2" maxlength="500" aria-label="${d.day}일차 한 줄 소감" placeholder="오늘 가장 기억에 남는 것은 … 왜냐하면 …">${esc(S.refl[k] || "")}</textarea>
-      ${savedLine("refl/" + k, S.refl[k])}
-    </article>`;
-  });
-  return h;
+  const k = "d" + recDay();
+  return `<article class="card refl" id="r-${k}">
+    <div class="m-head"><b>오늘의 한 줄 소감</b></div>
+    <textarea data-bind="refl" data-key="${k}" rows="3" maxlength="500" aria-label="한 줄 소감">${esc(S.refl[k] || "")}</textarea>
+    ${savedLine("refl/" + k, S.refl[k])}
+  </article>`;
 }
 
 function shotsList() {
-  const SH = S.data.shots;
   const now = T.now();
-  if (S.ui.shotDay == null) {
-    const d = dayOf(now);
-    const first = S.data.schedule[0].date;
-    S.ui.shotDay = d ? d.day : T.parts(now).date < first ? 1 : S.data.schedule.length;
-  }
-  const day = S.ui.shotDay;
-  let h = `<div class="seg days">${S.data.schedule.map((d) => `<button class="${d.day === day ? "on" : ""}" data-act="shotday" data-day="${d.day}"><b>${d.day}일차</b><small>${esc(d.label)}</small></button>`).join("")}</div>`;
-  const list = SH.list.filter((s) => s.day === day);
+  const list = S.data.shots.list.filter((s) => s.day === recDay());
   const curIdx = list.findIndex((s) => s.at <= now && now < s.endAt);
-  h += list.map((s, k) => `<article class="card shot-card ${k === curIdx ? "focus" : ""}" id="s-${esc(s.id)}">${shotItem(s, false, k === curIdx ? "지금" : "")}</article>`).join("");
-  return h;
+  return list.map((s, k) => `<article class="card shot-card ${k === curIdx ? "focus" : ""}" id="s-${esc(s.id)}">${shotItem(s, false, k === curIdx ? "지금" : "")}</article>`).join("");
 }
 
 function rolesList() {
@@ -502,7 +500,6 @@ function rolesList() {
     <b class="who">${esc(r.name)}</b>
     <p>${esc(r.todo)}</p>
   </article>`).join("");
-  h += `<p class="hint">모두 함께: 장소마다 미션 답 · 매일 밤 한 줄 소감 · 찍은 사진 설명 한 줄</p>`;
   return h;
 }
 

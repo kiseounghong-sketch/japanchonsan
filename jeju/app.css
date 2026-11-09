@@ -292,6 +292,7 @@ input:focus-visible + .box { outline: 3px solid var(--sea); outline-offset: 2px;
 .subs li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .subs small { flex-basis: 100%; color: var(--ink-2); }
 .stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stats.two { grid-template-columns: repeat(2, 1fr); }
 .stats li { background: var(--card-2); border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: flex; align-items: baseline; gap: 4px; }
 .stats b { font-size: 1.6rem; font-weight: 900; color: var(--sea); }
 .stats span { font-size: 0.8rem; color: var(--ink-2); line-height: 1.25; }
@@ -319,6 +320,12 @@ input:focus-visible + .box { outline: 3px solid var(--sea); outline-offset: 2px;
 .row.move .r-title { font-weight: 600; color: var(--ink-2); font-size: 0.94rem; }
 .row.move a, .row.move > div { background: var(--card-2); padding-top: 8px; padding-bottom: 8px; min-height: 0; }
 .row.move .r-time { font-size: 0.9rem; color: var(--ink-2); }
+.row.slim a, .row.slim > div { grid-template-columns: 3.5em 1fr; gap: 10px; padding: 3px 14px; min-height: 0; background: var(--card-2); align-items: baseline; }
+.row.slim .r-time { font-size: 0.78rem; font-weight: 700; color: var(--ink-3); }
+.row.slim .r-title { font-size: 0.8rem; font-weight: 600; color: var(--ink-3); line-height: 1.4; }
+.row.slim .r-title small { font-size: inherit; font-weight: 500; }
+.row.slim .chip { font-size: 0.66rem; padding: 0 6px; }
+.timeline li.slim + li, .timeline li + li.slim { border-top-color: transparent; }
 .row.past { opacity: 0.45; }
 .row.cur { background: var(--sea-soft); box-shadow: inset 5px 0 0 var(--sea); opacity: 1; }
 .row.cur a, .row.cur > div { background: transparent; }
@@ -360,7 +367,9 @@ textarea:focus, input:focus { outline: none; border-color: var(--sea); box-shado
 .uses small { color: var(--ink-3); }
 details.card summary { font-weight: 800; cursor: pointer; min-height: 32px; display: flex; align-items: center; }
 details.card[open] summary { margin-bottom: 6px; }
-.shot .btn.up { align-self: flex-start; margin-top: 2px; }
+.up-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-top: 2px; }
+.upd { font-size: 0.86rem; font-weight: 800; color: var(--ok); }
+.upd:empty { display: none; }
 .shot-card.focus { border: 2px solid var(--sea); }
 .past-title { margin-top: 22px; padding-top: 12px; border-top: 1px dashed var(--line); color: var(--ink-2); }
 .role-head { display: flex; align-items: center; gap: 6px; }
