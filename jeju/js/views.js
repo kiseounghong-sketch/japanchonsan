@@ -207,11 +207,11 @@ function gatherCard(t, now) {
   return `<section class="card gather ${urgent ? "urgent" : ""}" aria-live="polite">
     <div class="g-main">
       <div class="label">${icon("flag")}다음 집결${g.live ? ' <span class="chip st-live">선생님 지정</span>' : ""}</div>
+      <p class="g-count"><b>${left <= 0 ? "지금" : esc(T.dur(left))}</b>${left > 0 ? " 남음" : ""}</p>
       <p class="g-line">${line}</p>
       <p class="g-sub">${left > 0 ? `<b>${esc(T.hm(g.at - 5 * 60e3))}</b>까지 도착 (5분 전)` : "늦으면 바로 선생님께 전화"}${g.memo ? ` · ${esc(g.memo)}` : ""}</p>
       ${g.also ? `<p class="g-sub also">또는 ${esc(g.also.time)} ${esc(g.also.gatherAt || g.also.title)}${g.also.memo ? ` (${esc(g.also.memo)})` : ""}</p>` : ""}
     </div>
-    <div class="g-count"><b>${left <= 0 ? "지금" : esc(T.dur(left))}</b>${left > 0 ? "<small>남음</small>" : ""}</div>
   </section>`;
 }
 
@@ -305,10 +305,10 @@ function todayBefore(t, now) {
   h += `<section class="card gather">
     <div class="g-main">
       <div class="label">${icon("flag")}출발 집결 · ${esc(d1.label)}</div>
+      <p class="g-count"><b>${esc(T.dur(first.start - now))}</b> 남음</p>
       ${gathers.map((g) => `<p class="g-line"><b>${esc(g.time)}</b> ${esc(g.gatherAt)}${g.memo ? ` <small>${esc(g.memo)}</small>` : ""}</p>`).join("")}
       <p class="g-sub">각자 출발조 시간 <b>5분 전</b> 도착 · 사진 있는 신분증 필수</p>
     </div>
-    <div class="g-count"><b>${esc(T.dur(first.start - now))}</b><small>남음</small></div>
   </section>`;
   h += `<section class="card">
     <div class="label">준비물 <span class="count">${packed}/${L.length}</span></div>
