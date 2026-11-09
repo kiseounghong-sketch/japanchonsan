@@ -25,6 +25,23 @@ const $tabs = document.getElementById("tabs");
 const $sheet = document.getElementById("sheet");
 let installEvt = null;
 let dataLoadedAt = 0;
+let sheetOpener = null;
+
+function updateLayoutOffsets() {
+  const root = document.documentElement;
+  const top = document.querySelector(".top");
+  const nav = $main.querySelector(".record-nav, :scope > .seg.days");
+  root.style.setProperty("--top-height", `${top.getBoundingClientRect().height}px`);
+  root.style.setProperty("--view-nav-height", `${nav ? nav.getBoundingClientRect().height : 0}px`);
+}
+
+// 큰 글씨·연결 상태·화면 회전으로 머리줄 높이가 바뀌어도 탭을 가리지 않습니다.
+if ("ResizeObserver" in window) {
+  const observer = new ResizeObserver(updateLayoutOffsets);
+  observer.observe(document.querySelector(".top"));
+  observer.observe($main);
+}
+window.addEventListener("resize", updateLayoutOffsets);
 
 /* ---------- 데이터 ---------- */
 async function fetchData() {
@@ -106,6 +123,8 @@ function render(keepScroll) {
   $main.setAttribute("data-view", S.tab);
   renderTabs();
   renderHeader();
+  $main.querySelectorAll("textarea[data-bind]").forEach(autosize);
+  updateLayoutOffsets();
   if (keepScroll) window.scrollTo(0, y);
   checkUploads(false);
 }
@@ -214,16 +233,26 @@ function updateSaved() {
 
 /* ---------- 시트(아래에서 올라오는 창) ---------- */
 function openSheet(html) {
+  if ($sheet.hidden) sheetOpener = document.activeElement;
   $sheet.innerHTML = `<div class="sheet-bg" data-act="close"></div><div class="sheet-box" role="dialog" aria-modal="true">${html}</div>`;
   $sheet.hidden = false;
   document.body.classList.add("locked");
-  const f = $sheet.querySelector("[autofocus]");
-  if (f) setTimeout(() => f.focus(), 60);
+  const heading = $sheet.querySelector("h2");
+  if (heading) {
+    heading.id = "sheet-title";
+    $sheet.querySelector(".sheet-box").setAttribute("aria-labelledby", heading.id);
+  }
+  const f = $sheet.querySelector("[autofocus], button, input, textarea");
+  if (f) f.focus({ preventScroll: true });
+  [$main, $tabs, document.querySelector(".top")].forEach((el) => { el.inert = true; });
 }
 function closeSheet() {
   $sheet.hidden = true;
   $sheet.innerHTML = "";
   document.body.classList.remove("locked");
+  [$main, $tabs, document.querySelector(".top")].forEach((el) => { el.inert = false; });
+  if (sheetOpener && sheetOpener.isConnected) sheetOpener.focus({ preventScroll: true });
+  sheetOpener = null;
 }
 
 function nameSheet() {
@@ -308,9 +337,9 @@ async function onAct(el, e) {
     case "tab": return setTab(el.dataset.tab);
     case "goto": return goto(el);
     case "close": return closeSheet();
-    case "day": S.ui.day = Number(el.dataset.day); render(); return;
-    case "shotday": S.ui.shotDay = Number(el.dataset.day); render(true); return;
-    case "seg": S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); render(true); return;
+    case "day": S.ui.day = Number(el.dataset.day); render(); window.scrollTo(0, 0); return;
+    case "shotday": S.ui.shotDay = Number(el.dataset.day); render(); window.scrollTo(0, 0); return;
+    case "seg": S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); render(); window.scrollTo(0, 0); return;
     case "jump": { const t = document.getElementById(el.dataset.anchor); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     case "me": return nameSheet();
     case "set-me": {
@@ -552,7 +581,16 @@ document.addEventListener("submit", (e) => {
 });
 document.addEventListener("input", onInput);
 document.addEventListener("change", onChange);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$sheet.hidden) closeSheet(); });
+document.addEventListener("keydown", (e) => {
+  if ($sheet.hidden) return;
+  if (e.key === "Escape") { closeSheet(); return; }
+  if (e.key !== "Tab") return;
+  const items = [...$sheet.querySelectorAll('button, input, textarea, select, a[href], [tabindex="0"]')].filter((el) => !el.disabled && el.getClientRects().length);
+  const first = items[0], last = items[items.length - 1];
+  if (!first) return;
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 // 로고를 길게 누르면 선생님 모드 (숨은 버튼)
 (function longPress() {
