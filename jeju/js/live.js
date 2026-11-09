@@ -54,7 +54,7 @@ function sdk() {
 }
 
 let authCore = null;
-async function authSdk() {
+export async function authSdk() {
   const f = await sdk();
   if (!authCore) {
     authCore = import(SDK + "firebase-auth.js");
@@ -63,7 +63,7 @@ async function authSdk() {
   const Au = await authCore;
   const auth = Au.getAuth(f.app);
   if (EMU && EMU.auth && !auth.emulatorConfig) Au.connectAuthEmulator(auth, EMU.auth, { disableWarnings: true });
-  return { ...f, Au, auth };
+  return { ...f, Au, auth, emulator: EMU };
 }
 
 const base = () => `jeju/s/${live.code}`;

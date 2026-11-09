@@ -282,6 +282,7 @@ function teacherSheet() {
       <button class="btn wide" type="submit">로그인</button>
       <p class="err" id="t-login-err" role="alert"></p>
     </form>
+    <a class="btn ghost wide" href="budget.html">예산</a>
     <button class="btn ghost wide" data-act="close">닫기</button>`);
 }
 
