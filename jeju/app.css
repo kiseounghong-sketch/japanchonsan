@@ -287,6 +287,11 @@ input:focus-visible + .box { outline: 3px solid var(--sea); outline-offset: 2px;
 .bar i { display: block; height: 100%; background: var(--ok); border-radius: 99px; transition: width 0.3s; }
 .mini-tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .mini-tl li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.today-tl li.past { opacity: 0.45; }
+.today-tl li { display: grid; grid-template-columns: 3em 1fr; gap: 8px; align-items: baseline; padding: 2px 6px; border-radius: 8px; }
+.today-tl .tt { min-width: 0; }
+.today-tl li.cur { font-weight: 800; background: var(--sea-soft); }
+.now-task { border: 2px solid var(--sea); }
 .mini-tl li > span:first-child { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--sea); width: 3em; flex: none; }
 .subs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .subs li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
