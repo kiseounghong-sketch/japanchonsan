@@ -353,7 +353,8 @@ textarea:focus, input:focus { outline: none; border-color: var(--sea); box-shado
 .m-head { display: flex; align-items: center; gap: 8px; }
 .m-head .muted { font-size: 0.88rem; }
 .m-q { font-weight: 700; color: var(--ink); }
-.saved { font-size: 0.8rem; color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; min-height: 1.2em; }
+.saved { font-size: 0.8rem; color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.saved:empty { display: none; }
 .uses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .uses li { display: flex; flex-direction: column; padding: 8px 10px; border-radius: 12px; background: var(--card-2); }
 .uses small { color: var(--ink-3); }

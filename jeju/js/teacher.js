@@ -105,7 +105,7 @@ function metaCard() {
     <h2>${icon("folder")}공유 설정</h2>
     <p class="muted">입장 코드가 있는 학생에게만 보여요 (공개 주소에는 안 올라가요).</p>
     <form class="stack" data-form="t-meta">
-      <label>사진·영상 올릴 구글 드라이브 폴더 링크<input name="driveUrl" type="url" inputmode="url" placeholder="https://drive.google.com/..." value="${esc(m.driveUrl || "")}"></label>
+      <label>사진 올릴 구글 드라이브 폴더 링크<input name="driveUrl" type="url" inputmode="url" placeholder="https://drive.google.com/..." value="${esc(m.driveUrl || "")}"></label>
       <label>선생님 연락처 (비상 연락에 표시)<input name="teacherTel" type="tel" inputmode="tel" placeholder="010-0000-0000" value="${esc(m.teacherTel || "")}"></label>
       <button class="btn" type="submit">저장</button>
     </form>
@@ -174,7 +174,7 @@ export function collectView() {
     S.data.shots.list.forEach((s) => {
       const lines = P.map((n) => {
         const v = ((all.shots || {})[n] || {})[s.id];
-        return v && (v.n || v.p || v.v) ? answerLine(n, [v.p ? "사진✓" : "", v.v ? "영상✓" : "", v.n || ""].filter(Boolean).join(" ")) : "";
+        return v && (v.n || v.p) ? answerLine(n, [v.p ? "사진✓" : "", v.n || ""].filter(Boolean).join(" ")) : "";
       }).join("");
       if (lines) rows.push(`<div class="col"><h3>${s.day}일차 ${esc(s.label || s.time)} ${esc(s.place)}</h3>${lines}</div>`);
     });
