@@ -19,7 +19,12 @@ export function prepare(data) {
   data.rows = all;
   data.placeById = {};
   data.places.forEach((p) => { data.placeById[p.id] = p; });
-  data.shots.list.forEach((s) => { s.at = T.kst(data.schedule[s.day - 1].date, s.time); });
+  data.shots.list.forEach((s) => {
+    s.at = T.kst(data.schedule[s.day - 1].date, s.time);
+    // 그 장면을 찍는 일정이 끝나는 시각 (촬영 목록에서 '지금/다음' 장소를 맨 위로 올릴 때 사용)
+    const row = all.find((r) => r.day === s.day && r.start <= s.at && s.at < r.endMs);
+    s.endAt = row ? row.endMs : s.at + 3600e3;
+  });
   return data;
 }
 

@@ -63,8 +63,7 @@
     "day": 3, "date": "2026-11-12", "label": "11. 12.(목)",
     "stay": "루시드엠 펜션 (2박째)", "stayPlace": "lucid",
     "safety": [
-      "돌고래 투어: 구명조끼 착용, 난간에 기대지 않기, 멀미약은 30분 전",
-      "고기 구울 때 불판 화상 주의, 방어회는 바로 먹고 남은 건 버리기"
+      "돌고래 투어: 구명조끼 착용, 난간에 기대지 않기, 멀미약은 30분 전"
     ],
     "rows": [
       { "time": "08:30", "title": "숙소 조식", "place": "lucid", "type": "meal", "status": "ok" },
@@ -75,10 +74,9 @@
       { "time": "13:00", "title": "은하감귤체험농장", "place": "eunha", "type": "activity", "status": "ok" },
       { "time": "14:30", "title": "집결 → 제주돌고래힐링투어", "place": "dolphin", "memo": "출발 20분 전 승선 신고", "type": "gather", "status": "need", "gather": true, "gatherAt": "은하감귤체험농장 (투어 출발)" },
       { "time": "15:00", "end": "16:30", "title": "제주돌고래힐링투어", "place": "dolphin", "memo": "결항 시 신도리 해안 관찰", "type": "activity", "status": "need" },
-      { "time": "17:10", "title": "저녁 – 상원가든", "place": "sangwon", "memo": "흑돼지", "type": "meal", "status": "ok" },
-      { "time": "18:20", "title": "홍마트 모슬포점, 방어회 포장", "place": "hongmart", "type": "activity", "status": "ok" },
+      { "time": "17:10", "title": "저녁", "memo": "장소 미정", "type": "meal", "status": "tbd" },
       { "time": "18:50", "title": "이동 → 펜션", "place": "lucid", "memo": "약 15분", "type": "move", "status": "ok" },
-      { "time": "19:05", "end": "21:00", "title": "펜션 도착, 방어회, 짐 미리 싸기", "place": "lucid", "memo": "회는 바로 먹고 남은 건 버리기", "type": "stay", "status": "ok" }
+      { "time": "19:05", "end": "21:00", "title": "펜션 도착, 짐 미리 싸기", "place": "lucid", "type": "stay", "status": "ok" }
     ]
   },
   {

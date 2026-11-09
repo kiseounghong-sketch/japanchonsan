@@ -4,6 +4,7 @@ import { live } from "./live.js";
 import * as T from "./time.js";
 import { esc, icon, statusChip, mapAttrs } from "./ui.js";
 import { compute, dayOf, activeGather, shotsFor, missionsFor, missionForRow } from "./plan.js";
+import { folderUrl, hasFolders } from "./folders.js";
 
 const place = (id) => (id && S.data.placeById[id]) || null;
 const has = (v) => !!(v && String(v).trim());
@@ -226,7 +227,12 @@ function shotsNow(t) {
 }
 const s0 = (list) => list[0].id;
 
-export function shotItem(s, compact) {
+function uploadBtn(s) {
+  const u = folderUrl(s.id);
+  return u ? `<a class="btn sm up" href="${esc(u)}" target="_blank" rel="noopener">${icon("folder")}${esc(s.place)} 폴더에 올리기</a>` : "";
+}
+
+export function shotItem(s, compact, mark) {
   const st = S.shots[s.id] || {};
   const teacherOnly = (kind) => kind === "p" && s.photoBy === "teacher";
   const line = (kind, text) => `<label class="s-line ${st[kind] ? "done" : ""}">
@@ -236,10 +242,11 @@ export function shotItem(s, compact) {
       <span class="s-text">${esc(text)}${teacherOnly(kind) ? ' <span class="chip st-t">선생님</span>' : ""}</span>
     </label>`;
   return `<div class="shot ${s.star ? "star" : ""}">
-    ${compact ? "" : `<div class="s-head"><span class="s-time">${esc(s.label || s.time)}</span><b>${esc(s.place)}</b>${s.star ? `<span class="chip st-star">${icon("star")}꼭 찍기</span>` : ""}</div>`}
+    ${compact ? "" : `<div class="s-head">${mark ? `<span class="chip st-now">${mark}</span>` : ""}<span class="s-time">${esc(s.label || s.time)}</span><b>${esc(s.place)}</b>${s.star ? `<span class="chip st-star">${icon("star")}꼭 찍기</span>` : ""}</div>`}
     ${s.photo ? line("p", s.photo) : ""}
     ${s.video ? line("v", s.video) : ""}
     ${s.warn ? `<p class="warn">${icon("alert")}<span>${esc(s.warn)}</span></p>` : ""}
+    ${uploadBtn(s)}
     ${compact ? "" : `<input class="s-note" type="text" maxlength="200" data-note="${esc(s.id)}" placeholder="사진 설명 한 줄 (보고서용)" value="${esc(st.n || "")}">${savedLine("shots/" + s.id, st.n)}`}
   </div>`;
 }
@@ -433,6 +440,10 @@ export function viewRecord() {
 function driveCard() {
   const url = live.meta.driveUrl || S.data.camp.driveUrl;
   const camp = S.data.camp;
+  const photos = folderUrl("photos");
+  if (photos) {
+    return `<a class="drive" href="${esc(photos)}" target="_blank" rel="noopener">${icon("folder")}<span><b>사진·영상 폴더 (구글 드라이브)</b><small>장소마다 폴더가 있어요. 촬영 목록의 '폴더에 올리기'로 바로 열기 · 파일명 예: ${esc(camp.fileName)}</small></span>${icon("ext")}</a>`;
+  }
   if (url) {
     return `<a class="drive" href="${esc(url)}" target="_blank" rel="noopener">${icon("folder")}<span><b>사진·영상 올리기 (구글 드라이브)</b><small>${esc(camp.uploadRule)} · 파일명 예: ${esc(camp.fileName)}</small></span>${icon("ext")}</a>`;
   }
@@ -472,17 +483,38 @@ function reflList() {
 function shotsList() {
   const SH = S.data.shots;
   const done = SH.list.filter((s) => { const st = S.shots[s.id] || {}; return (!s.photo || st.p) && (!s.video || st.v); }).length;
-  let h = `<section class="card">
-    <div class="label">${icon("camera")}찍는 이유 세 가지</div>
-    <ul class="uses">${SH.uses.map((u) => `<li><b>${esc(u.use)}</b><span>${esc(u.need)}</span><small>${esc(u.who)}</small></li>`).join("")}</ul>
-  </section>`;
+  let h = "";
+  h += `<p class="lead">다 찍은 장면 <b>${done}</b> / ${SH.list.length} · 사진 설명은 찍은 사람이 그날 밤에</p>`;
+  h += hasFolders()
+    ? `<p class="hint">${icon("folder")}'폴더에 올리기'를 누르면 구글 드라이브에서 그 장소 폴더가 열려요 → <b>+</b> → <b>업로드</b>. 선생님이 추가해 준 구글 계정으로 로그인해야 올릴 수 있어요.</p>`
+    : `<p class="hint">${icon("folder")}선생님이 드라이브 링크를 넣으면 장소마다 '폴더에 올리기' 버튼이 생겨요.</p>`;
+  const now = T.now();
+  const list = SH.list;
+  const i = list.findIndex((s) => s.endAt > now);
+  const group = (arr, first) => {
+    let out = "", lastDay = 0;
+    arr.forEach((s, k) => {
+      if (s.day !== lastDay) {
+        out += `<h2 class="sec-title">${s.day}일차 <small>${esc(S.data.schedule[s.day - 1].label)}</small></h2>`;
+        lastDay = s.day;
+      }
+      const mark = first && k === 0 ? (now >= s.at ? "지금" : "다음") : "";
+      out += `<article class="card shot-card ${mark ? "focus" : ""}" id="s-${esc(s.id)}">${shotItem(s, false, mark)}</article>`;
+    });
+    return out;
+  };
+  if (i <= 0) {
+    // 캠프 전(전부 앞으로) 또는 캠프 뒤(전부 지남): 시간 순서 그대로
+    h += group(list, i === 0);
+  } else {
+    h += group(list.slice(i), true);
+    h += `<h2 class="sec-title past-title">지난 장소 <small>최근 순</small></h2>`;
+    h += group(list.slice(0, i).reverse(), false);
+  }
+  h += `<h2 class="sec-title past-title">촬영 안내</h2>`;
+  h += `<details class="card tips"><summary>찍는 이유 세 가지</summary><ul class="uses">${SH.uses.map((u) => `<li><b>${esc(u.use)}</b><span>${esc(u.need)}</span><small>${esc(u.who)}</small></li>`).join("")}</ul></details>`;
   h += `<details class="card tips"><summary>어떻게 찍을까 (7가지)</summary><ul class="dots">${SH.tips.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>`;
   h += `<details class="card tips"><summary>촬영 안전·예절</summary><ul class="dots">${SH.etiquette.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>`;
-  h += `<p class="lead">다 찍은 장면 <b>${done}</b> / ${SH.list.length} · 사진 설명은 찍은 사람이 그날 밤에</p>`;
-  [1, 2, 3, 4].forEach((d) => {
-    h += `<h2 class="sec-title">${d}일차 <small>${esc(S.data.schedule[d - 1].label)}</small></h2>`;
-    h += SH.list.filter((s) => s.day === d).map((s) => `<article class="card shot-card" id="s-${esc(s.id)}">${shotItem(s, false)}</article>`).join("");
-  });
   return h;
 }
 
