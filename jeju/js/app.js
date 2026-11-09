@@ -152,7 +152,6 @@ function valueFor(bucket, key) {
     if (!v) return null;
     const out = {};
     if (v.p) out.p = true;
-    if (v.v) out.v = true;
     if (v.n && v.n.trim()) out.n = v.n.trim().slice(0, 300);
     return Object.keys(out).length ? out : null;
   }
@@ -261,6 +260,7 @@ function goto(el) {
   const tab = el.dataset.tab;
   if (el.dataset.seg) { S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); }
   if (el.dataset.day) S.ui.day = Number(el.dataset.day);
+  if (/^s-\d/.test(el.dataset.anchor || "")) S.ui.shotDay = Number(el.dataset.anchor[2]);
   setTab(tab, el.dataset.anchor);
 }
 
@@ -292,6 +292,7 @@ async function onAct(el, e) {
     case "goto": return goto(el);
     case "close": return closeSheet();
     case "day": S.ui.day = Number(el.dataset.day); render(); return;
+    case "shotday": S.ui.shotDay = Number(el.dataset.day); render(true); return;
     case "mapday": S.ui.mapDay = Number(el.dataset.day); render(true); return;
     case "seg": S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); render(true); return;
     case "jump": { const t = document.getElementById(el.dataset.anchor); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
