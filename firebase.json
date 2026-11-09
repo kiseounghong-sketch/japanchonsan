@@ -11,7 +11,9 @@
       ".gitattributes",
       ".nojekyll",
       "**/node_modules/**",
-      "jeju/README.md"
+      "jeju/README.md",
+      "AGENTS.md",
+      "jeju/tools/**"
     ],
     "headers": [
       {
