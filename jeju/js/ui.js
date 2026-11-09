@@ -49,11 +49,38 @@ export function statusChip(row) {
   return "";
 }
 
-// 네이버 지도 검색 링크. 휴대폰에서는 네이버 지도 앱(없으면 모바일 웹)으로 열립니다.
-// places.json의 "naver"는 검색어이며, 첫 결과가 맞는 장소인지 확인해 둔 값입니다.
-export function mapUrl(place, fallbackName) {
-  const q = (place && place.naver) || ((place && place.name) || fallbackName || "").replace(/\s*\(.*?\)\s*/g, " ").trim();
-  return "https://map.naver.com/p/search/" + encodeURIComponent(q);
+// 네이버 지도 링크 — 누르면 네이버 지도 앱이 바로 열리고 그 장소 카드가 나옵니다.
+// (네이버 지도 웹이 '앱 열기'에 쓰는 것과 같은 형식)
+// - 아이폰: https://app.map.naver.com/launchApp/place?... (네이버 지도 앱에 등록된 유니버설 링크)
+// - 안드로이드: intent://place?...#Intent;scheme=nmap;package=com.nhn.android.nmap;...
+// - 앱이 없으면 그 장소의 네이버 플레이스 웹 페이지로, 컴퓨터에서는 네이버 지도 웹으로 열립니다.
+// places.json의 "nid" = 네이버 지도 장소 번호(m.place.naver.com/place/번호), "naver" = 번호가 없을 때 쓸 검색어
+const UA = (typeof navigator !== "undefined" && navigator.userAgent) || "";
+const IOS = /iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+const ANDROID = /Android/i.test(UA);
+
+export function mapLinkInfo(place, fallbackName) {
+  const nid = place && /^\d+$/.test(String(place.nid || "")) ? String(place.nid) : "";
+  if (!nid) {
+    const q = (place && place.naver) || ((place && place.name) || fallbackName || "").replace(/\s*\(.*?\)\s*/g, " ").trim();
+    return { href: "https://map.naver.com/p/search/" + encodeURIComponent(q), newTab: true };
+  }
+  const web = `https://m.place.naver.com/place/${nid}/home`;
+  const params = `pinId=${nid}&pinType=site&menu=location&appSchemeName=nmap&mode=half&id=${nid}&app=Y&appmarket=N&fallbackUrl=${encodeURIComponent(web)}`;
+  if (IOS) return { href: `https://app.map.naver.com/launchApp/place?${params}`, newTab: false };
+  if (ANDROID) {
+    return {
+      href: `intent://place?${params}#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.nmap;S.browser_fallback_url=${encodeURIComponent(web)};end`,
+      newTab: false,
+    };
+  }
+  return { href: `https://map.naver.com/p/entry/place/${nid}`, newTab: true };
+}
+
+// <a> 태그에 넣을 href·target (앱 링크는 같은 창에서 열어야 앱이 바로 뜸)
+export function mapAttrs(place, fallbackName) {
+  const { href, newTab } = mapLinkInfo(place, fallbackName);
+  return `href="${esc(href)}"${newTab ? ' target="_blank" rel="noopener"' : ""}`;
 }
 
 let toastTimer = null;

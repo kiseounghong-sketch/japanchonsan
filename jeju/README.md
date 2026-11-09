@@ -38,9 +38,9 @@
 - `end`가 없으면 다음 줄 시작 시각까지로 계산
 - `gather: true`인 줄이 `오늘` 탭 **집결 카운트다운**에 쓰임 (`gatherAt` = 화면에 보일 장소)
 - `pay: "self"` → '개인 돈' 표시
-- `place` = `places.json`의 `id` (누르면 네이버 지도)
+- `place` = `places.json`의 `id` (누르면 네이버 지도 앱에서 그 장소가 바로 열림)
 
-다른 파일: `places.json` 장소·주소(`naver` = 네이버 지도 검색어. 바꾸면 네이버 지도에서 첫 결과가 맞는지 확인) · `rules.json` 안전 규칙 · `contacts.json` 비상 연락 · `checklist.json` 준비물 · `missions.json` 미션 · `roles.json` 역할 · `shots.json` 촬영 목록 · `info.json` 개인 돈·대안·제출물 · `camp.json` 기본 정보
+다른 파일: `places.json` 장소·주소(`nid` = 네이버 지도 장소 번호 — 네이버 지도에서 장소를 열었을 때 주소 `m.place.naver.com/place/숫자`의 숫자, `naver` = 번호가 없을 때 쓸 검색어) · `rules.json` 안전 규칙 · `contacts.json` 비상 연락 · `checklist.json` 준비물 · `missions.json` 미션 · `roles.json` 역할 · `shots.json` 촬영 목록 · `info.json` 개인 돈·대안·제출물 · `camp.json` 기본 정보
 
 ## 미리 보기
 

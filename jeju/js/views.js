@@ -2,7 +2,7 @@
 import { S, roster } from "./state.js";
 import { live } from "./live.js";
 import * as T from "./time.js";
-import { esc, icon, statusChip, mapUrl } from "./ui.js";
+import { esc, icon, statusChip, mapAttrs } from "./ui.js";
 import { compute, dayOf, activeGather, shotsFor, missionsFor, missionForRow } from "./plan.js";
 
 const place = (id) => (id && S.data.placeById[id]) || null;
@@ -10,7 +10,7 @@ const has = (v) => !!(v && String(v).trim());
 
 function mapLink(p, label) {
   if (!p) return "";
-  return `<a class="plink" href="${esc(mapUrl(p))}" target="_blank" rel="noopener">${icon("pin")}<span>${esc(label || p.name)}</span></a>`;
+  return `<a class="plink" ${mapAttrs(p)}>${icon("pin")}<span>${esc(label || p.name)}</span></a>`;
 }
 
 /* ---------- 저장 상태 표시 ---------- */
@@ -386,7 +386,7 @@ function rowHtml(r, now) {
     <span class="r-body"><span class="r-title">${esc(r.title)}</span>${r.memo ? `<span class="r-memo">${esc(r.memo)}</span>` : ""}${tags.length ? `<span class="r-tags">${tags.join("")}</span>` : ""}</span>
     ${p ? `<span class="r-go">${icon("pin")}</span>` : ""}`;
   return `<li class="${cls}"${cur ? ' id="cur-row"' : ""}>${p
-    ? `<a href="${esc(mapUrl(p))}" target="_blank" rel="noopener" aria-label="${esc(`${r.time} ${r.title}, ${p.name} 네이버 지도 열기`)}">${inner}</a>`
+    ? `<a ${mapAttrs(p)} aria-label="${esc(`${r.time} ${r.title}, ${p.name} 네이버 지도 열기`)}">${inner}</a>`
     : `<div>${inner}</div>`}</li>`;
 }
 
@@ -405,13 +405,13 @@ export function viewMap() {
     h += `<h2 class="sec-title">${d}일차 <small>${esc(day.label)}</small></h2><div class="plist">${list.map((p) => placeCard(p)).join("")}</div>`;
   });
   const C = S.data.contacts;
-  h += `<h2 class="sec-title">가까운 병원</h2><div class="plist">${C.hospitals.map((x) => placeCard({ name: `${x.name} (${x.area})`, address: x.address, naver: x.naver, hospital: true })).join("")}</div>`;
-  h += `<p class="hint">링크를 누르면 네이버 지도(앱 또는 웹)가 열려요.</p>`;
+  h += `<h2 class="sec-title">가까운 병원</h2><div class="plist">${C.hospitals.map((x) => placeCard({ name: `${x.name} (${x.area})`, address: x.address, nid: x.nid, naver: x.naver, hospital: true })).join("")}</div>`;
+  h += `<p class="hint">누르면 네이버 지도 앱에서 그 장소가 바로 열려요. 앱이 없으면 네이버 웹 페이지로 열려요.</p>`;
   return h;
 }
 
 function placeCard(p, big) {
-  return `<a class="place ${big ? "big" : ""}" href="${esc(mapUrl(p))}" target="_blank" rel="noopener">
+  return `<a class="place ${big ? "big" : ""}" ${mapAttrs(p)}>
     <span class="p-ico">${icon(p.stay ? "home" : p.hospital ? "alert" : "pin")}</span>
     <span class="p-body"><b>${esc(p.name)}</b>${p.address ? `<small>${esc(p.address)}</small>` : ""}${p.note ? `<small class="p-note">${esc(p.note)}</small>` : ""}</span>
     <span class="p-go">지도${icon("ext")}</span>
@@ -522,7 +522,7 @@ export function viewInfo(installable) {
         ? `<a class="call" href="tel:${esc(tel)}">${icon("phone")}<span><b>${esc(C.teacher.name)}</b><small>${esc(C.teacher.desc)} · ${esc(tel)}</small></span></a>`
         : `<div class="call off">${icon("user")}<span><b>${esc(C.teacher.name)}</b><small>${esc(C.teacher.desc)} · ${esc(C.teacher.note)}</small></span></div>`}
       ${C.places.map((p) => `<a class="call" href="tel:${esc(p.tel)}">${icon("phone")}<span><b>${esc(p.name)}</b><small>${esc(p.desc)} · ${esc(p.tel)}</small></span></a>`).join("")}
-      ${C.hospitals.map((x) => `<a class="call" href="${esc(mapUrl({ naver: x.naver, name: x.name }))}" target="_blank" rel="noopener">${icon("pin")}<span><b>${esc(x.name)}</b><small>${esc(x.area)} · ${esc(x.address)} · 지도</small></span></a>`).join("")}
+      ${C.hospitals.map((x) => `<a class="call" ${mapAttrs({ nid: x.nid, naver: x.naver, name: x.name })}>${icon("pin")}<span><b>${esc(x.name)}</b><small>${esc(x.area)} · ${esc(x.address)} · 지도</small></span></a>`).join("")}
     </div>
   </section>`;
 
