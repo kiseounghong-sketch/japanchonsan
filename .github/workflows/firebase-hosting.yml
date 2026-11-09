@@ -26,6 +26,11 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: chongsangojapan
+          # firebase-tools 15.35.0부터 배포 전에 serviceusage.services.get 권한을 확인하는데,
+          # 지금 서비스 계정에는 이 권한이 없어 배포가 거부됩니다(2026-11-09).
+          # 마지막으로 성공한 15.34.0에 고정해 둡니다. Google Cloud IAM에서 서비스 계정에
+          # 'Service Usage 소비자(roles/serviceusage.serviceUsageConsumer)' 역할을 주면 이 줄을 지워도 됩니다.
+          firebaseToolsVersion: 15.34.0
 
   # database.rules.json(데이터베이스 보안 규칙)도 함께 Firebase에 올립니다.
   rules:
