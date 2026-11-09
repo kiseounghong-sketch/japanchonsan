@@ -119,13 +119,53 @@ function todayDuring(t, now) {
   h += noticesBlock();
   h += rollcallCard(now);
   h += nowCard(t, now);
+  h += missionNow(t);
+  h += shotsNow(t);
+  h += reflNow(t);
   h += nextCard(t, now);
   h += gatherCard(t, now);
-  h += shotsNow(t);
-  h += missionsToday(day, t);
-  h += mealsStay(day);
+  h += todaySchedule(day, now);
   h += safetyToday(day);
   return h;
+}
+
+// 지금 일정 장소의 미션 — 오늘 화면에서 바로 쓰기
+function missionNow(t) {
+  const m = missionForRow(t.cur);
+  if (!m) return "";
+  return `<section class="card mission now-task" id="m-${m.id}">
+    <div class="label">${icon("record")}지금 미션 · ${esc(m.title)}${has(S.answers[m.id]) ? ' <span class="chip st-ok">씀</span>' : ""}</div>
+    <label class="m-q" for="tn-${m.id}">${esc(m.q)}</label>
+    <textarea id="tn-${m.id}" data-bind="answers" data-key="${m.id}" rows="2" maxlength="1000">${esc(S.answers[m.id] || "")}</textarea>
+    ${savedLine("answers/" + m.id, S.answers[m.id])}
+  </section>`;
+}
+
+// 숙소에 있는 저녁·일정이 끝난 뒤·마지막 귀가 길에는 그날 한 줄 소감
+function reflNow(t) {
+  const r = t.cur;
+  const last = S.data.rows[S.data.rows.length - 1];
+  const show = t.dayDone || (r && r.type === "stay" && r.time >= "17:00") || (r && r === last);
+  if (!show || !t.day) return "";
+  const k = "d" + t.day.day;
+  return `<section class="card refl now-task" id="r-${k}">
+    <div class="label">${icon("record")}오늘의 한 줄 소감</div>
+    <textarea data-bind="refl" data-key="${k}" rows="2" maxlength="500" aria-label="오늘의 한 줄 소감">${esc(S.refl[k] || "")}</textarea>
+    ${savedLine("refl/" + k, S.refl[k])}
+  </section>`;
+}
+
+// 오늘 일정 한눈에 (이동 제외, 지금 줄 강조, 지난 줄 흐리게)
+function todaySchedule(day, now) {
+  const rows = day.rows.filter((r) => r.type !== "move" || r.gather);
+  return `<section class="card">
+    <div class="label">${icon("schedule")}오늘 일정</div>
+    <ol class="mini-tl today-tl">${rows.map((r) => {
+      const cur = r.start <= now && now < r.endMs;
+      const past = r.endMs <= now;
+      return `<li class="${cur ? "cur" : past ? "past" : ""}"><span>${esc(r.time)}</span><span class="tt">${esc(r.title.replace(/^이동\s*/, ""))}${cur ? ' <span class="chip st-now">지금</span>' : ""}${r.pay === "self" ? ' <span class="chip st-pay">개인 돈</span>' : ""}${statusChip(r)}</span></li>`;
+    }).join("")}</ol>
+  </section>`;
 }
 
 function nowCard(t, now) {
@@ -137,16 +177,13 @@ function nowCard(t, now) {
     meta = `<span>${esc(T.hm(r.endMs))}까지</span><span class="sep">·</span><span>${esc(T.dur(r.endMs - now))} 남음</span>`;
     const pct = Math.min(100, Math.max(0, ((now - r.start) / (r.endMs - r.start)) * 100));
     prog = `<div class="prog" aria-hidden="true"><i style="width:${pct.toFixed(1)}%"></i></div>`;
-    const m = missionForRow(r);
     body = (r.memo ? `<p class="memo">${esc(r.memo)}</p>` : "")
-      + `<div class="row-links">${r.place ? mapLink(place(r.place)) : ""}${statusChip(r)}${r.pay === "self" ? '<span class="chip st-pay">개인 돈</span>' : ""}</div>`
-      + (m ? `<button class="mission-cta" data-act="goto" data-tab="record" data-seg="mission" data-anchor="m-${m.id}">${icon("record")}<span><small>여기 미션</small>${esc(m.q)}</span>${has(S.answers[m.id]) ? '<span class="chip st-ok">씀</span>' : icon("chevron")}</button>` : "");
+      + `<div class="row-links">${r.place ? mapLink(place(r.place)) : ""}${statusChip(r)}${r.pay === "self" ? '<span class="chip st-pay">개인 돈</span>' : ""}</div>`;
   } else if (!t.dayStarted) {
     title = "아직 오늘 일정 전이에요";
     meta = t.next ? `<span>첫 일정 ${esc(t.next.time)} · ${esc(T.dur(t.next.start - now))} 후</span>` : "";
   } else if (t.dayDone) {
     title = "오늘 일정 끝! 수고했어요";
-    body = `<p class="memo">잠들기 전에 오늘의 한 줄 소감을 남겨 주세요.</p><button class="btn sm" data-act="goto" data-tab="record" data-seg="refl">${icon("record")}소감 쓰기</button>`;
   } else {
     title = "잠깐 쉬는 시간";
     meta = t.prev ? `<span>방금 끝: ${esc(t.prev.title)}</span>` : "";
@@ -247,41 +284,6 @@ export function shotItem(s, compact, mark) {
   </div>`;
 }
 
-function missionsToday(day) {
-  const list = missionsFor(day.day);
-  if (!list.length) return "";
-  const done = list.filter((m) => has(S.answers[m.id])).length;
-  return `<section class="card">
-    <div class="label">${icon("record")}오늘의 미션 <span class="count">${done}/${list.length}</span></div>
-    <ul class="mlist">${list.map((m) => `<li class="${has(S.answers[m.id]) ? "done" : ""}">
-      <button data-act="goto" data-tab="record" data-seg="mission" data-anchor="m-${m.id}">
-        <span class="mk">${has(S.answers[m.id]) ? icon("check") : ""}</span>
-        <span class="mt"><b>${esc(m.title)}</b><small>${esc(m.q)}</small></span>${icon("chevron")}
-      </button></li>`).join("")}</ul>
-    <p class="hint">매일 밤: ${esc(S.data.missions.nightly)}</p>
-  </section>`;
-}
-
-function mealsStay(day) {
-  const meals = day.rows.filter((r) => r.type === "meal");
-  const stayP = place(day.stayPlace);
-  return `<div class="duo">
-    <section class="card">
-      <div class="label">오늘 식사</div>
-      <ul class="meals">${meals.map((r) => `<li>
-        <span class="t">${esc(r.time)}</span>
-        <span class="w"><b>${esc(r.title.replace(/\s*–\s*/, " · "))}</b>${r.memo ? `<small>${esc(r.memo)}</small>` : ""}</span>
-        <span class="tags">${r.pay === "self" ? '<span class="chip st-pay">개인 돈</span>' : '<span class="chip st-plain">지원</span>'}${statusChip(r)}</span>
-      </li>`).join("")}</ul>
-    </section>
-    <section class="card stay">
-      <div class="label">${icon("home")}오늘 숙소</div>
-      <h3>${esc(day.stay)}</h3>
-      ${stayP ? `<p class="muted">${esc(stayP.address)}${stayP.note ? `<br>${esc(stayP.note)}` : ""}</p>${mapLink(stayP, "네이버 지도")}` : `<p class="muted">영동 20:55 · 옥천 20:33 하차, 보호자 인계 후 해산</p>`}
-    </section>
-  </div>`;
-}
-
 function safetyToday(day) {
   if (!day.safety || !day.safety.length) return "";
   return `<section class="card safety">
@@ -318,11 +320,6 @@ function todayBefore(t, now) {
     <div class="bar"><i style="width:${(packed / L.length) * 100}%"></i></div>
     <p class="muted">${packed === L.length ? "다 챙겼어요!" : `아직 ${L.length - packed}개 남았어요: ${L.filter((x) => !S.checks[x.id]).map((x) => esc(x.text)).join(", ")}`}</p>
     <button class="btn sm" data-act="goto" data-tab="info" data-anchor="i-pack">준비물 체크하기</button>
-  </section>`;
-  h += `<section class="card">
-    <div class="label">1일차 미리보기 · 숙소 ${esc(d1.stay)}</div>
-    <ol class="mini-tl">${d1.rows.filter((r) => r.type !== "move").map((r) => `<li><span>${esc(r.time)}</span>${esc(r.title)}${r.pay === "self" ? ' <span class="chip st-pay">개인 돈</span>' : ""}</li>`).join("")}</ol>
-    <button class="linkbtn" data-act="goto" data-tab="schedule" data-day="1">1일차 전체 일정 보기</button>
   </section>`;
   h += safetyToday(d1);
   return h;
