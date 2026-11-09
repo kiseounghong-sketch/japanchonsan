@@ -352,6 +352,37 @@
         "$other": {
           ".validate": false
         }
+      },
+      "expenses": {
+        ".read": "auth != null && (auth.token.email === 'teacher@japanchonsan.app' || (auth.token.email_verified === true && auth.token.email === root.child('jeju').child('budgetAccess').child('editorEmail').val()))",
+        "$id": {
+          ".write": "auth != null && (auth.token.email === 'teacher@japanchonsan.app' || (auth.token.email_verified === true && auth.token.email === root.child('jeju').child('budgetAccess').child('editorEmail').val()))",
+          ".validate": "$id.matches(/^[a-zA-Z0-9-]{1,64}$/) && newData.hasChildren(['category','amount','text','date','included','updatedAt','updatedBy'])",
+          "category": {
+            ".validate": "newData.isString() && root.child('jeju/budget/items').child(newData.val()).exists()"
+          },
+          "amount": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 300"
+          },
+          "date": {
+            ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+          },
+          "included": {
+            ".validate": "newData.isBoolean()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "updatedBy": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
       }
     }
   }
