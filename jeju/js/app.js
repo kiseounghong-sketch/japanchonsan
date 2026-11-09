@@ -7,7 +7,7 @@ import { prepare } from "./plan.js";
 import { unlockFolders, refreshUploads } from "./folders.js";
 import * as Live from "./live.js";
 import { live, CODE_RE } from "./live.js";
-import { viewToday, viewSchedule, viewMap, viewRecord, viewInfo, savedText, shareBar } from "./views.js";
+import { viewToday, viewSchedule, viewRecord, viewInfo, savedText, shareBar } from "./views.js";
 import { viewTeacher, noticesList, gatherPanel, collectView, collectText, shareLink, kakaoText } from "./teacher.js";
 
 const FILES = ["camp", "schedule", "places", "rules", "contacts", "checklist", "missions", "roles", "info", "shots"];
@@ -15,11 +15,10 @@ const OPTIONAL = ["folders"]; // 없어도 앱은 동작
 const TABS = [
   ["today", "오늘", "today"],
   ["schedule", "일정", "schedule"],
-  ["map", "지도", "map"],
   ["record", "미션·기록", "record"],
   ["info", "안내", "info"],
 ];
-const VIEWS = { today: viewToday, schedule: viewSchedule, map: viewMap, record: viewRecord, info: () => viewInfo(!!installEvt), teacher: viewTeacher };
+const VIEWS = { today: viewToday, schedule: viewSchedule, record: viewRecord, info: () => viewInfo(!!installEvt), teacher: viewTeacher };
 
 const $main = document.getElementById("main");
 const $tabs = document.getElementById("tabs");
@@ -101,7 +100,7 @@ function renderHeader() {
 
 function render(keepScroll) {
   if (!S.data) return;
-  if (S.tab === "teacher" && !S.teacherUI) S.tab = "today";
+  if ((S.tab === "teacher" && !S.teacherUI) || !VIEWS[S.tab]) S.tab = "today";
   const y = window.scrollY;
   $main.innerHTML = (VIEWS[S.tab] || viewToday)();
   $main.setAttribute("data-view", S.tab);
@@ -311,7 +310,6 @@ async function onAct(el, e) {
     case "close": return closeSheet();
     case "day": S.ui.day = Number(el.dataset.day); render(); return;
     case "shotday": S.ui.shotDay = Number(el.dataset.day); render(true); return;
-    case "mapday": S.ui.mapDay = Number(el.dataset.day); render(true); return;
     case "seg": S.ui.seg = el.dataset.seg; save("seg", S.ui.seg); render(true); return;
     case "jump": { const t = document.getElementById(el.dataset.anchor); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     case "me": return nameSheet();

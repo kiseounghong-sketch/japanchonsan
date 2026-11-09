@@ -40,7 +40,7 @@
 - `pay: "self"` → '개인 돈' 표시
 - `place` = `places.json`의 `id` (누르면 네이버 지도 앱에서 그 장소가 바로 열림)
 
-다른 파일: `places.json` 장소·주소(`nid` = 네이버 지도 장소 번호 — 네이버 지도에서 장소를 열었을 때 주소 `m.place.naver.com/place/숫자`의 숫자, `naver` = 번호가 없을 때 쓸 검색어) · `rules.json` 안전 규칙 · `contacts.json` 비상 연락 · `checklist.json` 준비물 · `missions.json` 미션 · `roles.json` 역할 · `shots.json` 촬영 목록 · `info.json` 개인 돈·대안·제출물 · `camp.json` 기본 정보
+다른 파일: `places.json` 장소(`rooms` = 숙소 방 번호, 일정에 표시 · `nid` = 네이버 지도 장소 번호 — 네이버 지도에서 장소를 열었을 때 주소 `m.place.naver.com/place/숫자`의 숫자, `naver` = 번호가 없을 때 쓸 검색어) · `rules.json` 안전 규칙 · `contacts.json` 비상 연락 · `checklist.json` 준비물 · `missions.json` 미션 · `roles.json` 역할 · `shots.json` 촬영 목록 · `info.json` 개인 돈·대안·제출물 · `camp.json` 기본 정보
 
 ## 미리 보기
 

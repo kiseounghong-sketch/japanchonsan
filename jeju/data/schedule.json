@@ -73,7 +73,7 @@
       { "time": "11:40", "title": "점심 – 연돈", "place": "yeondon", "memo": "각자 계산, 영업 시작 시간 확인 중", "type": "meal", "status": "need", "pay": "self" },
       { "time": "13:00", "title": "은하감귤체험농장", "place": "eunha", "type": "activity", "status": "ok" },
       { "time": "14:30", "title": "집결 → 제주돌고래힐링투어", "place": "dolphin", "memo": "출발 20분 전 승선 신고", "type": "gather", "status": "need", "gather": true, "gatherAt": "은하감귤체험농장 (투어 출발)" },
-      { "time": "15:00", "end": "16:30", "title": "제주돌고래힐링투어", "place": "dolphin", "memo": "결항 시 신도리 해안 관찰", "type": "activity", "status": "need" },
+      { "time": "15:00", "end": "16:30", "title": "제주돌고래힐링투어", "place": "dolphin", "memo": "위치는 예약 문자로 확인 · 결항 시 신도리 해안 관찰", "type": "activity", "status": "need" },
       { "time": "17:10", "title": "저녁", "memo": "장소 미정", "type": "meal", "status": "tbd" },
       { "time": "18:50", "title": "이동 → 펜션", "place": "lucid", "memo": "약 15분", "type": "move", "status": "ok" },
       { "time": "19:05", "end": "21:00", "title": "펜션 도착, 짐 미리 싸기", "place": "lucid", "type": "stay", "status": "ok" }
