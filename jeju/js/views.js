@@ -1,4 +1,4 @@
-// 학생 화면 5개: 오늘 / 일정 / 지도 / 미션·기록 / 안내
+// 학생 화면 4개: 오늘 / 일정 / 미션·기록 / 안내
 // 공통 틀: .card(카드) · .ch(카드 머리: 아이콘+제목+오른쪽 값) · .list(구분선 있는 줄 목록)
 import { S, roster } from "./state.js";
 import { live } from "./live.js";
@@ -10,6 +10,10 @@ import { folderUrl, uploadBadge } from "./folders.js";
 const place = (id) => (id && S.data.placeById[id]) || null;
 const has = (v) => !!(v && String(v).trim());
 const payChip = (r) => (r.pay === "self" ? '<span class="chip st-pay">개인 돈</span>' : "");
+
+function roomLabels(rooms) {
+  return rooms.split(" · ").map((room) => `<span>${esc(room)}</span>`).join("");
+}
 
 function mapLink(p, label) {
   if (!p) return "";
@@ -256,7 +260,7 @@ function todaySchedule(day, now) {
   const stayP = place(day.stayPlace);
   return `<section class="card">
     ${ch("schedule", "오늘 일정", stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${icon("home")}${esc(day.stay)}</a>` : esc(day.stay))}
-    ${stayP && stayP.rooms ? `<p class="sub">${esc(stayP.rooms)}</p>` : ""}
+    ${stayP && stayP.rooms ? `<p class="sub rooms">${roomLabels(stayP.rooms)}</p>` : ""}
     <ol class="tl-mini">${rows.map((r) => {
       const cur = r.start <= now && now < r.endMs;
       const past = r.endMs <= now;
@@ -347,7 +351,7 @@ export function viewSchedule() {
   const stayP = place(day.stayPlace);
   let h = dayTabs("day", day.day);
   h += `<section class="card flush">
-    <div class="tl-head">${icon("home")}<span>숙소</span>${stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${esc(day.stay)}</a>` : `<b>${esc(day.stay)}</b>`}${stayP && stayP.rooms ? `<small>${esc(stayP.rooms)}</small>` : ""}</div>
+    <div class="tl-head">${icon("home")}<span>숙소</span>${stayP ? `<a class="ch-link" ${mapAttrs(stayP)}>${esc(day.stay)}</a>` : `<b>${esc(day.stay)}</b>`}${stayP && stayP.rooms ? `<small class="rooms">${roomLabels(stayP.rooms)}</small>` : ""}</div>
     <ol class="timeline">${day.rows.map((r) => rowHtml(r, now)).join("")}</ol>
   </section>`;
   return h;
@@ -373,7 +377,7 @@ function rowHtml(r, now) {
   const st = statusChip(r);
   if (st) tags.push(st);
   const inner = `<span class="r-time">${esc(r.time)}${r.end ? `<small>~${esc(r.end)}</small>` : ""}</span>
-    <span class="r-body"><span class="r-title">${esc(r.title)}${tags.length ? ` ${tags.join("")}` : ""}</span>${r.memo ? `<span class="r-memo">${esc(r.memo)}</span>` : ""}</span>
+    <span class="r-body"><span class="r-title">${esc(r.title)}</span>${tags.length ? `<span class="r-tags">${tags.join("")}</span>` : ""}${r.memo ? `<span class="r-memo">${esc(r.memo)}</span>` : ""}</span>
     ${p ? `<span class="r-go">${icon("pin")}</span>` : ""}`;
   return wrap(`row${r.gather ? " gather" : ""}${state}`, inner, `${r.time} ${r.title}${p ? `, ${p.name} 지도` : ""}`);
 }
@@ -389,10 +393,10 @@ function placeRow(p, hl) {
 /* ---------- 미션·기록 ---------- */
 export function viewRecord() {
   const seg = S.ui.seg;
-  let h = `<div class="seg" role="tablist">${[["mission", "미션"], ["refl", "소감"], ["shots", "사진"], ["roles", "역할"]].map(([k, l]) => `<button role="tab" aria-selected="${seg === k}" class="${seg === k ? "on" : ""}" data-act="seg" data-seg="${k}">${l}</button>`).join("")}</div>`;
-  if (seg === "roles") return h + rolesList();
+  let h = `<div class="record-nav"><div class="seg" role="tablist" aria-label="기록 구분">${[["mission", "미션"], ["refl", "소감"], ["shots", "사진"], ["roles", "역할"]].map(([k, l]) => `<button role="tab" aria-selected="${seg === k}" class="${seg === k ? "on" : ""}" data-act="seg" data-seg="${k}">${l}</button>`).join("")}</div>`;
+  if (seg === "roles") return h + `</div>` + rolesList();
   if (S.ui.shotDay == null) S.ui.shotDay = autoDay();
-  h += dayTabs("shotday", S.ui.shotDay);
+  h += dayTabs("shotday", S.ui.shotDay) + `</div>`;
   if (seg === "shots") return h + shotsList();
   if (!S.code || !S.me || live.status === "badcode") h += shareBar();
   return h + (seg === "refl" ? reflList() : missionsList());
