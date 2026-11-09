@@ -366,7 +366,6 @@ export function viewSchedule() {
   const stayP = place(day.stayPlace);
   let h = `<div class="seg days" role="tablist">${days.map((d) => `<button role="tab" aria-selected="${d.day === day.day}" class="${d.day === day.day ? "on" : ""}" data-act="day" data-day="${d.day}"><b>${d.day}일차</b><small>${esc(d.label)}</small></button>`).join("")}</div>`;
   h += `<div class="dayhead">${icon("home")}<span>숙소</span>${stayP ? mapLink(stayP, day.stay) : `<b>${esc(day.stay)}</b>`}</div>`;
-  h += `<p class="legend">표시 없는 일정은 <b>확정</b> · 흐린 줄은 <b>이동</b> · 장소가 있는 줄을 누르면 네이버 지도</p>`;
   h += `<ol class="timeline">${day.rows.map((r) => rowHtml(r, now)).join("")}</ol>`;
   return h;
 }
@@ -375,6 +374,14 @@ function rowHtml(r, now) {
   const past = r.endMs <= now;
   const cur = r.start <= now && now < r.endMs;
   const p = place(r.place);
+  if (r.type === "move" && !r.gather) {
+    // 이동은 한 줄로 얇게: "12:25 → 자매국수 · 15분"
+    const t = r.title.replace(/^이동\s*/, "");
+    const inner = `<span class="r-time">${esc(r.time)}</span><span class="r-title">${esc(t)}${r.memo ? `<small> · ${esc(r.memo)}</small>` : ""}${cur ? ' <span class="chip st-now">지금</span>' : ""}</span>`;
+    return `<li class="row slim ${past ? "past" : ""} ${cur ? "cur" : ""}"${cur ? ' id="cur-row"' : ""}>${p
+      ? `<a ${mapAttrs(p)} aria-label="${esc(`${r.time} ${r.title}`)}">${inner}</a>`
+      : `<div>${inner}</div>`}</li>`;
+  }
   const cls = ["row", r.type === "move" ? "move" : "", past ? "past" : "", cur ? "cur" : "", r.gather ? "gather" : ""].join(" ").trim();
   const tags = [];
   if (cur) tags.push('<span class="chip st-now">지금</span>');
