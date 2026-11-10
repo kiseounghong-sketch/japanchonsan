@@ -25,5 +25,5 @@ input[type="email"] { width: 100%; min-width: 0; min-height: 44px; border: 1px s
 .negative { color: var(--danger); }
 [data-form="expense"] .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
 
-.existing-pending summary { cursor: pointer; min-height: 36px; padding: 8px 0; font-size: .85rem; font-weight: 700; }
-.existing-pending .existing-expense { margin-top: 8px; }
+.budget-balances summary { cursor: pointer; min-height: 36px; padding: 8px 0; font-size: .85rem; font-weight: 700; }
+[data-form="expense"] select { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--card-2); font-size: 1rem; }

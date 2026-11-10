@@ -1,5 +1,5 @@
 import * as API from "./budget-api.js";
-import { amount, totals, validateBudget, parseBudget, MAX_ITEMS, withExpenses, existingDetails } from "./budget-model.js";
+import { amount, totals, validateBudget, parseBudget, MAX_ITEMS, ledgerItems } from "./budget-model.js";
 import { esc, icon, toast } from "./ui.js";
 
 const main = document.getElementById("main");
@@ -9,12 +9,12 @@ let expenses = {}, expenseTag = null, expenseId = "", syncing = false;
 let loginMode = "teacher", ready = false, saving = false;
 const won = (value) => value == null ? "미정" : Number(value).toLocaleString("ko-KR");
 const errorLine = () => '<p class="err" role="alert"></p>';
-const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open]');
+const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open], .budget-settings[open]');
 const changed = (form) => [...form.querySelectorAll('input:not([type="file"]), textarea, select')].some((field) =>
   field.tagName === "SELECT" ? [...field.options].some(option => option.selected !== option.defaultSelected && (option.defaultSelected || option.index !== 0)) : field.type === "checkbox" ? field.checked !== field.defaultChecked : field.value !== field.defaultValue);
 
-function amounts(b, s, remaining) {
-  return `<dl class="budget-values"><div><dt>예산</dt><dd>${won(b)}</dd></div><div><dt>확정·예상 지출</dt><dd>${won(s)}</dd></div><div><dt>남음</dt><dd class="${remaining < 0 ? "negative" : ""}">${won(remaining)}</dd></div></dl>`;
+function amounts(b, s, remaining, actual = false) {
+  return `<dl class="budget-values"><div><dt>예산</dt><dd>${won(b)}</dd></div><div><dt>${actual ? "사용액" : "계획 지출"}</dt><dd>${won(s)}</dd></div><div><dt>잔액</dt><dd class="${remaining < 0 ? "negative" : ""}">${won(remaining)}</dd></div></dl>`;
 }
 function clear() { expenses = {}; expenseTag = null; expenseId = ""; budget = null; etag = null; editorEmail = ""; generation++; }
 function showError(error) {
@@ -39,7 +39,7 @@ function showVerification() {
 function editForm(id, item) {
   return `<form class="stack budget-form" data-form="item" data-id="${esc(id)}" data-edit hidden>
     <label>비목<input name="label" value="${esc(item.label)}" maxlength="40" required></label>
-    <div class="two"><label>예산<input name="budget" inputmode="numeric" value="${item.budget}" required></label><label>확정·예상 지출<input name="spent" inputmode="numeric" value="${item.spent ?? ""}" placeholder="미정"></label></div>
+    <div class="two"><label>예산<input name="budget" inputmode="numeric" value="${item.budget}" required></label><label>계획 지출<input name="spent" inputmode="numeric" value="${item.spent ?? ""}" placeholder="미정"></label></div>
     <label class="inline"><input type="checkbox" name="approximate" ${item.approximate ? "checked" : ""}>약</label>
     <label>메모<textarea name="note" rows="2" maxlength="1000">${esc(item.note)}</textarea></label>
     <div class="btns"><button class="btn sm" type="submit">저장</button><button class="btn sm ghost" type="button" data-act="cancel">취소</button></div>${errorLine()}
@@ -59,9 +59,11 @@ function render() {
   if (!budget) {
     html = `<section class="card"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000"></textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
   } else {
-    const sum = totals(withExpenses(budget.items, expenses));
-    html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>사업비 합계 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining)}${sum.unknown ? `<span class="sub">지출 미정 ${sum.unknown}건</span>` : ""}</section>`;
-    html += ledgerForm() + existingDetailsCard() + '<section class="card" id="expense-list"></section><details class="budget-settings"><summary class="btn ghost wide">예산 설정</summary>';
+    const sum = totals(ledgerItems(budget.items, expenses));
+    html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>가계부 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining, true)}</section>`;
+    html += ledgerForm() + '<section class="card" id="expense-list"></section><details class="budget-settings"><summary class="btn ghost wide">예산계획서</summary>';
+    const plan = totals(budget.items);
+    html += `<section class="card"><h2>계획 합계</h2>${amounts(plan.budget, plan.spent, plan.remaining)}</section>`;
     for (const [id, item] of Object.entries(budget.items).sort((a, b) => a[1].order - b[1].order)) {
       html += `<section class="card"><div class="budget-head"><h2>${esc(item.label)}${item.approximate ? ' <span class="chip st-need">예상</span>' : ""}</h2><button class="btn sm ghost" data-act="edit">편집</button></div>${amounts(item.budget, item.spent, item.budget - (item.spent ?? 0))}${item.note ? `<p class="sub budget-note">${esc(item.note)}</p>` : ""}${editForm(id, item)}</section>`;
     }
@@ -123,7 +125,7 @@ main.addEventListener("submit", async (event) => {
       if (loginMode === "signup") { await API.register(email, String(data.get("password"))); toast("인증 메일을 보냈어요"); }
       else await API.login(email, String(data.get("password")));
     } else if (kind === "expense") {
-      const entry = { category: String(data.get("category")), amount: amount(data.get("amount")), text: String(data.get("text")).trim(), date: String(data.get("date")), included: !!data.get("included") };
+      const entry = { category: String(data.get("category")), amount: amount(data.get("amount")), text: String(data.get("text")).trim(), date: String(data.get("date")), included: expenses[expenseId]?.included ?? false };
       if (!entry.amount || !entry.text || !budget.items[entry.category]) throw new Error("금액과 내용을 확인해 주세요.");
       expenseId ||= crypto.randomUUID();
       await API.saveExpense(expenseId, entry, expenseTag);
@@ -180,7 +182,6 @@ main.addEventListener("click", async (event) => {
       } else {
         expenseId = id; expenseTag = result.etag;
         for (const key of ["category", "amount", "text", "date"]) form.elements[key].value = result.data[key];
-        form.elements.included.checked = result.data.included;
         form.querySelector('button[type="submit"]').textContent = "수정 저장";
         form.scrollIntoView({ block: "start" }); form.elements.amount.focus();
       }
@@ -245,25 +246,17 @@ function ledgerForm() {
     <label>금액<input name="amount" inputmode="numeric" required placeholder="원"></label>
     <label>내용<input name="text" maxlength="300" required></label>
     <div class="two"><label>비목<select name="category">${Object.entries(budget.items).map(([id, item]) => `<option value="${esc(id)}">${esc(item.label)}</option>`).join("")}</select></label><label>날짜<input type="date" name="date" value="${date}" required></label></div>
-    <label class="inline"><input type="checkbox" name="included">기존 반영액에 포함</label>
     <div class="btns"><button type="submit" class="btn">지출 저장</button><button type="button" class="btn ghost" data-act="expense-cancel">취소</button></div>${errorLine()}
   </form></section>`;
 }
 function updateLedger() {
   if (!budget) return;
-  const adjusted = withExpenses(budget.items, expenses), sum = totals(adjusted);
+  const adjusted = ledgerItems(budget.items, expenses), sum = totals(adjusted);
   const summary = document.querySelector('#budget-summary .budget-values');
-  if (summary) summary.outerHTML = amounts(sum.budget, sum.spent, sum.remaining);
+  if (summary) summary.outerHTML = amounts(sum.budget, sum.spent, sum.remaining, true);
   const target = document.getElementById('expense-list');
   if (!target) return;
-  target.innerHTML = `<h2>지출 내역 <small>${won(Object.values(expenses).reduce((sum, entry) => sum + entry.amount, 0))}원</small></h2><div class="budget-balances">${Object.values(adjusted).map(item => `<div><span>${esc(item.label)}</span><b class="${item.budget - (item.spent || 0) < 0 ? 'negative' : ''}">${won(item.budget - (item.spent || 0))}원 남음</b></div>`).join('')}</div>` +
-    Object.entries(expenses).sort((a,b) => b[1].date.localeCompare(a[1].date) || b[1].updatedAt-a[1].updatedAt).map(([id, e]) => `<article class="expense-row"><div class="budget-head"><b>${esc(e.text)}</b><strong>${won(e.amount)}원</strong></div><div class="sub">${esc(e.date)} · ${esc(budget.items[e.category]?.label || '')}${e.included ? ' · 기존 반영' : ''}</div><div class="btns"><button class="btn sm ghost" data-act="expense-edit" data-id="${esc(id)}">수정</button><button class="btn sm ghost" data-act="expense-delete" data-id="${esc(id)}">삭제</button></div></article>`).join('');
-}
-
-function existingDetailsCard() {
-  const rows = existingDetails(budget.items);
-  const confirmed = rows.filter(row => row.confirmed);
-  const pending = rows.filter(row => !row.confirmed);
-  const list = (entries) => entries.map(row => `<article class="expense-row existing-expense"><div class="budget-head"><b>${esc(row.label)}</b><strong>${won(row.amount)}${row.amount == null ? '' : '원'}</strong></div><div class="sub">${esc(budget.items[row.category].label)} · ${row.confirmed ? '확정' : row.amount == null ? '미정' : '예상·확인 필요'}</div>${row.note ? `<p class="sub budget-note">${esc(row.note)}</p>` : ''}</article>`).join('');
-  return `<section class="card" id="existing-expenses"><h2>기존 확정 내역 <small>${won(confirmed.reduce((sum, row) => sum + row.amount, 0))}원</small></h2>${confirmed.length ? list(confirmed) : '<p class="empty">확정 내역 없음</p>'}${pending.length ? `<details class="existing-pending"><summary>예상·미정 ${pending.length}건</summary>${list(pending)}</details>` : ''}</section>`;
+  const balancesOpen = target.querySelector('.budget-balances')?.open;
+  target.innerHTML = `<h2>가계부 내역 <small>${won(Object.values(expenses).reduce((sum, entry) => sum + entry.amount, 0))}원</small></h2><details class="budget-balances" ${balancesOpen ? "open" : ""}><summary>비목별 잔액</summary>${Object.values(adjusted).map(item => `<div><span>${esc(item.label)}</span><b class="${item.budget - (item.spent || 0) < 0 ? 'negative' : ''}">${won(item.budget - (item.spent || 0))}원 남음</b></div>`).join('')}</details>` +
+    Object.entries(expenses).sort((a,b) => b[1].date.localeCompare(a[1].date) || b[1].updatedAt-a[1].updatedAt).map(([id, e]) => `<article class="expense-row"><div class="budget-head"><b>${esc(e.text)}</b><strong>${won(e.amount)}원</strong></div><div class="sub">${esc(e.date)} · ${esc(budget.items[e.category]?.label || '미분류')}</div><div class="btns"><button class="btn sm ghost" data-act="expense-edit" data-id="${esc(id)}">수정</button><button class="btn sm ghost" data-act="expense-delete" data-id="${esc(id)}">삭제</button></div></article>`).join('');
 }

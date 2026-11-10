@@ -73,38 +73,13 @@ export function parseBudget(text) {
   return validateBudget(data);
 }
 
-export function withExpenses(items, expenses) {
-  const result = structuredClone(items);
+// 계획 금액은 참고용입니다. 가계부에는 저장된 지출을 각각 한 번만 합산합니다.
+export function ledgerItems(items, expenses) {
+  const result = Object.fromEntries(Object.entries(items).map(([id, item]) => [id, { ...item, spent: 0 }]));
   for (const entry of Object.values(expenses)) {
-    if (!entry.included && result[entry.category]) result[entry.category].spent = (result[entry.category].spent ?? 0) + entry.amount;
+    const key = Object.hasOwn(result, entry.category) ? entry.category : 'uncategorized';
+    result[key] ||= { label: '미분류', budget: 0, spent: 0 };
+    result[key].spent += entry.amount;
   }
   return result;
-}
-
-// 비공개로 불러온 메모에서 합계가 일치하는 명시적 내역만 나눕니다.
-// 날짜·인원·단가 등을 지출로 추측하거나 원본 금액을 바꾸지 않습니다.
-export function existingDetails(items) {
-  const uncertain = (text) => /미확정|확정\s*(전|예정|아님)|미정|예상|견적\s*전/.test(text);
-  const certain = (text) => /확정/.test(text) && !uncertain(text);
-  const rows = [];
-  for (const [category, item] of Object.entries(items).sort((a, b) => a[1].order - b[1].order)) {
-    const note = (item.note || '').trim();
-    const wrapped = /^확정\s*\([\s\S]*\)$/.test(note);
-    const source = wrapped ? note.replace(/^확정\s*\(/, '').slice(0, -1) : note;
-    const pieces = source.split(/\s*\+\s*/);
-    const details = pieces.map(part => {
-      const values = [...part.matchAll(/[\d,]+/g)].filter(match => /^\d{3,}$|^\d{1,3}(,\d{3})+$/.test(match[0]));
-      if (values.length !== 1) return null;
-      const value = values[0];
-      const label = (part.slice(0, value.index) + part.slice(value.index + value[0].length)).replace(/원(?=\s|$|확정)|확정/g, '').trim();
-      if (!label) return null;
-      return { category, label, amount: Number(value[0].replace(/,/g, '')), confirmed: !item.approximate && !uncertain(part) && (wrapped || certain(part)) };
-    });
-    if (pieces.length > 1 && details.every(Boolean) && details.reduce((sum, row) => sum + row.amount, 0) === item.spent) {
-      rows.push(...details);
-    } else {
-      rows.push({ category, label: item.label, amount: item.spent, note, confirmed: item.spent != null && !item.approximate && (pieces.length === 1 || wrapped) && certain(note) });
-    }
-  }
-  return rows;
 }
