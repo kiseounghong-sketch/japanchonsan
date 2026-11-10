@@ -25,7 +25,7 @@ function discardBatch() {
 let loginMode = "teacher", ready = false, saving = false;
 const won = (value) => value == null ? "미정" : Number(value).toLocaleString("ko-KR");
 const errorLine = () => '<p class="err" role="alert"></p>';
-const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open], .budget-settings[open], [data-form=batch]');
+const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open], .budget-settings[open], .expense-actions[open], [data-form=batch]');
 const changed = (form) => [...form.querySelectorAll('input:not([type="file"]), textarea, select')].some((field) =>
   field.tagName === "SELECT" ? [...field.options].some(option => option.selected !== option.defaultSelected && (option.defaultSelected || option.index !== 0)) : field.type === "checkbox" ? field.checked !== field.defaultChecked : field.value !== field.defaultValue);
 
@@ -68,6 +68,13 @@ function ownerSettings() {
   if (!API.isOwner()) return "";
   return `<details class="card budget-owner"><summary>공동 편집자</summary><form class="stack" data-form="access"><label>로그인 이메일<input type="email" name="email" value="${esc(editorEmail)}" maxlength="254" autocomplete="off"></label><button class="btn" type="submit">저장</button>${errorLine()}</form></details>`;
 }
+function pendingPlanExpenses() {
+  const planned = batchFromPlan(budget.items);
+  return planned && matchBatch(planned.rows, budget.items, expenses).some(row => !row.saved && !row.matches.length);
+}
+function planAmounts(item) {
+  return `<dl class="budget-values"><div><dt>예산</dt><dd>${won(item.budget)}</dd></div><div><dt>계획 지출</dt><dd>${won(item.spent)}</dd></div></dl>`;
+}
 function render() {
   expenseId = ""; expenseTag = null;
   if (!API.currentUser()) { showLogin(); return; }
@@ -78,12 +85,12 @@ function render() {
   } else {
     const sum = totals(ledgerItems(budget.items, expenses));
     html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>가계부 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining, true)}</section>`;
-    if (batchFromPlan(budget.items)) html += '<button class="btn ghost wide" data-act="plan-expenses">확정 지출 불러오기</button>';
+    html += batchCard();
+    if (!batchDraft && pendingPlanExpenses()) html += '<button class="btn ghost wide" data-act="plan-expenses">확정 지출 불러오기</button>';
     html += ledgerForm() + '<section class="card" id="expense-list"></section><details class="budget-settings"><summary class="btn ghost wide">예산계획서</summary>';
-    const plan = totals(budget.items);
-    html += `<section class="card"><h2>계획 합계</h2>${amounts(plan.budget, plan.spent, plan.remaining)}</section>`;
+
     for (const [id, item] of Object.entries(budget.items).sort((a, b) => a[1].order - b[1].order)) {
-      html += `<section class="card"><div class="budget-head"><h2>${esc(item.label)}${item.approximate ? ' <span class="chip st-need">예상</span>' : ""}</h2><button class="btn sm ghost" data-act="edit">편집</button></div>${amounts(item.budget, item.spent, item.budget - (item.spent ?? 0))}${item.note ? `<p class="sub budget-note">${esc(item.note)}</p>` : ""}${editForm(id, item)}</section>`;
+      html += `<section class="card"><div class="budget-head"><h2>${esc(item.label)}${item.approximate ? ' <span class="chip st-need">예상</span>' : ""}</h2><button class="btn sm ghost" data-act="edit">편집</button></div>${planAmounts(item)}${item.note ? `<p class="sub budget-note">${esc(item.note)}</p>` : ""}${editForm(id, item)}</section>`;
     }
     html += noteSection("pending", "금액 미정") + noteSection("excluded", "사업비 제외");
     if (Object.keys(budget.items).length < MAX_ITEMS) {
@@ -91,7 +98,7 @@ function render() {
     }
   }
   if (budget) html += "</details>";
-  main.innerHTML = batchCard() + html + ownerSettings();
+  main.innerHTML = (budget ? "" : batchCard()) + html + ownerSettings();
   updateLedger();
 }
 async function refresh() {
@@ -188,11 +195,13 @@ main.addEventListener("click", async (event) => {
     if (act === "plan-expenses") {
       if (batchDraft) { document.getElementById("batch-import")?.scrollIntoView({ block: "start" }); return; }
       batchDraft = batchFromPlan(budget.items); batchError = "";
+      button.remove();
       document.getElementById("batch-import")?.remove();
-      main.insertAdjacentHTML("afterbegin", batchCard());
+      document.getElementById("budget-summary")?.insertAdjacentHTML("afterend", batchCard());
       document.getElementById("batch-import")?.scrollIntoView({ block: "start" });
     } else if (act === "batch-cancel") {
       discardBatch(); button.closest("section").remove();
+      if (budget && pendingPlanExpenses() && !main.querySelector('[data-act="plan-expenses"]')) document.getElementById("budget-summary")?.insertAdjacentHTML("afterend", '<button class="btn ghost wide" data-act="plan-expenses">확정 지출 불러오기</button>');
     } else if (act === "setup-plan") {
       document.getElementById("budget-setup")?.scrollIntoView({ block: "start" });
     } else if (act === "expense-edit" || act === "expense-delete") {
@@ -277,7 +286,7 @@ function ledgerForm() {
     <label>금액<input name="amount" inputmode="numeric" required placeholder="원"></label>
     <label>내용<input name="text" maxlength="300" required></label>
     <div class="two"><label>비목<select name="category">${Object.entries(budget.items).map(([id, item]) => `<option value="${esc(id)}">${esc(item.label)}</option>`).join("")}</select></label><label>날짜<input type="date" name="date" value="${date}" required></label></div>
-    <div class="btns"><button type="submit" class="btn">지출 저장</button><button type="button" class="btn ghost" data-act="expense-cancel">취소</button></div>${errorLine()}
+    <div class="btns"><button type="submit" class="btn">지출 저장</button><button type="button" class="btn ghost" data-act="expense-cancel">비우기</button></div>${errorLine()}
   </form></section>`;
 }
 function updateLedger() {
@@ -288,8 +297,9 @@ function updateLedger() {
   const target = document.getElementById('expense-list');
   if (!target) return;
   const balancesOpen = target.querySelector('.budget-balances')?.open;
-  target.innerHTML = `<h2>가계부 내역 <small>${won(Object.values(expenses).reduce((sum, entry) => sum + entry.amount, 0))}원</small></h2><details class="budget-balances" ${balancesOpen ? "open" : ""}><summary>비목별 잔액</summary>${Object.values(adjusted).map(item => `<div><span>${esc(item.label)}</span><b class="${item.budget - (item.spent || 0) < 0 ? 'negative' : ''}">${won(item.budget - (item.spent || 0))}원 남음</b></div>`).join('')}</details>` +
-    Object.entries(expenses).sort((a,b) => b[1].date.localeCompare(a[1].date) || b[1].updatedAt-a[1].updatedAt).map(([id, e]) => `<article class="expense-row"><div class="budget-head"><b>${esc(e.text)}</b><strong>${won(e.amount)}원</strong></div><div class="sub">${esc(e.date)} · ${esc(budget.items[e.category]?.label || '미분류')}</div><div class="btns"><button class="btn sm ghost" data-act="expense-edit" data-id="${esc(id)}">수정</button><button class="btn sm ghost" data-act="expense-delete" data-id="${esc(id)}">삭제</button></div></article>`).join('');
+  const openActions = new Set([...target.querySelectorAll('.expense-actions[open]')].map(el => el.dataset.id));
+  target.innerHTML = `<h2>지출 내역 <small>${Object.keys(expenses).length}건</small></h2><details class="budget-balances" ${balancesOpen ? "open" : ""}><summary>비목별 잔액</summary>${Object.values(adjusted).map(item => `<div><span>${esc(item.label)}</span><b class="${item.budget - (item.spent || 0) < 0 ? 'negative' : ''}">${won(item.budget - (item.spent || 0))}원 남음</b></div>`).join('')}</details>` +
+    Object.entries(expenses).sort((a,b) => b[1].date.localeCompare(a[1].date) || b[1].updatedAt-a[1].updatedAt).map(([id, e]) => `<article class="expense-row"><div class="budget-head"><b>${esc(e.text)}</b><strong>${won(e.amount)}원</strong></div><div class="sub">${esc(e.date)} · ${esc(budget.items[e.category]?.label || '미분류')}</div><details class="expense-actions" data-id="${esc(id)}" ${openActions.has(id) ? "open" : ""}><summary>관리</summary><div class="btns"><button class="btn sm ghost" data-act="expense-edit" data-id="${esc(id)}">수정</button><button class="btn sm ghost" data-act="expense-delete" data-id="${esc(id)}">삭제</button></div></details></article>`).join('');
 }
 
 function batchCard() {
@@ -340,7 +350,8 @@ window.addEventListener('hashchange', () => {
   generation++;
   if (budget) {
     document.getElementById('batch-import')?.remove();
-    main.insertAdjacentHTML('afterbegin', batchCard());
+    main.querySelector('[data-act=plan-expenses]')?.remove();
+    document.getElementById('budget-summary')?.insertAdjacentHTML('afterend', batchCard());
   } else if (!API.currentUser()) {
     showLogin();
   } else if (main.querySelector('[data-form=import]')) {
