@@ -24,3 +24,6 @@ input[type="email"] { width: 100%; min-width: 0; min-height: 44px; border: 1px s
 .expense-row strong { flex: none; font-size: .95rem; }
 .negative { color: var(--danger); }
 [data-form="expense"] .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+
+.existing-pending summary { cursor: pointer; min-height: 36px; padding: 8px 0; font-size: .85rem; font-weight: 700; }
+.existing-pending .existing-expense { margin-top: 8px; }
