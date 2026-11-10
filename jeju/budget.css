@@ -27,3 +27,8 @@ input[type="email"] { width: 100%; min-width: 0; min-height: 44px; border: 1px s
 
 .budget-balances summary { cursor: pointer; min-height: 36px; padding: 8px 0; font-size: .85rem; font-weight: 700; }
 [data-form="expense"] select { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--card-2); font-size: 1rem; }
+
+.batch-row { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.batch-row input { flex: none; margin-top: 4px; }
+.batch-row span { min-width: 0; }
+.batch-row small { display: block; color: var(--ink-2); }

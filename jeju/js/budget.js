@@ -1,3 +1,4 @@
+import { parseBatch, matchBatch } from "./budget-batch.js";
 import * as API from "./budget-api.js";
 import { amount, totals, validateBudget, parseBudget, MAX_ITEMS, ledgerItems } from "./budget-model.js";
 import { esc, icon, toast } from "./ui.js";
@@ -6,10 +7,20 @@ const main = document.getElementById("main");
 const logoutButton = document.getElementById("logout");
 let budget = null, etag = null, editorEmail = "", generation = 0;
 let expenses = {}, expenseTag = null, expenseId = "", syncing = false;
+let batchDraft = null, batchError = "", batchPreview = [];
+function readBatchLink() {
+  if (!location.hash.startsWith("#add=")) return false;
+  const encoded = location.hash.slice(5);
+  history.replaceState(null, "", location.pathname + location.search);
+  batchDraft = null; batchError = ""; batchPreview = [];
+  try { batchDraft = parseBatch(encoded); } catch (_) { batchError = "불러오기 링크를 확인해 주세요."; }
+  return true;
+}
+readBatchLink();
 let loginMode = "teacher", ready = false, saving = false;
 const won = (value) => value == null ? "미정" : Number(value).toLocaleString("ko-KR");
 const errorLine = () => '<p class="err" role="alert"></p>';
-const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open], .budget-settings[open]');
+const editing = () => (!!main.querySelector('[data-form="expense"]') && changed(main.querySelector('[data-form="expense"]'))) || !!main.querySelector('[data-edit]:not([hidden]), .budget-owner[open], .budget-settings[open], [data-form=batch]');
 const changed = (form) => [...form.querySelectorAll('input:not([type="file"]), textarea, select')].some((field) =>
   field.tagName === "SELECT" ? [...field.options].some(option => option.selected !== option.defaultSelected && (option.defaultSelected || option.index !== 0)) : field.type === "checkbox" ? field.checked !== field.defaultChecked : field.value !== field.defaultValue);
 
@@ -57,7 +68,7 @@ function render() {
   if (!API.currentUser()) { showLogin(); return; }
   let html = "";
   if (!budget) {
-    html = `<section class="card"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000"></textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
+    html = `<section class="card"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000">${esc(batchDraft?.planText || "")}</textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
   } else {
     const sum = totals(ledgerItems(budget.items, expenses));
     html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>가계부 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining, true)}</section>`;
@@ -73,7 +84,7 @@ function render() {
     }
   }
   if (budget) html += "</details>";
-  main.innerHTML = html + ownerSettings();
+  main.innerHTML = (budget ? batchCard() : "") + html + ownerSettings();
   updateLedger();
 }
 async function refresh() {
@@ -117,6 +128,7 @@ main.addEventListener("submit", async (event) => {
   const error = form.querySelector(".err");
   error.textContent = "";
   const data = new FormData(form), kind = form.dataset.form;
+  const controlStates = [...form.querySelectorAll("button, input, textarea, select")].map(field => [field, field.disabled]);
   saving = true; logoutButton.disabled = true;
   form.querySelectorAll("button, input, textarea, select").forEach((button) => { button.disabled = true; });
   try {
@@ -124,6 +136,8 @@ main.addEventListener("submit", async (event) => {
       const email = loginMode === "teacher" ? API.TEACHER_EMAIL : String(data.get("email"));
       if (loginMode === "signup") { await API.register(email, String(data.get("password"))); toast("인증 메일을 보냈어요"); }
       else await API.login(email, String(data.get("password")));
+    } else if (kind === "batch") {
+      await saveBatch(data);
     } else if (kind === "expense") {
       const entry = { category: String(data.get("category")), amount: amount(data.get("amount")), text: String(data.get("text")).trim(), date: String(data.get("date")), included: expenses[expenseId]?.included ?? false };
       if (!entry.amount || !entry.text || !budget.items[entry.category]) throw new Error("금액과 내용을 확인해 주세요.");
@@ -155,7 +169,7 @@ main.addEventListener("submit", async (event) => {
     if (error.isConnected) error.textContent = API.errorText(err); else toast(API.errorText(err));
   } finally {
     saving = false; logoutButton.disabled = false;
-    form.querySelectorAll("button, input, textarea, select").forEach((button) => { button.disabled = false; });
+    controlStates.forEach(([field, disabled]) => { field.disabled = disabled; });
   }
 });
 main.addEventListener("click", async (event) => {
@@ -164,11 +178,15 @@ main.addEventListener("click", async (event) => {
   if (!ready) { if (button.dataset.act === "refresh") location.reload(); return; }
   try {
     const act = button.dataset.act;
-    if (act === "expense-edit" || act === "expense-delete") {
+    if (act === "batch-cancel") {
+      batchDraft = null; batchError = ""; batchPreview = []; button.closest("section").remove();
+    } else if (act === "expense-edit" || act === "expense-delete") {
       const seq = ++generation;
       const id = button.dataset.id;
       const form = main.querySelector('[data-form="expense"]');
-      if (act === "expense-edit" && changed(form) && !confirm("입력 중인 내용을 버리고 수정할까요?")) return;
+      if (act === "batch-cancel") {
+      batchDraft = null; batchError = ""; batchPreview = []; button.closest("section").remove();
+    } else if (act === "expense-edit" && changed(form) && !confirm("입력 중인 내용을 버리고 수정할까요?")) return;
       form.querySelectorAll("button, input, textarea, select").forEach(field => { field.disabled = true; });
       let result;
       try { result = await API.loadExpense(id); }
@@ -220,12 +238,12 @@ main.addEventListener("change", async (event) => {
 });
 logoutButton.addEventListener("click", async () => {
   if (saving) return;
-  clear(); main.innerHTML = "";
+  batchDraft = null; batchError = ""; batchPreview = []; clear(); main.innerHTML = "";
   try { await API.logout(); } catch (error) { showError(error); }
 });
 window.addEventListener("offline", () => { clear(); showError(new Error("인터넷 연결을 확인해 주세요.")); });
 window.addEventListener("online", () => { if (ready) refresh(); });
-window.addEventListener("pagehide", () => { clear(); main.innerHTML = ""; });
+window.addEventListener("pagehide", () => { batchDraft = null; batchError = ""; batchPreview = []; clear(); main.innerHTML = ""; });
 window.addEventListener("pageshow", (event) => { if (event.persisted && ready) refresh(); });
 setInterval(async () => {
   if (!ready || !budget || !API.currentUser() || saving || syncing || document.hidden || !navigator.onLine) return;
@@ -260,3 +278,52 @@ function updateLedger() {
   target.innerHTML = `<h2>가계부 내역 <small>${won(Object.values(expenses).reduce((sum, entry) => sum + entry.amount, 0))}원</small></h2><details class="budget-balances" ${balancesOpen ? "open" : ""}><summary>비목별 잔액</summary>${Object.values(adjusted).map(item => `<div><span>${esc(item.label)}</span><b class="${item.budget - (item.spent || 0) < 0 ? 'negative' : ''}">${won(item.budget - (item.spent || 0))}원 남음</b></div>`).join('')}</details>` +
     Object.entries(expenses).sort((a,b) => b[1].date.localeCompare(a[1].date) || b[1].updatedAt-a[1].updatedAt).map(([id, e]) => `<article class="expense-row"><div class="budget-head"><b>${esc(e.text)}</b><strong>${won(e.amount)}원</strong></div><div class="sub">${esc(e.date)} · ${esc(budget.items[e.category]?.label || '미분류')}</div><div class="btns"><button class="btn sm ghost" data-act="expense-edit" data-id="${esc(id)}">수정</button><button class="btn sm ghost" data-act="expense-delete" data-id="${esc(id)}">삭제</button></div></article>`).join('');
 }
+
+function batchCard() {
+  if (batchError) return `<section class="card" id="batch-import"><p class="err">${esc(batchError)}</p><button class="btn ghost" data-act="batch-cancel">닫기</button></section>`;
+  if (!batchDraft) return "";
+  const rows = matchBatch(batchDraft.rows, budget.items, expenses);
+  batchPreview = rows;
+  const date = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+  return `<section class="card" id="batch-import"><h2>지출 내역 추가 <small>${won(rows.reduce((sum, row) => sum + row.amount, 0))}원</small></h2><form class="stack" data-form="batch">
+    ${rows.map(row => `<label class="batch-row"><input type="checkbox" name="rows" value="${esc(row.id)}" ${row.saved || !row.categoryId ? 'disabled' : row.matches.length ? '' : 'checked'}><span><b>${esc(row.text)} · ${won(row.amount)}원</b><small>${esc(row.category)}${row.saved ? ' · 이미 추가됨' : !row.categoryId ? ' · 비목 확인 필요' : row.matches.length ? ' · 동일 금액 내역 있음' : ''}</small>${row.matches.length && !row.saved ? `<small>${row.matches.map(e => esc(e.text) + ' · ' + esc(e.date)).join('<br>')}</small>` : ''}</span></label>`).join('')}
+    <label>기록 날짜<input type="date" name="date" value="${date}" required></label>
+    <div class="btns"><button class="btn" type="submit">선택 내역 추가</button><button class="btn ghost" type="button" data-act="batch-cancel">취소</button></div>${errorLine()}
+  </form></section>`;
+}
+async function saveBatch(formData) {
+  if (!batchDraft) return;
+  const draft = batchDraft;
+  const selected = new Set(formData.getAll('rows'));
+  if (!selected.size) throw new Error('추가할 내역을 선택해 주세요.');
+  const before = batchPreview;
+  const latestBudget = await API.loadBudget();
+  if (!latestBudget.data) throw new Error('예산계획서를 먼저 불러와 주세요.');
+  const latest = await API.loadExpenses();
+  const rows = matchBatch(draft.rows, latestBudget.data.items, latest);
+  let added = 0;
+  for (const row of rows.filter(row => selected.has(row.id))) {
+    if (row.saved) continue;
+    if (!row.categoryId) throw new Error('비목을 확인해 주세요.');
+    const old = before.find(e => e.id === row.id);
+    if (row.matches.length > (old?.matches.length || 0)) throw new Error('같은 금액의 내역이 추가됐어요. 다시 확인해 주세요.');
+    try {
+      await API.saveExpense(row.id, { category: row.categoryId, text: row.text, amount: row.amount, date: String(formData.get('date')), included: false });
+      added++;
+    } catch (error) {
+      // 같은 링크의 동시 저장·응답 유실 후 재시도는 기존 기록을 덮어쓰지 않습니다.
+      if (!(await API.loadExpense(row.id)).data) throw error;
+    }
+  }
+  if (batchDraft === draft) { batchDraft = null; batchPreview = []; }
+  await refresh(); toast(added ? `${added}건 추가했어요` : '이미 추가된 내역이에요');
+}
+
+window.addEventListener('hashchange', () => {
+  if (!readBatchLink()) return;
+  generation++;
+  if (budget) {
+    document.getElementById('batch-import')?.remove();
+    main.insertAdjacentHTML('afterbegin', batchCard());
+  }
+});
