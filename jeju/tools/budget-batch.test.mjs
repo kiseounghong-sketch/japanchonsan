@@ -26,3 +26,8 @@ test('예산이 없는 기기의 계획서도 검증 후 입력 초안으로만 
  assert.equal(parseBatch(encode({...data,plan})).planText,plan);
  assert.throws(()=>parseBatch(encode({...data,plan:'invalid'})));
 });
+test('같은 비목의 합산 기록도 중복 후보로 표시한다',()=>{
+ const batch=parseBatch(encode({...data,rows:[data.rows[0],{...data.rows[0],text:'결제 B',amount:2000}]}));
+ const result=matchBatch(batch.rows,{'item-0':{label:'교통'}},{manual:{category:'item-0',amount:3000,text:'합산 결제'}});
+ assert.deepEqual(result.map(row=>row.matches.length),[1,1]);
+});
