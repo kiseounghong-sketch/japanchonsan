@@ -1,4 +1,4 @@
-import { parseBatch, matchBatch } from "./budget-batch.js";
+import { parseBatch, matchBatch, batchFromPlan } from "./budget-batch.js";
 import * as API from "./budget-api.js";
 import { amount, totals, validateBudget, parseBudget, MAX_ITEMS, ledgerItems } from "./budget-model.js";
 import { esc, icon, toast } from "./ui.js";
@@ -8,6 +8,7 @@ const logoutButton = document.getElementById("logout");
 let budget = null, etag = null, editorEmail = "", generation = 0;
 let expenses = {}, expenseTag = null, expenseId = "", syncing = false;
 let batchDraft = null, batchError = "", batchPreview = [];
+let planPreviewDismissed = false;
 function readBatchLink() {
   if (!location.hash.startsWith("#add=")) return false;
   const encoded = location.hash.slice(5);
@@ -17,6 +18,7 @@ function readBatchLink() {
 }
 readBatchLink();
 function discardBatch() {
+  planPreviewDismissed = true;
   batchDraft = null; batchError = ""; batchPreview = [];
   if (location.hash.startsWith("#add=")) history.replaceState(null, "", location.pathname + location.search);
 }
@@ -69,12 +71,14 @@ function ownerSettings() {
 function render() {
   expenseId = ""; expenseTag = null;
   if (!API.currentUser()) { showLogin(); return; }
+  if (budget && !batchDraft && !batchError && !planPreviewDismissed && !Object.keys(expenses).length) batchDraft = batchFromPlan(budget.items);
   let html = "";
   if (!budget) {
     html = `<section class="card" id="budget-setup"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000">${esc(batchDraft?.planText || "")}</textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
   } else {
     const sum = totals(ledgerItems(budget.items, expenses));
     html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>가계부 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining, true)}</section>`;
+    if (batchFromPlan(budget.items)) html += '<button class="btn ghost wide" data-act="plan-expenses">확정 지출 불러오기</button>';
     html += ledgerForm() + '<section class="card" id="expense-list"></section><details class="budget-settings"><summary class="btn ghost wide">예산계획서</summary>';
     const plan = totals(budget.items);
     html += `<section class="card"><h2>계획 합계</h2>${amounts(plan.budget, plan.spent, plan.remaining)}</section>`;
@@ -181,7 +185,13 @@ main.addEventListener("click", async (event) => {
   if (!ready) { if (button.dataset.act === "refresh") location.reload(); return; }
   try {
     const act = button.dataset.act;
-    if (act === "batch-cancel") {
+    if (act === "plan-expenses") {
+      if (batchDraft) { document.getElementById("batch-import")?.scrollIntoView({ block: "start" }); return; }
+      batchDraft = batchFromPlan(budget.items); batchError = "";
+      document.getElementById("batch-import")?.remove();
+      main.insertAdjacentHTML("afterbegin", batchCard());
+      document.getElementById("batch-import")?.scrollIntoView({ block: "start" });
+    } else if (act === "batch-cancel") {
       discardBatch(); button.closest("section").remove();
     } else if (act === "setup-plan") {
       document.getElementById("budget-setup")?.scrollIntoView({ block: "start" });

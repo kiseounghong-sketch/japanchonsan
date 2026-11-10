@@ -25,3 +25,20 @@ export function matchBatch(rows, items, expenses) {
     return { ...row, categoryId: category, saved, matches };
   });
 }
+
+// 사용자가 확정한 비목만 비공개 계획서에서 읽습니다. 실제 금액은 코드에 두지 않습니다.
+export function batchFromPlan(items) {
+  const rows = [];
+  for (const [id, item] of Object.entries(items)) {
+    if (!["항공료", "숙박비", "임차료"].includes(item.label) || !Number.isInteger(item.spent) || item.spent <= 0) continue;
+    const outbound = item.label === "항공료" && item.note?.match(/가는\s*편\s*([\d,]+)/);
+    const inbound = item.label === "항공료" && item.note?.match(/오는\s*편\s*([\d,]+)/);
+    const a = outbound && Number(outbound[1].replace(/,/g, ""));
+    const b = inbound && Number(inbound[1].replace(/,/g, ""));
+    const entries = a > 0 && b > 0 && a + b === item.spent
+      ? [{ text: "가는 편 항공료", amount: a }, { text: "오는 편 항공료", amount: b }]
+      : [{ text: item.label, amount: item.spent }];
+    entries.forEach((entry, index) => rows.push({ id: `plan-${id}-${index}`, category: item.label, ...entry }));
+  }
+  return rows.length ? { rows } : null;
+}
