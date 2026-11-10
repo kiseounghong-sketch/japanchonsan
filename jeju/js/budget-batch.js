@@ -1,6 +1,6 @@
 import { parseBudget } from "./budget-model.js";
 
-// 링크의 내역은 메모리에만 두고, 로그인 및 저장 버튼 확인 후 전송합니다.
+// 초안은 URL fragment와 메모리에서 읽고, 로그인 및 저장 버튼 확인 후 전송합니다.
 export function parseBatch(encoded) {
   if (!encoded || encoded.length > 16000) throw new Error('불러오기 링크를 확인해 주세요.');
   const raw = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(encoded.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));

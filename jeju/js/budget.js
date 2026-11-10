@@ -11,12 +11,15 @@ let batchDraft = null, batchError = "", batchPreview = [];
 function readBatchLink() {
   if (!location.hash.startsWith("#add=")) return false;
   const encoded = location.hash.slice(5);
-  history.replaceState(null, "", location.pathname + location.search);
   batchDraft = null; batchError = ""; batchPreview = [];
   try { batchDraft = parseBatch(encoded); } catch (_) { batchError = "불러오기 링크를 확인해 주세요."; }
   return true;
 }
 readBatchLink();
+function discardBatch() {
+  batchDraft = null; batchError = ""; batchPreview = [];
+  if (location.hash.startsWith("#add=")) history.replaceState(null, "", location.pathname + location.search);
+}
 let loginMode = "teacher", ready = false, saving = false;
 const won = (value) => value == null ? "미정" : Number(value).toLocaleString("ko-KR");
 const errorLine = () => '<p class="err" role="alert"></p>';
@@ -39,7 +42,7 @@ function showLogin() {
     <form class="stack" data-form="login">
       ${teacher ? "" : `<label>이메일<input type="email" name="email" autocomplete="username" required maxlength="254"></label>`}
       <label>비밀번호<input type="password" name="password" autocomplete="${signup ? "new-password" : "current-password"}" required ${signup ? 'minlength="6"' : ""}></label>
-      <button class="btn" type="submit">${signup ? "가입·인증 메일 보내기" : "로그인"}</button>${errorLine()}
+      <button class="btn" type="submit">${signup ? "가입·인증 메일 보내기" : batchDraft ? "로그인하고 내역 보기" : "로그인"}</button>${errorLine()}
     </form>
     ${teacher ? "" : `<button class="linkbtn" data-act="login-mode" data-mode="${signup ? "editor" : "signup"}">${signup ? "로그인으로" : "계정 만들기"}</button>`}
   </section>`;
@@ -68,7 +71,7 @@ function render() {
   if (!API.currentUser()) { showLogin(); return; }
   let html = "";
   if (!budget) {
-    html = `<section class="card"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000">${esc(batchDraft?.planText || "")}</textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
+    html = `<section class="card" id="budget-setup"><h2>예산 불러오기</h2><form class="stack" data-form="import"><label>예산 정리<textarea name="text" rows="6" maxlength="60000">${esc(batchDraft?.planText || "")}</textarea></label><input class="budget-import" type="file" accept=".json,.txt,application/json,text/plain" aria-label="예산 파일 불러오기"><button class="btn" type="submit">저장</button>${errorLine()}</form></section>`;
   } else {
     const sum = totals(ledgerItems(budget.items, expenses));
     html = `<section class="card" id="budget-summary"><div class="budget-head"><h2>가계부 <small class="muted">원</small></h2><button class="btn sm ghost" data-act="refresh">새로고침</button></div>${amounts(sum.budget, sum.spent, sum.remaining, true)}</section>`;
@@ -84,7 +87,7 @@ function render() {
     }
   }
   if (budget) html += "</details>";
-  main.innerHTML = (budget ? batchCard() : "") + html + ownerSettings();
+  main.innerHTML = batchCard() + html + ownerSettings();
   updateLedger();
 }
 async function refresh() {
@@ -179,14 +182,14 @@ main.addEventListener("click", async (event) => {
   try {
     const act = button.dataset.act;
     if (act === "batch-cancel") {
-      batchDraft = null; batchError = ""; batchPreview = []; button.closest("section").remove();
+      discardBatch(); button.closest("section").remove();
+    } else if (act === "setup-plan") {
+      document.getElementById("budget-setup")?.scrollIntoView({ block: "start" });
     } else if (act === "expense-edit" || act === "expense-delete") {
       const seq = ++generation;
       const id = button.dataset.id;
       const form = main.querySelector('[data-form="expense"]');
-      if (act === "batch-cancel") {
-      batchDraft = null; batchError = ""; batchPreview = []; button.closest("section").remove();
-    } else if (act === "expense-edit" && changed(form) && !confirm("입력 중인 내용을 버리고 수정할까요?")) return;
+      if (act === "expense-edit" && changed(form) && !confirm("입력 중인 내용을 버리고 수정할까요?")) return;
       form.querySelectorAll("button, input, textarea, select").forEach(field => { field.disabled = true; });
       let result;
       try { result = await API.loadExpense(id); }
@@ -238,13 +241,13 @@ main.addEventListener("change", async (event) => {
 });
 logoutButton.addEventListener("click", async () => {
   if (saving) return;
-  batchDraft = null; batchError = ""; batchPreview = []; clear(); main.innerHTML = "";
+  discardBatch(); clear(); main.innerHTML = "";
   try { await API.logout(); } catch (error) { showError(error); }
 });
 window.addEventListener("offline", () => { clear(); showError(new Error("인터넷 연결을 확인해 주세요.")); });
 window.addEventListener("online", () => { if (ready) refresh(); });
 window.addEventListener("pagehide", () => { batchDraft = null; batchError = ""; batchPreview = []; clear(); main.innerHTML = ""; });
-window.addEventListener("pageshow", (event) => { if (event.persisted && ready) refresh(); });
+window.addEventListener("pageshow", (event) => { if (event.persisted && ready) { readBatchLink(); refresh(); } });
 setInterval(async () => {
   if (!ready || !budget || !API.currentUser() || saving || syncing || document.hidden || !navigator.onLine) return;
   syncing = true; const seq = generation;
@@ -282,6 +285,9 @@ function updateLedger() {
 function batchCard() {
   if (batchError) return `<section class="card" id="batch-import"><p class="err">${esc(batchError)}</p><button class="btn ghost" data-act="batch-cancel">닫기</button></section>`;
   if (!batchDraft) return "";
+  if (!budget) {
+    return `<section class="card" id="batch-import"><h2>지출 내역 추가 <small>${won(batchDraft.rows.reduce((sum, row) => sum + row.amount, 0))}원</small></h2>${batchDraft.rows.map(row => `<article class="expense-row"><div class="budget-head"><b>${esc(row.text)}</b><strong>${won(row.amount)}원</strong></div><small>${esc(row.category)}</small></article>`).join('')}<div class="btns"><button class="btn" data-act="setup-plan">계획서 확인</button><button class="btn ghost" data-act="batch-cancel">취소</button></div></section>`;
+  }
   const rows = matchBatch(batchDraft.rows, budget.items, expenses);
   batchPreview = rows;
   const date = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
@@ -315,7 +321,7 @@ async function saveBatch(formData) {
       if (!(await API.loadExpense(row.id)).data) throw error;
     }
   }
-  if (batchDraft === draft) { batchDraft = null; batchPreview = []; }
+  if (batchDraft === draft) discardBatch();
   await refresh(); toast(added ? `${added}건 추가했어요` : '이미 추가된 내역이에요');
 }
 
@@ -325,5 +331,9 @@ window.addEventListener('hashchange', () => {
   if (budget) {
     document.getElementById('batch-import')?.remove();
     main.insertAdjacentHTML('afterbegin', batchCard());
+  } else if (!API.currentUser()) {
+    showLogin();
+  } else if (main.querySelector('[data-form=import]')) {
+    render();
   }
 });
