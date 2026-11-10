@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBatch, matchBatch } from '../js/budget-batch.js';
+import { parseBatch, matchBatch, batchFromPlan } from '../js/budget-batch.js';
 const encode = data => Buffer.from(JSON.stringify(data)).toString('base64url');
 const data = {v:1,id:'test-batch-123',rows:[{category:'교통',text:'결제 A',amount:1000}]};
 test('반복 링크의 기록 ID는 고정되며 불필요한 필드를 가져오지 않는다',()=>{
@@ -30,4 +30,22 @@ test('같은 비목의 합산 기록도 중복 후보로 표시한다',()=>{
  const batch=parseBatch(encode({...data,rows:[data.rows[0],{...data.rows[0],text:'결제 B',amount:2000}]}));
  const result=matchBatch(batch.rows,{'item-0':{label:'교통'}},{manual:{category:'item-0',amount:3000,text:'합산 결제'}});
  assert.deepEqual(result.map(row=>row.matches.length),[1,1]);
+});
+
+test('비공개 계획서의 확정 비목만 가져오고 항공 왕복 금액을 검증한다',()=>{
+ const items={
+  'item-0':{label:'항공료',spent:3000,note:'가는 편 1,000 + 오는 편 2,000'},
+  'item-1':{label:'숙박비',spent:4000,approximate:true},
+  'item-2':{label:'임차료',spent:5000},
+  'item-3':{label:'급량비',spent:6000},
+  'item-4':{label:'용품비',spent:null}
+ };
+ const draft=batchFromPlan(items);
+ assert.deepEqual(draft.rows.map(r=>r.amount),[1000,2000,4000,5000]);
+ assert.deepEqual(batchFromPlan(items),draft);
+ items['item-0'].spent=3500;
+ assert.equal(batchFromPlan(items).rows[0].amount,3500);
+ assert.equal(batchFromPlan({'item-0':{label:'항공료',spent:0}}),null);
+ const saved=Object.fromEntries(draft.rows.map(r=>[r.id,{category:'item-0',amount:r.amount}]));
+ assert.ok(matchBatch(draft.rows,items,saved).every(r=>r.saved));
 });
