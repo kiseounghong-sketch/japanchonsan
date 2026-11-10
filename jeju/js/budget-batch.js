@@ -20,7 +20,8 @@ export function matchBatch(rows, items, expenses) {
     const categories = Object.entries(items).filter(([, item]) => item.label === row.category);
     const category = categories.length === 1 ? categories[0][0] : null;
     const saved = Object.hasOwn(expenses, row.id);
-    const matches = Object.values(expenses).filter(e => e.category === category && e.amount === row.amount);
+    const categoryTotal = rows.filter(entry => entry.category === row.category).reduce((sum, entry) => sum + entry.amount, 0);
+    const matches = Object.values(expenses).filter(e => e.category === category && (e.amount === row.amount || e.amount === categoryTotal));
     return { ...row, categoryId: category, saved, matches };
   });
 }
