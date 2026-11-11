@@ -40,7 +40,8 @@ function autoDay() {
 /* ---------- 저장 상태 표시 ---------- */
 export function savedText(path, value) {
   if (!has(value)) return "";
-  if (!S.code || !S.me) return `${icon("check")}이 폰에 저장됨`;
+  if (!S.code) return `${icon("alert")}이 폰에만 저장됨 · 입장 코드를 넣어야 선생님께 가요`;
+  if (!S.me) return `${icon("alert")}이 폰에만 저장됨 · 이름을 골라야 선생님께 가요`;
   if (S.dirty[path]) return `${icon("check")}저장됨 · 공유 대기`;
   return `${icon("check")}저장됨 · 선생님과 공유됨`;
 }
@@ -81,6 +82,9 @@ function setupCard() {
   }
   if (!S.me) {
     h += `<div class="note-bar">${icon("user")}<span>처음 한 번, <b>내 이름</b>을 골라 주세요.</span><button class="btn sm" data-act="me">고르기</button></div>`;
+  }
+  if (!S.code) {
+    h += `<div class="note-bar warn">${icon("alert")}<span><b>입장 코드가 없어요.</b> 미션·소감이 선생님께 안 가요.</span><button class="btn sm" data-act="code">코드 넣기</button></div>`;
   }
   if (live.status === "badcode") {
     h += `<div class="note-bar warn">${icon("alert")}<span>입장 코드가 맞지 않아요.</span><button class="btn sm" data-act="code">다시 넣기</button></div>`;

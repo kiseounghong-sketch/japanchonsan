@@ -348,6 +348,7 @@ async function onAct(el, e) {
       const changed = n !== S.me;
       S.me = n;
       persist("me");
+      syncManifest();
       closeSheet();
       if (changed && S.code) { markAllDirty(); scheduleSync(300); }
       toast(`${n}(으)로 저장했어요`);
@@ -355,14 +356,19 @@ async function onAct(el, e) {
       return;
     }
     case "code": return codeSheet();
-    case "code-remove":
+    case "code-remove": {
       S.code = "";
       persist("code");
+      const u = new URL(location.href);
+      u.searchParams.delete("c");
+      history.replaceState(null, "", u.pathname + u.search + u.hash);
+      syncManifest();
       Live.start("");
       closeSheet();
       toast("입장 코드를 뺐어요. 기록은 이 폰에만 저장돼요.");
       render(true);
       return;
+    }
     case "seen": S.seen[el.dataset.id] = 1; persist("seen"); render(true); return;
     case "old-notices": S.ui.oldNotices = !S.ui.oldNotices; render(true); return;
     case "arrive":
@@ -450,6 +456,7 @@ function useCode(code) {
   const changed = code !== S.code;
   S.code = code;
   persist("code");
+  syncManifest();
   if (changed) { markAllDirty(); }
   Live.start(code);
   render(true);
@@ -642,8 +649,6 @@ function readParams() {
     let touched = false;
     if (c && CODE_RE.test(c)) {
       if (c !== S.code) { S.code = c; persist("code"); markAllDirty(); }
-      u.searchParams.delete("c");
-      touched = true;
     }
     if (me) {
       if (!S.me) { S.me = me.slice(0, 12); persist("me"); }
@@ -654,9 +659,41 @@ function readParams() {
   } catch (e) { /* 무시 */ }
 }
 
+// 홈 화면에 추가한 앱은 브라우저와 저장소가 따로라서(특히 아이폰), 시작 주소에 입장 코드를 넣어 둡니다.
+function syncManifest() {
+  try {
+    const link = document.querySelector('link[rel="manifest"]');
+    if (!link) return;
+    const base = new URL("./", location.href).href;
+    const start = new URL("./", location.href);
+    if (S.code) start.searchParams.set("c", S.code);
+    if (S.me) start.searchParams.set("me", S.me);
+    const m = {
+      id: "gasseulsinje-jeju-camp", name: "가쓸신제 · 제주 캠프", short_name: "가쓸신제", lang: "ko",
+      start_url: start.href, scope: base, display: "standalone", orientation: "portrait",
+      background_color: "#F4F2ED", theme_color: "#0B6E8A",
+      icons: [
+        { src: base + "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: base + "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: base + "icons/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      ],
+    };
+    if (link.dataset.blob) URL.revokeObjectURL(link.dataset.blob);
+    const url = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: "application/manifest+json" }));
+    link.dataset.blob = url;
+    link.href = url;
+    // 아이폰 '홈 화면에 추가'는 지금 주소를 쓰므로 주소에도 코드를 남겨 둡니다.
+    if (S.code) {
+      const u = new URL(location.href);
+      if (u.searchParams.get("c") !== S.code) { u.searchParams.set("c", S.code); history.replaceState(null, "", u.pathname + u.search + u.hash); }
+    }
+  } catch (e) { /* 무시 */ }
+}
+
 async function boot() {
   applyPrefs();
   readParams();
+  syncManifest();
   Live.setOnChange((kind) => {
     if (kind === "connected") scheduleSync(300);
     if (kind !== "all") ensureWatchAll();
