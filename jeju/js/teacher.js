@@ -158,11 +158,22 @@ function people() {
   return roster().filter((n) => n !== "선생님");
 }
 
+// 아직 아무 기록(미션·소감·사진 체크)도 안 온 학생 — 입장 코드·이름을 안 넣었을 가능성
+function missingLine(all, P) {
+  const sent = (n) => ["answers", "reflections", "shots"].some((k) => Object.keys((all[k] || {})[n] || {}).length);
+  const miss = P.filter((n) => !sent(n));
+  return miss.length ? `<p class="hint">아직 기록이 안 온 학생: <b>${miss.map(esc).join(", ")}</b> (입장 코드·이름 확인)</p>` : "";
+}
+
 export function collectView() {
   const all = live.all;
   if (!all) return `<p class="muted">불러오는 중…</p>`;
   const P = people();
   const k = S.ui.tseg;
+  return missingLine(all, P) + collectBody(all, P, k);
+}
+
+function collectBody(all, P, k) {
   if (k === "reflections") {
     return S.data.schedule.map((d) => `<div class="col">
       <h3>${d.day}일차 <small class="muted">${esc(d.label)}</small></h3>
